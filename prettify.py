@@ -29,7 +29,7 @@ def getItem(line, idx):
 def printPrettyMD(matrix):
     toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |"
     for line in matrix:
-        toPrint += f"\n | {getItem(line,2)} | {getItem(line,1)} | {getItem(line,0)} | {getItem(line,3)} |"
+        toPrint += f"\n| {getItem(line,2)} | {getItem(line,1)} | {getItem(line,0)} | {getItem(line,3)} |"
     return toPrint
     
 def main():
