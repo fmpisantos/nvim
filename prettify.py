@@ -26,10 +26,21 @@ def parseStr(alias):
 def getItem(line, idx):
     return line[idx] if len(line) > idx else ""
 
+def getMode(items):
+    idx = 0
+    mode = ""
+    if '{' in items[0]:
+         for item in items:
+            mode += item
+            if "}" in item:
+                return mode, idx
+    return getItem(items, 0), 0
+
 def printPrettyMD(matrix):
     toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |\n|----------------------|--------------|------|------|"
     for line in matrix:
-        toPrint += f"\n| {getItem(line,2)} | {getItem(line,1)} | {getItem(line,0)} | {getItem(line,3)} |"
+        mode, idx = getMode(line)
+        toPrint += f"\n| {getItem(line,idx+2)} | {getItem(line,idx+1)} | {mode} | {getItem(line,idx+3)} |"
     return toPrint
     
 def main():
