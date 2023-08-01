@@ -27,6 +27,9 @@ def parseStr(alias):
 def getItem(line, idx):
     return line[idx] if len(line) > idx else ""
 
+def getFunction(item):
+    return item.replace("function() ", "").replace(" end", "")
+
 def getMode(items):
     idx = 0
     mode = ""
@@ -41,7 +44,7 @@ def printPrettyMD(matrix):
     toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |\n|----------------------|--------------|------|------|"
     for line in matrix:
         mode, idx = getMode(line)
-        toPrint += f"\n| {getItem(line,idx+2)} | {getItem(line,idx+1)} | {mode} | {getItem(line,idx+3)} |"
+        toPrint += f"\n| {getFunction(getItem(line,idx+2))} | {getItem(line,idx+1)} | {mode} | {getItem(line,idx+3)} |"
     return toPrint
     
 def main():

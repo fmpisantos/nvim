@@ -4,20 +4,20 @@
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
 |  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(1) end |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(2) end |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(3) end |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(4) end |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
-|  function() vim.lsp.buf.definition() end |  &quot;gd&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.hover() end |  &quot;K&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.workspace_symbol() end |  &quot;&lt;leader&gt;vws&quot; | &quot;n&quot; |  opts |
-|  function() vim.diagnostic.open_float() end |  &quot;&lt;leader&gt;vd&quot; | &quot;n&quot; |  opts |
-|  function() vim.diagnostic.goto_next() end |  &quot;[d&quot; | &quot;n&quot; |  opts |
-|  function() vim.diagnostic.goto_prev() end |  &quot;]d&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.code_action() end |  &quot;&lt;leader&gt;vca&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.references() end |  &quot;&lt;leader&gt;vrr&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.rename() end |  &quot;&lt;leader&gt;vrn&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.signature_help() end |  &quot;&lt;C-h&gt;&quot; | &quot;i&quot; |  opts |
+|  ui.nav_file(1) |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(2) |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(3) |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(4) |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
+|  vim.lsp.buf.definition() |  &quot;gd&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.hover() |  &quot;K&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.workspace_symbol() |  &quot;&lt;leader&gt;vws&quot; | &quot;n&quot; |  opts |
+|  vim.diagnostic.open_float() |  &quot;&lt;leader&gt;vd&quot; | &quot;n&quot; |  opts |
+|  vim.diagnostic.goto_next() |  &quot;[d&quot; | &quot;n&quot; |  opts |
+|  vim.diagnostic.goto_prev() |  &quot;]d&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.code_action() |  &quot;&lt;leader&gt;vca&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.references() |  &quot;&lt;leader&gt;vrr&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.rename() |  &quot;&lt;leader&gt;vrn&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.signature_help() |  &quot;&lt;C-h&gt;&quot; | &quot;i&quot; |  opts |
 |  builtin.find_files |  &#x27;&lt;leader&gt;pf&#x27; | &#x27;n&#x27; |  {} |
 |  builtin.find_files |  &#x27;&lt;leader&gt;pg&#x27; | &#x27;n&#x27; |  {} |
 |  function( |  &#x27;&lt;leader&gt;ps&#x27; | &#x27;n&#x27; |  |
@@ -78,10 +78,10 @@
 |  function( |  &quot;&lt;leader&gt;&lt;leader&gt;&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
 |  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(1) end |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(2) end |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(3) end |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(4) end |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(1) |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(2) |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(3) |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(4) |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
 |  vim.cmd.UndotreeToggle |  &quot;&lt;leader&gt;u&quot; |  &quot;n&quot; |  |
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  builtin.find_files |  &#x27;&lt;leader&gt;pf&#x27; | &#x27;n&#x27; |  {} |
@@ -90,20 +90,20 @@
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
 |  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(1) end |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(2) end |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(3) end |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
-|  function() ui.nav_file(4) end |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
-|  function() vim.lsp.buf.definition() end |  &quot;gd&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.hover() end |  &quot;K&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.workspace_symbol() end |  &quot;&lt;leader&gt;vws&quot; | &quot;n&quot; |  opts |
-|  function() vim.diagnostic.open_float() end |  &quot;&lt;leader&gt;vd&quot; | &quot;n&quot; |  opts |
-|  function() vim.diagnostic.goto_next() end |  &quot;[d&quot; | &quot;n&quot; |  opts |
-|  function() vim.diagnostic.goto_prev() end |  &quot;]d&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.code_action() end |  &quot;&lt;leader&gt;vca&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.references() end |  &quot;&lt;leader&gt;vrr&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.rename() end |  &quot;&lt;leader&gt;vrn&quot; | &quot;n&quot; |  opts |
-|  function() vim.lsp.buf.signature_help() end |  &quot;&lt;C-h&gt;&quot; | &quot;i&quot; |  opts |
+|  ui.nav_file(1) |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(2) |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(3) |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(4) |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
+|  vim.lsp.buf.definition() |  &quot;gd&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.hover() |  &quot;K&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.workspace_symbol() |  &quot;&lt;leader&gt;vws&quot; | &quot;n&quot; |  opts |
+|  vim.diagnostic.open_float() |  &quot;&lt;leader&gt;vd&quot; | &quot;n&quot; |  opts |
+|  vim.diagnostic.goto_next() |  &quot;[d&quot; | &quot;n&quot; |  opts |
+|  vim.diagnostic.goto_prev() |  &quot;]d&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.code_action() |  &quot;&lt;leader&gt;vca&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.references() |  &quot;&lt;leader&gt;vrr&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.rename() |  &quot;&lt;leader&gt;vrn&quot; | &quot;n&quot; |  opts |
+|  vim.lsp.buf.signature_help() |  &quot;&lt;C-h&gt;&quot; | &quot;i&quot; |  opts |
 |  builtin.find_files |  &#x27;&lt;leader&gt;pf&#x27; | &#x27;n&#x27; |  {} |
 |  builtin.find_files |  &#x27;&lt;leader&gt;pg&#x27; | &#x27;n&#x27; |  {} |
 |  function( |  &#x27;&lt;leader&gt;ps&#x27; | &#x27;n&#x27; |  |
