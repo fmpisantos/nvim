@@ -21,7 +21,7 @@ def parseStr(alias):
     # [[mode, command, function], ...]
     lines = alias.split('\n')
     lines = [line[line.find('(')+1:] for line in lines] 
-    lines = [line[:line.rfind(')')-1] for line in lines] 
+    lines = [line[:line.rfind(')')] for line in lines] 
     return [line.split(',') for line in lines]
 
 def getItem(line, idx):
