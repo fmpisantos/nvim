@@ -33,9 +33,9 @@
 |  function |  "<leader>vwm" | "n" |  |
 |  function |  "<leader>svwm" | "n" |  |
 |  [["_dP] |  "<leader>p" | "x" |  |
-|  "<leader>y" |  "v"} | {"n" "v"} |  [["+y] |
+|  [["+y] |  "<leader>y" | {"n" "v"} |  |
 |  [["+Y] |  "<leader>Y" | "n" |  |
-|  "<leader>d" |  "v"} | {"n" "v"} |  [["_d] |
+|  [["_d] |  "<leader>d" | {"n" "v"} |  |
 |  "<Esc> |  "<C-c>" | "i" |  |
 |  "<nop> |  "Q" | "n" |  |
 |  "<cmd>silent !tmux neww tmux-sessionizer<CR> |  "<C-f>" | "n" |  |
@@ -60,9 +60,9 @@
 |  function |  "<leader>vwm" | "n" |  |
 |  function |  "<leader>svwm" | "n" |  |
 |  [["_dP] |  "<leader>p" | "x" |  |
-|  "<leader>y" |  "v"} | {"n" "v"} |  [["+y] |
+|  [["+y] |  "<leader>y" | {"n" "v"} |  |
 |  [["+Y] |  "<leader>Y" | "n" |  |
-|  "<leader>d" |  "v"} | {"n" "v"} |  [["_d] |
+|  [["_d] |  "<leader>d" | {"n" "v"} |  |
 |  "<Esc> |  "<C-c>" | "i" |  |
 |  "<nop> |  "Q" | "n" |  |
 |  "<cmd>silent !tmux neww tmux-sessionizer<CR> |  "<C-f>" | "n" |  |
@@ -119,9 +119,9 @@
 |  function |  "<leader>vwm" | "n" |  |
 |  function |  "<leader>svwm" | "n" |  |
 |  [["_dP] |  "<leader>p" | "x" |  |
-|  "<leader>y" |  "v"} | {"n" "v"} |  [["+y] |
+|  [["+y] |  "<leader>y" | {"n" "v"} |  |
 |  [["+Y] |  "<leader>Y" | "n" |  |
-|  "<leader>d" |  "v"} | {"n" "v"} |  [["_d] |
+|  [["_d] |  "<leader>d" | {"n" "v"} |  |
 |  "<Esc> |  "<C-c>" | "i" |  |
 |  "<nop> |  "Q" | "n" |  |
 |  "<cmd>silent !tmux neww tmux-sessionizer<CR> |  "<C-f>" | "n" |  |

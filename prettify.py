@@ -34,8 +34,8 @@ def getMode(items):
             mode += item
             if "}" in item:
                 return mode, idx
-    return getItem(items, 0), 0
-
+            idx = idx + 1
+    return getItem(items, 0), idx
 def printPrettyMD(matrix):
     toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |\n|----------------------|--------------|------|------|"
     for line in matrix:
