@@ -1,5 +1,6 @@
 # Keybinds 
 | Function | Keybind | Mode | Opts |
+|----------------------|--------------|------|------|
 |  vim.cmd.Gi |  "<leader>gs" | "n" |  |
 |  mark.add_fil |  "<leader>a" | "n" |  |
 |  ui.toggle_quick_men |  "<C-e>" | "n" |  |

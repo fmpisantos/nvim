@@ -27,7 +27,7 @@ def getItem(line, idx):
     return line[idx] if len(line) > idx else ""
 
 def printPrettyMD(matrix):
-    toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |"
+    toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |\n|----------------------|--------------|------|------|"
     for line in matrix:
         toPrint += f"\n| {getItem(line,2)} | {getItem(line,1)} | {getItem(line,0)} | {getItem(line,3)} |"
     return toPrint
