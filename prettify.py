@@ -1,4 +1,5 @@
 import subprocess
+import html
 
 def writeToFile(path, content):
     with open(path, "w") as file:
@@ -49,7 +50,7 @@ def main():
     writeToFile("grep.txt",grepStr)
     parsedStr = parseStr(grepStr)
     printStr = printPrettyMD(parsedStr)
-    writeToFile("./pretty.md", printStr)
+    writeToFile("./pretty.md", html.escape(printStr))
     
 if __name__ == "__main__":
     main()
