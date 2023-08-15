@@ -73,20 +73,13 @@
 |  &quot;&lt;cmd&gt;lprev&lt;CR&gt;zz&quot; |  &quot;&lt;leader&gt;j&quot; | &quot;n&quot; |  |
 |  [[:%s/\&lt;&lt;C-r&gt;&lt;C-w&gt;\&gt;/&lt;C-r&gt;&lt;C-w&gt;/gI&lt;Left&gt;&lt;Left&gt;&lt;Left&gt;]] |  &quot;&lt;leader&gt;s&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;!chmod +x %&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;x&quot; | &quot;n&quot; |  { silent = true } |
-|  &quot;&lt;cmd&gt;e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;vpp&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;CellularAutomaton make_it_rain&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;mr&quot; | &quot;n&quot; |  |
+|  &quot;&lt;cmd&gt;e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;vpp&quot; | &quot;n&quot; |  |
 |  function( |  &quot;&lt;leader&gt;&lt;leader&gt;&quot; | &quot;n&quot; |  |
-|  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
-|  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
-|  ui.nav_file(1) |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
-|  ui.nav_file(2) |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
-|  ui.nav_file(3) |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
-|  ui.nav_file(4) |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
-|  vim.cmd.UndotreeToggle |  &quot;&lt;leader&gt;u&quot; |  &quot;n&quot; |  |
-|  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
-|  builtin.find_files |  &#x27;&lt;leader&gt;pf&#x27; | &#x27;n&#x27; |  {} |
-|  builtin.find_files |  &#x27;&lt;leader&gt;pg&#x27; | &#x27;n&#x27; |  {} |
-|  function( |  &#x27;&lt;leader&gt;ps&#x27; | &#x27;n&#x27; |  |
+|  function( |  &quot;gf&quot; | &quot;n&quot; |  |
+|  function( |  &quot;gd&quot; | &quot;n&quot; |  |
+|  &quot;ddo&lt;Esc&gt;pkdd&quot; |  &quot;&lt;A-j&gt;&quot; | &quot;n&quot; |  |
+|  &quot;ddkP&quot; |  &quot;&lt;A-k&gt;&quot; | &quot;n&quot; |  |
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
 |  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
@@ -135,4 +128,15 @@
 |  &quot;&lt;cmd&gt;e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;vpp&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;CellularAutomaton make_it_rain&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;mr&quot; | &quot;n&quot; |  |
 |  function( |  &quot;&lt;leader&gt;&lt;leader&gt;&quot; | &quot;n&quot; |  |
+|  builtin.find_files |  &#x27;&lt;leader&gt;pf&#x27; | &#x27;n&#x27; |  {} |
+|  builtin.find_files |  &#x27;&lt;leader&gt;pg&#x27; | &#x27;n&#x27; |  {} |
+|  function( |  &#x27;&lt;leader&gt;ps&#x27; | &#x27;n&#x27; |  |
+|  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
+|  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
+|  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(1) |  &quot;&lt;C-h&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(2) |  &quot;&lt;C-j&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(3) |  &quot;&lt;C-k&gt;&quot; | &quot;n&quot; |  |
+|  ui.nav_file(4) |  &quot;&lt;C-l&gt;&quot; | &quot;n&quot; |  |
+|  vim.cmd.UndotreeToggle |  &quot;&lt;leader&gt;u&quot; |  &quot;n&quot; |  |
 |  |  |  |  |
