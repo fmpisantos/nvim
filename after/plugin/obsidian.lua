@@ -1,6 +1,6 @@
 require('obsidian').setup({
     -- Required, the path to your vault directory.
-    dir = "/Users/fmpi.santos/Projects/NeuralNetwork",
+    dir = "C:\\Users\\filip\\Documents\\Personal\\NeuralNetwork",
 
     -- Optional, set the log level for obsidian.nvim.
     log_level = vim.log.levels.DEBUG,
@@ -20,8 +20,8 @@ require('obsidian').setup({
     -- Optional, key mappings.
     mappings = {
         -- Overrides the 'gf' mapping to work on markdown/wiki links within your vault.
-        ["gd"] = require("obsidian.mapping").gf_passthrough(),
-        ["gf"] = require("obsidian.mapping").gf_passthrough(),
+        --["gd"] = require("obsidian.mapping").gf_passthrough(),
+        --["gf"] = require("obsidian.mapping").gf_passthrough(),
     },
 
     -- Optional, customize how names/IDs for new notes are created.
