@@ -11,6 +11,7 @@
     - tar xzf nvim-macos.tar.gz
     - ./nvim-macos/bin/nvim
     - Mac can use "brew install neovim"
+    - echo "export PATH=\"/path/to/nvim:$PATH\"" >> ~/.bashrc && source ~/.bashrc
     - cd ~/.config && git clone git@github.com:fmpisantos/nvim.git
     - git clone --depth 1 https://github.com/wbthomason/packer.nvim\
          ~/.local/share/nvim/site/pack/packer/start/packer.nvim
