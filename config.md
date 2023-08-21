@@ -16,10 +16,10 @@
     - sudo mv ./nvim-linux64/bin/nvim /usr/bin 
 ## Mac/Linux:
     - cd ~/.config && git clone git@github.com:fmpisantos/nvim.git
-    - ```shell
-        git clone --depth 1 https://github.com/wbthomason/packer.nvim\
-         ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-        ```
+   ```shell
+git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+ ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+```
 ## Both Windows & Bash
         - open $config/nvim/lua/awman/packer/packer.lua and run :so 
         -:PackerSync 
