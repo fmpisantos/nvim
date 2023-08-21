@@ -6,7 +6,8 @@
     - git clone https://github.com/wbthomason/packer.nvim "$env:LOCALAPPDATA\nvim-data\site\pack\packer\start\packer.nvim"
 
 ## Mac/Linux:
-    - curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
+    - (MAC)     curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
+    - (Linux)   curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
     - tar xzf nvim-macos.tar.gz
     - ./nvim-macos/bin/nvim
     - Mac can use "brew install neovim"
