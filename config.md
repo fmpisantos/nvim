@@ -9,12 +9,11 @@
     - tar xzf nvim-macos.tar.gz
     - ./nvim-macos/bin/nvim
     - Mac can use "brew install neovim"
-    - echo "export PATH=\"~/nvim-macos/bin/nvim\"" >> ~/.bashrc && source ~/.bashrc
 ## Linux:
     - curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
      - tar xzf nvim-linux64.tar.gz
     - ./nvim-linux64/bin/nvim
-    - echo "export PATH=\"~/nvim-linux64/bin/nvim\"" >> ~/.bashrc && source ~/.bashrc
+    - sudo mv ./nvim-linux64/bin/nvim /usr/bin 
 ## Mac/Linux:
     - cd ~/.config && git clone git@github.com:fmpisantos/nvim.git
     - git clone --depth 1 https://github.com/wbthomason/packer.nvim\
