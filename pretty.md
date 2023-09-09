@@ -80,11 +80,12 @@
 |  function( |  &quot;gd&quot; | &quot;n&quot; |  |
 |  &quot;ddo&lt;Esc&gt;pkdd&quot; |  &quot;&lt;A-j&gt;&quot; | &quot;n&quot; |  |
 |  &quot;ddkP&quot; |  &quot;&lt;A-k&gt;&quot; | &quot;n&quot; |  |
-| function( | &quot;bm&quot; | &quot;n&quot; |  |
-| function( | &quot;bc&quot; | &quot;n&quot; |  |
-| function( | &quot;bn&quot; | &quot;n&quot; |  |
-| function( | &quot;bp&quot; | &quot;n&quot; |  |
-| function( | &quot;bl&quot; | &quot;n&quot; |  |
+| require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;bm&quot; | &quot;n&quot; |  {--[[ add or remove bookmark at current line]]} |
+| require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;bi&quot; | &quot;n&quot; |  {--[[add or edit mark annotation at current line]]} |
+| require(&quot;bookmarks&quot;).bookmark_clean() | &quot;bc&quot; | &quot;n&quot; |  {--[[clean all marks in local buffer]]} |
+| require(&quot;bookmarks&quot;).bookmark_next() | &quot;bn&quot; | &quot;n&quot; |  {--[[jump to next mark in local buffer]]} |
+| require(&quot;bookmarks&quot;).bookmark_prev() | &quot;bp&quot; | &quot;n&quot; |  {--[[jump to previous mark in local buffer]]} |
+| require(&quot;bookmarks&quot;).bookmark_list() | &quot;bl&quot; | &quot;n&quot; |  {--[[show marked file list in quickfix window]]} |
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
 |  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
