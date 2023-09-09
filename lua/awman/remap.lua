@@ -67,3 +67,14 @@ end, { noremap = false, expr = true })
 
 vim.keymap.set("n", "<A-j>", "ddo<Esc>pkdd");
 vim.keymap.set("n", "<A-k>", "ddkP");
+
+vim.keymap.set("n","bm",function()
+    require("bookmarks").bookmark_toggle() end) -- add or remove bookmark at current line
+vim.keymap.set("n","bc",function()
+    require("bookmarks").bookmark_clean() end) -- add or remove bookmark at current line
+vim.keymap.set("n","bn",function()
+    require("bookmarks").bookmark_next() end) -- add or remove bookmark at current line
+vim.keymap.set("n","bp",function()
+    require("bookmarks").bookmark_prev() end) -- add or remove bookmark at current line
+vim.keymap.set("n","bl",function()
+    require("bookmarks").bookmark_list() end) -- add or remove bookmark at current line

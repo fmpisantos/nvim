@@ -80,6 +80,11 @@
 |  function( |  &quot;gd&quot; | &quot;n&quot; |  |
 |  &quot;ddo&lt;Esc&gt;pkdd&quot; |  &quot;&lt;A-j&gt;&quot; | &quot;n&quot; |  |
 |  &quot;ddkP&quot; |  &quot;&lt;A-k&gt;&quot; | &quot;n&quot; |  |
+| function( | &quot;bm&quot; | &quot;n&quot; |  |
+| function( | &quot;bc&quot; | &quot;n&quot; |  |
+| function( | &quot;bn&quot; | &quot;n&quot; |  |
+| function( | &quot;bp&quot; | &quot;n&quot; |  |
+| function( | &quot;bl&quot; | &quot;n&quot; |  |
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
 |  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
@@ -129,7 +134,7 @@
 |  &quot;&lt;cmd&gt;CellularAutomaton make_it_rain&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;mr&quot; | &quot;n&quot; |  |
 |  function( |  &quot;&lt;leader&gt;&lt;leader&gt;&quot; | &quot;n&quot; |  |
 |  builtin.find_files |  &#x27;&lt;leader&gt;pf&#x27; | &#x27;n&#x27; |  {} |
-|  builtin.find_files |  &#x27;&lt;leader&gt;pg&#x27; | &#x27;n&#x27; |  {} |
+|  builtin.live_grep |  &#x27;&lt;leader&gt;pg&#x27; | &#x27;n&#x27; |  {} |
 |  function( |  &#x27;&lt;leader&gt;ps&#x27; | &#x27;n&#x27; |  |
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |

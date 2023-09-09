@@ -39,4 +39,7 @@ return require('packer').startup(function(use)
         "epwalsh/obsidian.nvim",
         requires = { {'nvim-lua/plenary.nvim'} }
     }
+    use {
+        'tomasky/bookmarks.nvim',
+    }
 end)

@@ -77,6 +77,11 @@
 .//lua/awman/remap.lua:vim.keymap.set("n", "gd", function()
 .//lua/awman/remap.lua:vim.keymap.set("n", "<A-j>", "ddo<Esc>pkdd");
 .//lua/awman/remap.lua:vim.keymap.set("n", "<A-k>", "ddkP");
+.//lua/awman/remap.lua:vim.keymap.set("n","bm",function()
+.//lua/awman/remap.lua:vim.keymap.set("n","bc",function()
+.//lua/awman/remap.lua:vim.keymap.set("n","bn",function()
+.//lua/awman/remap.lua:vim.keymap.set("n","bp",function()
+.//lua/awman/remap.lua:vim.keymap.set("n","bl",function()
 .//grep_vim.keymap.set:vim.keymap.set("n", "<leader>gs", vim.cmd.Git);
 .//grep_vim.keymap.set:vim.keymap.set("n", "<leader>a", mark.add_file)
 .//grep_vim.keymap.set:vim.keymap.set("n", "<C-e>", ui.toggle_quick_menu)
@@ -126,7 +131,7 @@
 .//grep_vim.keymap.set:vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 .//grep_vim.keymap.set:vim.keymap.set("n", "<leader><leader>", function()
 .//after/plugin/telescope.lua:vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
-.//after/plugin/telescope.lua:vim.keymap.set('n', '<leader>pg', builtin.find_files, {})
+.//after/plugin/telescope.lua:vim.keymap.set('n', '<leader>pg', builtin.live_grep, {})
 .//after/plugin/telescope.lua:vim.keymap.set('n', '<leader>ps', function()
 .//after/plugin/fugitive.lua:vim.keymap.set("n", "<leader>gs", vim.cmd.Git);
 .//after/plugin/harpoon.lua:vim.keymap.set("n", "<leader>a", mark.add_file)
