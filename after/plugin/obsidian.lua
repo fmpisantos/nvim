@@ -1,6 +1,6 @@
 require('obsidian').setup({
     -- Required, the path to your vault directory.
-    dir = "C:\\Users\\filip\\Documents\\Personal\\NeuralNetwork",
+    dir = "./",
 
     -- Optional, set the log level for obsidian.nvim.
     log_level = vim.log.levels.DEBUG,
