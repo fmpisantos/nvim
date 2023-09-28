@@ -42,4 +42,7 @@ return require('packer').startup(function(use)
     use {
         'tomasky/bookmarks.nvim',
     }
+    use {
+        "github/copilot.vim"
+    }
 end)
