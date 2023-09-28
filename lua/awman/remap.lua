@@ -74,3 +74,8 @@ vim.keymap.set("n","<leader>bc",function() require("bookmarks").bookmark_clean()
 vim.keymap.set("n","<leader>bn",function() require("bookmarks").bookmark_next() end, {--[[jump to next mark in local buffer]]}) 
 vim.keymap.set("n","<leader>bp",function() require("bookmarks").bookmark_prev() end, {--[[jump to previous mark in local buffer]]}) 
 vim.keymap.set("n","<leader>bl",function() require("bookmarks").bookmark_list() end, {--[[show marked file list in quickfix window]]}) 
+
+vim.keymap.set("n", "<S-Tab>", "<<hhhh");
+vim.keymap.set("n", "<leader><Tab>", ">>llll");
+vim.keymap.set("v", "<S-Tab>", "<gv");
+vim.keymap.set("v", "<Tab>", ">gv");
