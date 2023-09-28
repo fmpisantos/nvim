@@ -38,7 +38,7 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 - To configure GitHub Copilot, open Vim/Neovim and enter the following command.
 
 ```vim
-    :Copilot setup
+:Copilot setup
 ```
 
 - Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim command.
@@ -52,13 +52,13 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 - To configure GitHub Copilot, open Vim/Neovim and enter the following command.
 
 ```vim
-    :Copilot setup
+:Copilot setup
 ```
 
 - Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim command.
 
 ```vim
-   :Copilot enable
+:Copilot enable
 ```
 
 # Installing the Vim/Neovim extension on Linux
@@ -66,11 +66,11 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 - To configure GitHub Copilot, open Vim/Neovim and enter the following command.
 
 ```vim
-    :Copilot setup
+:Copilot setup
 ```
 
 Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim command.
 
 ```vim
-    :Copilot enable
+:Copilot enable
 ```
