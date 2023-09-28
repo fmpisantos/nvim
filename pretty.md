@@ -50,9 +50,6 @@
 |  &quot;&lt;cmd&gt;CellularAutomaton make_it_rain&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;mr&quot; | &quot;n&quot; |  |
 |  function( |  &quot;&lt;leader&gt;&lt;leader&gt;&quot; | &quot;n&quot; |  |
 |  vim.cmd.Ex |  &quot;&lt;leader&gt;pv&quot; | &quot;n&quot; |  |
-|  &quot;:m &#x27;&gt;+1&lt;CR&gt;gv=gv&quot; |  &quot;J&quot; | &quot;v&quot; |  |
-|  &quot;:m &#x27;&lt;-2&lt;CR&gt;gv=gv&quot; |  &quot;K&quot; | &quot;v&quot; |  |
-|  &quot;mzJ`z&quot; |  &quot;J&quot; | &quot;n&quot; |  |
 |  &quot;&lt;C-d&gt;zz&quot; |  &quot;&lt;C-d&gt;&quot; | &quot;n&quot; |  |
 |  &quot;&lt;C-u&gt;zz&quot; |  &quot;&lt;C-u&gt;&quot; | &quot;n&quot; |  |
 |  &quot;nzzzv&quot; |  &quot;n&quot; | &quot;n&quot; |  |
@@ -78,8 +75,8 @@
 |  function( |  &quot;&lt;leader&gt;&lt;leader&gt;&quot; | &quot;n&quot; |  |
 |  function( |  &quot;gf&quot; | &quot;n&quot; |  |
 |  function( |  &quot;gd&quot; | &quot;n&quot; |  |
-|  &quot;ddo&lt;Esc&gt;pkdd&quot; |  &quot;&lt;A-j&gt;&quot; | &quot;n&quot; |  |
-|  &quot;ddkP&quot; |  &quot;&lt;A-k&gt;&quot; | &quot;n&quot; |  |
+|  &quot;25j&quot; |  &quot;J&quot; | &quot;n&quot; |  |
+|  &quot;25k&quot; |  &quot;K&quot; | &quot;n&quot; |  |
 | require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;&lt;leader&gt;bm&quot; | &quot;n&quot; |  {--[[ add or remove bookmark at current line]]} |
 | require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;&lt;leader&gt;bi&quot; | &quot;n&quot; |  {--[[add or edit mark annotation at current line]]} |
 | require(&quot;bookmarks&quot;).bookmark_clean() | &quot;&lt;leader&gt;bc&quot; | &quot;n&quot; |  {--[[clean all marks in local buffer]]} |

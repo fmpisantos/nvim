@@ -2,10 +2,10 @@ vim.g.mapleader = " "
 
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+--vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+--vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
-vim.keymap.set("n", "J", "mzJ`z")
+-- vim.keymap.set("n", "J", "mzJ`z")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
@@ -65,8 +65,8 @@ vim.keymap.set("n", "gd", function()
   end
 end, { noremap = false, expr = true })
 
-vim.keymap.set("n", "<A-j>", "ddo<Esc>pkdd");
-vim.keymap.set("n", "<A-k>", "ddkP");
+vim.keymap.set("n", "J", "25j");
+vim.keymap.set("n", "K", "25k");
 
 vim.keymap.set("n","<leader>bm",function() require("bookmarks").bookmark_toggle() end, {--[[ add or remove bookmark at current line]]}) 
 vim.keymap.set("n","<leader>bi",function() require("bookmarks").bookmark_toggle() end, {--[[add or edit mark annotation at current line]]}) 

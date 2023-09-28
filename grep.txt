@@ -47,9 +47,6 @@
 .//grep_vim.keymap.set.lua:vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 .//grep_vim.keymap.set.lua:vim.keymap.set("n", "<leader><leader>", function()
 .//lua/awman/remap.lua:vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
-.//lua/awman/remap.lua:vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-.//lua/awman/remap.lua:vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
-.//lua/awman/remap.lua:vim.keymap.set("n", "J", "mzJ`z")
 .//lua/awman/remap.lua:vim.keymap.set("n", "<C-d>", "<C-d>zz")
 .//lua/awman/remap.lua:vim.keymap.set("n", "<C-u>", "<C-u>zz")
 .//lua/awman/remap.lua:vim.keymap.set("n", "n", "nzzzv")
@@ -75,8 +72,8 @@
 .//lua/awman/remap.lua:vim.keymap.set("n", "<leader><leader>", function()
 .//lua/awman/remap.lua:vim.keymap.set("n", "gf", function()
 .//lua/awman/remap.lua:vim.keymap.set("n", "gd", function()
-.//lua/awman/remap.lua:vim.keymap.set("n", "<A-j>", "ddo<Esc>pkdd");
-.//lua/awman/remap.lua:vim.keymap.set("n", "<A-k>", "ddkP");
+.//lua/awman/remap.lua:vim.keymap.set("n", "J", "25j");
+.//lua/awman/remap.lua:vim.keymap.set("n", "K", "25k");
 .//lua/awman/remap.lua:vim.keymap.set("n","<leader>bm",function() require("bookmarks").bookmark_toggle() end, {--[[ add or remove bookmark at current line]]}) 
 .//lua/awman/remap.lua:vim.keymap.set("n","<leader>bi",function() require("bookmarks").bookmark_toggle() end, {--[[add or edit mark annotation at current line]]}) 
 .//lua/awman/remap.lua:vim.keymap.set("n","<leader>bc",function() require("bookmarks").bookmark_clean() end, {--[[clean all marks in local buffer]]}) -- 
