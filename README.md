@@ -12,14 +12,26 @@ curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.t
 tar xzf nvim-macos.tar.gz
 ./nvim-macos/bin/nvim
 ```
-    Mac can use "brew install neovim"
+Mac can use "brew install neovim"
+
 ## Linux:
+Check this link for the most recent installation method: https://github.com/neovim/neovim/wiki/Installing-Neovim#linux
 ```shell
-curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
-tar xzf nvim-linux64.tar.gz
-./nvim-linux64/bin/nvim
-sudo mv ./nvim-linux64/bin/nvim /usr/bin 
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+chmod u+x nvim.appimage
+./nvim.appimage
 ```
+
+```shell
+./nvim.appimage --appimage-extract
+./squashfs-root/AppRun --version
+
+# Optional: exposing nvim globally.
+sudo mv squashfs-root /
+sudo ln -s /squashfs-root/AppRun /usr/bin/nvim
+nvim
+```
+
 ## Mac/Linux:
 ```shell
 cd ~/.config && git clone git@github.com:fmpisantos/nvim.git
