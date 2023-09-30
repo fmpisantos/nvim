@@ -89,4 +89,12 @@ Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim c
 
 # Extra requirements:
  - A C compiler in your path and libstdc++ installed (https://github.com/nvim-treesitter/nvim-treesitter#quickstart)
- - ripgrep 
+  - ```shell
+    sudo apt update
+    sudo apt install build-essential
+    sudo apt install libstdc++-10-dev
+    ```  
+ - ripgrep
+  - ```shell
+    sudo apt install ripgrep
+    ```
