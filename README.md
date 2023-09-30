@@ -86,3 +86,7 @@ Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim c
 ```vim
 :Copilot enable
 ```
+
+# Extra requirements:
+ - A C compiler in your path and libstdc++ installed (https://github.com/nvim-treesitter/nvim-treesitter#quickstart)
+ - ripgrep 
