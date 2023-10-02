@@ -65,9 +65,6 @@ vim.keymap.set("n", "gd", function()
   end
 end, { noremap = false, expr = true })
 
-vim.keymap.set("n", "J", "25j");
-vim.keymap.set("n", "K", "25k");
-
 vim.keymap.set("n","<leader>bm",function() require("bookmarks").bookmark_toggle() end, {--[[ add or remove bookmark at current line]]}) 
 vim.keymap.set("n","<leader>bi",function() require("bookmarks").bookmark_toggle() end, {--[[add or edit mark annotation at current line]]}) 
 vim.keymap.set("n","<leader>bc",function() require("bookmarks").bookmark_clean() end, {--[[clean all marks in local buffer]]}) -- 
@@ -79,3 +76,7 @@ vim.keymap.set("n", "<S-Tab>", "<<hhhh");
 vim.keymap.set("n", "<leader><Tab>", ">>llll");
 vim.keymap.set("v", "<S-Tab>", "<gv");
 vim.keymap.set("v", "<Tab>", ">gv");
+
+vim.keymap.set("n", "<M-j>", ":m+<CR>==");
+vim.keymap.set("n", "<M-k>", ":m-2<CR>==");
+
