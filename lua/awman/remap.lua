@@ -80,3 +80,5 @@ vim.keymap.set("v", "<Tab>", ">gv");
 vim.keymap.set("n", "<M-j>", ":m+<CR>==");
 vim.keymap.set("n", "<M-k>", ":m-2<CR>==");
 
+vim.keymap.set("n", "gh", "<cmd>diffget //2<CR>");
+vim.keymap.set("n", "gl", "<cmd>diffget //3<CR>");

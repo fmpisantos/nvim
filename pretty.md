@@ -1,6 +1,9 @@
 # Keybinds 
 | Function | Keybind | Mode | Opts |
 |----------------------|--------------|------|------|
+| :Gdiff | dv | n |  |
+| &lt;cmd&gt;diffget //2&lt;CR&gt; | gh | n | Get left in conflict (in :Gdiff) |
+| &lt;cmd&gt;diffget //3&lt;CR&gt; | gl | n | Get right in conflict (in :Gdiff) |
 |  vim.cmd.Git |  &quot;&lt;leader&gt;gs&quot; | &quot;n&quot; |  |
 |  mark.add_file |  &quot;&lt;leader&gt;a&quot; | &quot;n&quot; |  |
 |  ui.toggle_quick_menu |  &quot;&lt;C-e&gt;&quot; | &quot;n&quot; |  |
@@ -146,4 +149,6 @@
 |  &quot;&gt;gv&quot; |  &quot;&lt;Tab&gt;&quot; | &quot;v&quot; |  |
 |  &quot;:m+&lt;CR&gt;==&quot; |  &quot;&lt;M-j&gt;&quot; | &quot;n&quot; |  |
 |  &quot;:m-2&lt;CR&gt;==&quot; |  &quot;&lt;M-k&gt;&quot; | &quot;n&quot; |  |
+|  &quot;&lt;cmd&gt;diffget //2&lt;CR&gt;&quot; |  &quot;gh&quot; | &quot;n&quot; |  |
+|  &quot;&lt;cmd&gt;diffget //3&lt;CR&gt;&quot; |  &quot;gl&quot; | &quot;n&quot; |  |
 |  |  |  |  |

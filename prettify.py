@@ -42,6 +42,9 @@ def getMode(items):
     return getItem(items, 0), idx
 def printPrettyMD(matrix):
     toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |\n|----------------------|--------------|------|------|"
+    toPrint += "\n| :Gdiff | dv | n |  |"
+    toPrint += "\n| <cmd>diffget //2<CR> | gh | n | Get left in conflict (in :Gdiff) |"
+    toPrint += "\n| <cmd>diffget //3<CR> | gl | n | Get right in conflict (in :Gdiff) |"
     for line in matrix:
         mode, idx = getMode(line)
         toPrint += f"\n| {getFunction(getItem(line,idx+2))} | {getItem(line,idx+1)} | {mode} | {getItem(line,idx+3)} |"
