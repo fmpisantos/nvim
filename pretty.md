@@ -151,4 +151,5 @@
 |  &quot;:m-2&lt;CR&gt;==&quot; |  &quot;&lt;M-k&gt;&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;diffget //2&lt;CR&gt;&quot; |  &quot;gh&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;diffget //3&lt;CR&gt;&quot; |  &quot;gl&quot; | &quot;n&quot; |  |
+|  &quot;&lt;cmd&gt;:Git push -u origin &quot; |  &quot;&lt;leader&gt;gp&quot; | &quot;n&quot; |  |
 |  |  |  |  |
