@@ -83,3 +83,5 @@ vim.keymap.set("n", "<M-k>", ":m-2<CR>==");
 vim.keymap.set("n", "gh", "<cmd>diffget //2<CR>");
 vim.keymap.set("n", "gl", "<cmd>diffget //3<CR>");
 vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>");
+
+vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")

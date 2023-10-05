@@ -152,4 +152,5 @@
 |  &quot;&lt;cmd&gt;diffget //2&lt;CR&gt;&quot; |  &quot;gh&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;diffget //3&lt;CR&gt;&quot; |  &quot;gl&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;:Git push -u origin&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;gp&quot; | &quot;n&quot; |  |
+|  &quot;&lt;cmd&gt;silent !tmux neww tmux-sessionizer&lt;CR&gt;&quot; |  &quot;&lt;C-f&gt;&quot; | &quot;n&quot; |  |
 |  |  |  |  |
