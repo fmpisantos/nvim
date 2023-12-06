@@ -63,7 +63,9 @@ vim.keymap.set("n", "gd", function()
 end, { noremap = false, expr = true })
 
 vim.keymap.set("n","<leader>bm",function() require("bookmarks").bookmark_toggle() end, {--[[ add or remove bookmark at current line]]}) 
-vim.keymap.set("n","<leader>bi",function() require("bookmarks").bookmark_toggle() end, {--[[add or edit mark annotation at current line]]}) 
+vim.keymap.set("n","<leader>bi",function() require("bookmarks").bookmark_toggle() end, {--[[ add or remove bookmark at current line]]}) 
+vim.keymap.set("n","<leader>bme",function() require("bookmarks").bookmark_toggle() end, {--[[add or edit mark annotation at current line]]}) 
+vim.keymap.set("n","<leader>be",function() require("bookmarks").bookmark_toggle() end, {--[[add or edit mark annotation at current line]]}) 
 vim.keymap.set("n","<leader>bc",function() require("bookmarks").bookmark_clean() end, {--[[clean all marks in local buffer]]}) -- 
 vim.keymap.set("n","<leader>bn",function() require("bookmarks").bookmark_next() end, {--[[jump to next mark in local buffer]]}) 
 vim.keymap.set("n","<leader>bp",function() require("bookmarks").bookmark_prev() end, {--[[jump to previous mark in local buffer]]}) 

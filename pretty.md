@@ -132,13 +132,13 @@
 |  &quot;&lt;cmd&gt;lprev&lt;CR&gt;zz&quot; |  &quot;&lt;leader&gt;j&quot; | &quot;n&quot; |  |
 |  [[:%s/\&lt;&lt;C-r&gt;&lt;C-w&gt;\&gt;/&lt;C-r&gt;&lt;C-w&gt;/gI&lt;Left&gt;&lt;Left&gt;&lt;Left&gt;]] |  &quot;&lt;leader&gt;s&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;!chmod +x %&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;x&quot; | &quot;n&quot; |  { silent = true } |
-|  &quot;&lt;cmd&gt;CellularAutomaton make_it_rain&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;mr&quot; | &quot;n&quot; |  |
-|  &quot;&lt;cmd&gt;e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;vpp&quot; | &quot;n&quot; |  |
 |  function( |  &quot;&lt;leader&gt;&lt;leader&gt;&quot; | &quot;n&quot; |  |
 |  function( |  &quot;gf&quot; | &quot;n&quot; |  |
 |  function( |  &quot;gd&quot; | &quot;n&quot; |  |
 | require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;&lt;leader&gt;bm&quot; | &quot;n&quot; |  {--[[ add or remove bookmark at current line]]} |
-| require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;&lt;leader&gt;bi&quot; | &quot;n&quot; |  {--[[add or edit mark annotation at current line]]} |
+| require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;&lt;leader&gt;bi&quot; | &quot;n&quot; |  {--[[ add or remove bookmark at current line]]} |
+| require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;&lt;leader&gt;bme&quot; | &quot;n&quot; |  {--[[add or edit mark annotation at current line]]} |
+| require(&quot;bookmarks&quot;).bookmark_toggle() | &quot;&lt;leader&gt;be&quot; | &quot;n&quot; |  {--[[add or edit mark annotation at current line]]} |
 | require(&quot;bookmarks&quot;).bookmark_clean() | &quot;&lt;leader&gt;bc&quot; | &quot;n&quot; |  {--[[clean all marks in local buffer]]} |
 | require(&quot;bookmarks&quot;).bookmark_next() | &quot;&lt;leader&gt;bn&quot; | &quot;n&quot; |  {--[[jump to next mark in local buffer]]} |
 | require(&quot;bookmarks&quot;).bookmark_prev() | &quot;&lt;leader&gt;bp&quot; | &quot;n&quot; |  {--[[jump to previous mark in local buffer]]} |
@@ -152,5 +152,4 @@
 |  &quot;&lt;cmd&gt;diffget //2&lt;CR&gt;&quot; |  &quot;gh&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;diffget //3&lt;CR&gt;&quot; |  &quot;gl&quot; | &quot;n&quot; |  |
 |  &quot;&lt;cmd&gt;:Git push -u origin&lt;CR&gt;&quot; |  &quot;&lt;leader&gt;gp&quot; | &quot;n&quot; |  |
-|  &quot;&lt;cmd&gt;silent !tmux neww tmux-sessionizer&lt;CR&gt;&quot; |  &quot;&lt;C-f&gt;&quot; | &quot;n&quot; |  |
 |  |  |  |  |
