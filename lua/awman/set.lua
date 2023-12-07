@@ -37,3 +37,7 @@ vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 
 vim.g.mapleader = " "
+
+-- Set the clipboard to "unnamedplus"
+vim.cmd('set clipboard=unnamedplus')
+

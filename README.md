@@ -31,6 +31,7 @@ sudo mv squashfs-root /
 sudo ln -s /squashfs-root/AppRun /usr/bin/nvim
 nvim
 ```
+
 ## Mac/Linux:
 ```shell
 cd ~/.config && git clone git@github.com:fmpisantos/nvim.git
@@ -85,7 +86,6 @@ Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim c
 ```vim
 :Copilot enable
 ```
-
 
 # Extra requirements:
  - A C compiler in your path and libstdc++ installed (https://github.com/nvim-treesitter/nvim-treesitter#quickstart)

@@ -42,9 +42,6 @@ vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
-vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua<CR>");
-
 vim.keymap.set("n", "<leader><leader>", function()
     vim.cmd("so")
 end)
@@ -65,12 +62,11 @@ vim.keymap.set("n", "gd", function()
   end
 end, { noremap = false, expr = true })
 
-vim.keymap.set("n", "J", "25j");
-vim.keymap.set("n", "K", "25k");
-
 vim.keymap.set("n","<leader>bm",function() require("bookmarks").bookmark_toggle() end, {--[[ add or remove bookmark at current line]]}) 
-vim.keymap.set("n","<leader>bi",function() require("bookmarks").bookmark_toggle() end, {--[[add or edit mark annotation at current line]]}) 
-vim.keymap.set("n","<leader>bc",function() require("bookmarks").bookmark_clean() end, {--[[clean all marks in local buffer]]}) -- 
+vim.keymap.set("n","<leader>bi",function() require("bookmarks").bookmark_toggle() end, {--[[ add or remove bookmark at current line]]}) 
+vim.keymap.set("n","<leader>bme",function() require("bookmarks").bookmark_ann() end, {--[[add or edit mark annotation at current line]]}) 
+vim.keymap.set("n","<leader>be",function() require("bookmarks").bookmark_ann() end, {--[[add or edit mark annotation at current line]]}) 
+vim.keymap.set("n","<leader>bc",function() require("bookmarks").bookmark_clean() end, {--[[clean all marks in local buffer]]}) 
 vim.keymap.set("n","<leader>bn",function() require("bookmarks").bookmark_next() end, {--[[jump to next mark in local buffer]]}) 
 vim.keymap.set("n","<leader>bp",function() require("bookmarks").bookmark_prev() end, {--[[jump to previous mark in local buffer]]}) 
 vim.keymap.set("n","<leader>bl",function() require("bookmarks").bookmark_list() end, {--[[show marked file list in quickfix window]]}) 
@@ -79,3 +75,16 @@ vim.keymap.set("n", "<S-Tab>", "<<hhhh");
 vim.keymap.set("n", "<leader><Tab>", ">>llll");
 vim.keymap.set("v", "<S-Tab>", "<gv");
 vim.keymap.set("v", "<Tab>", ">gv");
+
+vim.keymap.set("n", "<M-j>", ":m+<CR>==");
+vim.keymap.set("n", "<M-k>", ":m-2<CR>==");
+
+vim.keymap.set("n", "<leader>gs", vim.cmd.Git, {--[[Git commit]]});
+vim.keymap.set("n","<leader>gd", "<cmd>:Gdiff<CR>", {--[[Git difference]]});
+vim.keymap.set("n", "<leader>gh", "<cmd>diffget //2<CR>", {--[[Use left]]});
+vim.keymap.set("n", "gh", "<cmd>diffget //2<CR>", {--[[Use left]]});
+vim.keymap.set("n", "<leader>gl", "<cmd>diffget //3<CR>", {--[[Use righ]]});
+vim.keymap.set("n", "gl", "<cmd>diffget //3<CR>", {--[[Use righ]]});
+vim.keymap.set("n","<leader>gc", "<cmd>:Git commit<CR>", {--[[Git commit]]}); 
+vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>", {--[[Git commit]]});
+
