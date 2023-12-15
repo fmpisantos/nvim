@@ -15,7 +15,12 @@ require("nvim-tree").setup({
     filters = {
         dotfiles = false
     },
-    update_focused_file = { enable = true }
+    update_focused_file = { enable = true },
+    actions = {
+        open_file = {
+            quit_on_open = true,
+        },
+    },
 })
 
 vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", {--[[Toggle SideBar]]});
