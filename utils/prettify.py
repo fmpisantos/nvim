@@ -56,7 +56,7 @@ def main():
     # writeToFile("grep.txt",grepStr)
     parsedStr = parseStr(grepStr)
     printStr = printPrettyMD(parsedStr)
-    writeToFile("../pretty.md", html.escape(printStr))
+    writeToFile("../Commands.md", html.escape(printStr))
     
 if __name__ == "__main__":
     main()
