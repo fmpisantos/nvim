@@ -90,7 +90,6 @@ vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>", {--[[Git commi
 --vim.keymap.set("sb", "a", "adds file to stage or unstage list", {--[[Adds file to stage or unstage list]]});
 --vim.keymap.set("sb", "X", "resets changes to file", {--[[Resets changes to file]]});
 
-vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", {--[[Toggle SideBar]]});
 
 --vim.keymap.set("sb", "a", "new file/dir", {--[[Crete new file or dir (ends in /)]]});
 --vim.keymap.set("sb", "r", "rename", {--[[Rename]]});
