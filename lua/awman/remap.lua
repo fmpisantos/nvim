@@ -88,3 +88,4 @@ vim.keymap.set("n", "gl", "<cmd>diffget //3<CR>", {--[[Use righ]]});
 vim.keymap.set("n","<leader>gc", "<cmd>:Git commit<CR>", {--[[Git commit]]}); 
 vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>", {--[[Git commit]]});
 
+vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", {--[[]]})
