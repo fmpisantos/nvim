@@ -41,7 +41,8 @@ def getMode(items):
             idx = idx + 1
     return getItem(items, 0), idx
 def printPrettyMD(matrix):
-    toPrint = "# Keybinds \n| Function | Keybind | Mode | Opts |\n|----------------------|--------------|------|------|"
+    toPrint = "https://docs.rockylinux.org/books/nvchad/nvchad_ui/nvimtree/#file-management"
+    toPrint += "# Keybinds \n| Function | Keybind | Mode | Opts |\n|----------------------|--------------|------|------|"
     toPrint += "\n| :Gdiff | dv | n |  |"
     toPrint += "\n| <cmd>diffget //2<CR> | gh | n | Get left in conflict (in :Gdiff) |"
     toPrint += "\n| <cmd>diffget //3<CR> | gl | n | Get right in conflict (in :Gdiff) |"
