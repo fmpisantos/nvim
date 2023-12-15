@@ -6,7 +6,7 @@ def writeToFile(path, content):
         file.write(content)
 
 def runGrep():
-    command = ["grep", "-r", "^vim\.keymap\.set", "./"]
+    command = ["grep", "-r", "^vim\.keymap\.set", "../"]
     try:
         output = subprocess.check_output(command, text=True, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
@@ -53,10 +53,10 @@ def printPrettyMD(matrix):
 def main():
     # grep -r '^vim.keymap.set' ./
     grepStr = runGrep()
-    writeToFile("grep.txt",grepStr)
+    # writeToFile("grep.txt",grepStr)
     parsedStr = parseStr(grepStr)
     printStr = printPrettyMD(parsedStr)
-    writeToFile("./pretty.md", html.escape(printStr))
+    writeToFile("../pretty.md", html.escape(printStr))
     
 if __name__ == "__main__":
     main()

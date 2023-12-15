@@ -88,4 +88,19 @@ vim.keymap.set("n", "gl", "<cmd>diffget //3<CR>", {--[[Use righ]]});
 vim.keymap.set("n","<leader>gc", "<cmd>:Git commit<CR>", {--[[Git commit]]}); 
 vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>", {--[[Git commit]]});
 
-vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", {--[[]]})
+vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", {--[[Toggle SideBar]]});
+
+--vim.keymap.set("sb", "a", "new file/dir", {--[[Crete new file or dir (ends in /)]]});
+--vim.keymap.set("sb", "r", "rename", {--[[Rename]]});
+--vim.keymap.set("sb", "<C-r>", "rename without initial name", {--[[Rename without initial name]]});
+--vim.keymap.set("sb", "d", "delete", {--[[Delete]]});
+--vim.keymap.set("sb", "x", "cut", {--[[Cut]]});
+--vim.keymap.set("sb", "p", "paste", {--[[Paste]]});
+--vim.keymap.set("sb", "c", "copy", {--[[Copy]]});
+--vim.keymap.set("sb", "y", "copy filename", {--[[Copy filename]]});
+--vim.keymap.set("sb", "Y", "copy filename with relative path", {--[[Copy filename with relative path]]});
+--vim.keymap.set("sb", "g+y", "copy filename with absolute path", {--[[Copy filename with absolute path]]});
+--vim.keymap.set("sb", "Tab", "open file but keepcursor on tree", {--[[Open file but keepcursor on tree]]});
+--vim.keymap.set("sb", "<C-v>", "open file w/ vertical split", {--[[Open file with vertical split]]});
+--vim.keymap.set("sb", "<C-h>", "open file w/ horizontal split", {--[[Open file with horizontal split]]});
+
