@@ -87,6 +87,8 @@ vim.keymap.set("n", "<leader>gl", "<cmd>diffget //3<CR>", {--[[Use righ]]});
 vim.keymap.set("n", "gl", "<cmd>diffget //3<CR>", {--[[Use righ]]});
 vim.keymap.set("n","<leader>gc", "<cmd>:Git commit<CR>", {--[[Git commit]]}); 
 vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>", {--[[Git commit]]});
+--vim.keymap.set("sb", "a", "adds file to stage or unstage list", {--[[Adds file to stage or unstage list]]});
+--vim.keymap.set("sb", "X", "resets changes to file", {--[[Resets changes to file]]});
 
 vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", {--[[Toggle SideBar]]});
 
