@@ -8,7 +8,7 @@ return {
 
 			-- Useful status updates for LSP
 			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-			{ 'j-hui/fidget.nvim', opts = {} },
+			-- { 'j-hui/fidget.nvim',    opts = {} },
 
 			-- Additional lua configuration, makes nvim stuff amazing!
 			'folke/neodev.nvim',
@@ -43,8 +43,8 @@ return {
 				nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
 				nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 				nmap('<leader>vca', vim.lsp.buf.code_action, '[V]iew [C]ode [A]ction')
-				nmap('<leader>vd', vim.diagnostic.open_float,'[V]iew [D]ialog');
-				nmap('<leader>vs', vim.lsp.buf.signature_help,'[V]iew [S]igniture');
+				nmap('<leader>vd', vim.diagnostic.open_float, '[V]iew [D]ialog');
+				nmap('<leader>vs', vim.lsp.buf.signature_help, '[V]iew [S]igniture');
 
 				nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 				nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -61,7 +61,7 @@ return {
 				-- Create a command `:Format` local to the LSP buffer
 				vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
 					vim.lsp.buf.format()
-					end, { desc = 'Format current buffer with LSP' })
+				end, { desc = 'Format current buffer with LSP' })
 			end
 
 			require('which-key').register {
@@ -80,7 +80,7 @@ return {
 			require('which-key').register({
 				['<leader>'] = { name = 'VISUAL <leader>' },
 				['<leader>h'] = { 'Git [H]unk' },
-				}, { mode = 'v' })
+			}, { mode = 'v' })
 
 			require('mason').setup()
 			require('mason-lspconfig').setup()
@@ -121,8 +121,6 @@ return {
 				end,
 			}
 
-			-- [[ Configure nvim-cmp ]]
-			-- See `:help cmp`
 			local cmp = require 'cmp'
 			local luasnip = require 'luasnip'
 			require('luasnip.loaders.from_vscode').lazy_load()
