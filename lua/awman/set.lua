@@ -34,8 +34,6 @@ vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
 
-vim.opt.colorcolumn = "80"
-
 -- Set the clipboard to "unnamedplus"
 vim.cmd('set clipboard=unnamedplus')
 
