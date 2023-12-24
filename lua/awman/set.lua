@@ -36,4 +36,4 @@ vim.opt.updatetime = 50
 
 -- Set the clipboard to "unnamedplus"
 vim.cmd('set clipboard=unnamedplus')
-
+vim.o.ignorecase = true
