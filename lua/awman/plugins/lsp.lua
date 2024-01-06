@@ -8,7 +8,7 @@ return {
 
 			-- Useful status updates for LSP
 			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-			{ 'j-hui/fidget.nvim',    opts = {} },
+			-- { 'j-hui/fidget.nvim',    opts = {} },
 
 			-- Additional lua configuration, makes nvim stuff amazing!
 			'folke/neodev.nvim',
@@ -63,6 +63,8 @@ return {
 
 				-- Create a command `:Format` local to the LSP buffer
 				vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
+					vim.cmd('setlocal expandtab') -- Set to use spaces instead of tabs
+					vim.cmd('setlocal shiftwidth=4') -- Set the number of spaces for each level of indentation
 					vim.lsp.buf.format()
 				end, { desc = 'Format current buffer with LSP' })
 			end
