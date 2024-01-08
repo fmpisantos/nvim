@@ -46,7 +46,7 @@ return {
 				nmap('<leader>vca', vim.lsp.buf.code_action, '[V]iew [C]ode [A]ction')
 				nmap('<leader>vd', vim.diagnostic.open_float, '[V]iew [D]ialog');
 				nmap('<leader>vs', vim.lsp.buf.signature_help, '[V]iew [S]igniture');
-				vim.keymap.set('i', '<C-h>', vim.lsp.buf.signature_help, { buffer = bufnr, desc = '[V]iew [S]igniture' })
+				vim.keymap.set('i', '<leader>k', vim.lsp.buf.signature_help, { buffer = bufnr, desc = '[V]iew [S]igniture' })
 
 				nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 				nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
