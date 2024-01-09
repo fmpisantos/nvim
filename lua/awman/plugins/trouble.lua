@@ -8,6 +8,6 @@ return {
         vim.keymap.set('n', '<leader>tdr', function() require("trouble").toggle("document_diagnostics") end, {desc = "[T]rouble [D]ocument [R]efresh"})
         vim.keymap.set('n', '<leader>tl', function() require("trouble").toggle("quickfix") end, {desc = "[T]rouble [L]ist"})
         vim.keymap.set('n', ']d', function() require("trouble").next({skip_groups = true, jump = true}) end, {desc = "Next [D]iagnostic"})
-        vim.keymap.set('n', '[d', function() require("trouble").prev({skip_groups = true, jump = true}) end, {desc = "Previous [D]iagnostic"})
+        vim.keymap.set('n', '[d', function() require("trouble").previous({skip_groups = true, jump = true}) end, {desc = "Previous [D]iagnostic"})
     end,
 }
