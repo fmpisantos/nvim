@@ -98,6 +98,8 @@ return {
 						telemetry = { enable = false },
 					},
 				},
+				tsserver = {},
+				jdtls = {}
 			}
 
 			-- Setup neovim lua configuration
