@@ -16,6 +16,21 @@ vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Remove tab for selected lines" }
 vim.keymap.set("v", "<Tab>", ">gv", { desc = "Add tab to selected lines" });
 vim.keymap.set("n", "<M-j>", ":m+<CR>==", { desc = "Switch present line with line above" });
 vim.keymap.set("n", "<M-k>", ":m-2<CR>==", { desc = "Switch present line with line bellow" });
+
+function OpenBufferDirectory()
+    local buffer_dir = vim.fn.expand('%:p:h')
+    local open_command
+    if vim.fn.has('win32') == 1 then
+        open_command = 'explorer "' .. buffer_dir .. '"'
+    else
+        open_command = 'xdg-open "' .. buffer_dir .. '" &'
+    end
+
+    vim.fn.system(open_command)
+end
+
+vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end, { desc = "Open Current Directory in explorer" })
+
 --vim.keymap.set("sb", "a", "adds file to stage or unstage list", {--[[Adds file to stage or unstage list]]});
 --vim.keymap.set("sb", "X", "resets changes to file", {--[[Resets changes to file]]});
 
