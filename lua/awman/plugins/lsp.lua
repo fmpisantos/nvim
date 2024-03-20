@@ -91,15 +91,12 @@ return {
 			require('mason-lspconfig').setup()
 
 			local servers = {
-				rust_analyzer = {},
 				lua_ls = {
 					Lua = {
 						workspace = { checkThirdParty = false },
 						telemetry = { enable = false },
 					},
-				},
-				tsserver = {},
-				jdtls = {}
+				}
 			}
 
 			-- Setup neovim lua configuration
