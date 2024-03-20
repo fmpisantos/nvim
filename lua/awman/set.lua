@@ -17,7 +17,7 @@ vim.opt.backup = false
 
 local home_dir = os.getenv("HOME")
 if not home_dir then
-  home_dir = os.getenv("USERPROFILE")
+    home_dir = os.getenv("USERPROFILE")
 end
 
 vim.opt.undodir = home_dir .. "/.vim/undodir"

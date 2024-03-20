@@ -27,6 +27,5 @@ require('lazy').setup({
             },
         },
     },
-    {import  =  "awman.plugins"}
-},{});
-
+    { import = "awman.plugins" }
+}, {});
