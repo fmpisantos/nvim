@@ -46,6 +46,9 @@ return {
             builtin.live_grep({ search_dirs = { vim.fn.expand("%:h") }, default_text = text })
         end, { desc = "[F]older [G]rep" });
 
+        -- search over the tags of the current buffer attached lsp server
+        vim.keymap.set('n', '<leader>?', builtin.lsp_workspace_symbols, { desc = "[P]roject [T]ags" });
+
         vim.keymap.set('n', '<leader><leader>', "<cmd>:Telescope keymaps<CR>", { desc = "Grep over keymaps" });
     end
 }

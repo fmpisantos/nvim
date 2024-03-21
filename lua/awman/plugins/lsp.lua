@@ -32,12 +32,20 @@ return {
         },
         config = function()
             local on_attach = function(_, bufnr)
-                local nmap = function(keys, func, desc)
+                local xmap = function(type, keys, func, desc)
                     if desc then
                         desc = 'LSP: ' .. desc
                     end
 
-                    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+                    vim.keymap.set(type, keys, func, { buffer = bufnr, desc = desc })
+                end
+
+                local imap = function(keys, func, desc)
+                    xmap('i', keys, func, desc)
+                end
+
+                local nmap = function(keys, func, desc)
+                    xmap('n', keys, func, desc)
                 end
 
                 nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -45,9 +53,6 @@ return {
                 nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
                 nmap('<leader>vca', vim.lsp.buf.code_action, '[V]iew [C]ode [A]ction')
                 nmap('<leader>vd', vim.diagnostic.open_float, '[V]iew [D]ialog');
-                nmap('<leader>vs', vim.lsp.buf.signature_help, '[V]iew [S]igniture');
-                vim.keymap.set('i', '<leader>k', vim.lsp.buf.signature_help,
-                    { buffer = bufnr, desc = '[V]iew [S]igniture' })
 
                 nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
                 nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -61,6 +66,8 @@ return {
                 nmap('<leader>ps', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[P]roject [S]ymbols')
 
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+                imap('<M-k>', vim.lsp.buf.hover, 'Signature help')
+                imap('<C-k>', vim.lsp.buf.signature_help, 'Signature help')
 
                 local function format()
                     -- Set buffer-local options for formatting
