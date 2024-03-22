@@ -111,7 +111,7 @@ Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim c
   ```shell
   export JDTLS_JVM_ARGS="-javaagent:/home/awman/.local/share/nvim/mason/packages/jdtls/lombok.jar"
   ```
-  Note: 
-    - in windows is probably located at %APPDATA%/Local/nvim-data/...
-    - Path to mason can be fount with :LspInfo in a java file
+  ## Note: 
+   - In windows is probably located at %APPDATA%/Local/nvim-data/...
+   - Path to mason can be fount with :LspInfo in a java file
     
