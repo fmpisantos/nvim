@@ -9,7 +9,7 @@ return {
     config = function()
         require('nvim-treesitter.configs').setup {
             ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'bash' },
-            auto_install = true,
+            auto_install = false,
             highlight = { enable = true },
             indent = { enable = true },
             textobjects = {
