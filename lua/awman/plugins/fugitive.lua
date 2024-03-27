@@ -10,5 +10,6 @@ return {
         vim.keymap.set("n", "gl", "<cmd>diffget //3<CR>", { desc = "Use righ" });
         vim.keymap.set("n", "<leader>gc", "<cmd>:Git commit<CR>", { desc = "Git commit" });
         vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>", { desc = "Git commit" });
+        vim.keymap.set("n", "<leader>gb", "<cmd>: Git blame<CR>", { desc = "Git blame" });
     end
 }

@@ -54,7 +54,7 @@ local function addDeprecatedInfo()
     vim.api.nvim_command("w!")
 
     local current_dir = vim.fn.expand("%:p:h") -- Get current file's directory
-    local deprecated_folder = current_dir:gsub("[^/\\]+$", "") .. "DEPRECATED\\"
+    local deprecated_folder = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
     local move_command = "move \"" .. vim.api.nvim_buf_get_name(0) .. "\" \"" .. deprecated_folder .. "\""
     os.execute(move_command)
 
