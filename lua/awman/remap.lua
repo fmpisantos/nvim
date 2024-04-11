@@ -32,6 +32,9 @@ end
 vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end,
     { desc = "Open Current Directory in explorer" })
 
+-- define a function so that I can use :Open to run the OopenBufferDirectory function
+vim.cmd([[command! Open :lua OpenBufferDirectory()]])
+
 --vim.keymap.set("sb", "a", "adds file to stage or unstage list", {--[[Adds file to stage or unstage list]]});
 --vim.keymap.set("sb", "X", "resets changes to file", {--[[Resets changes to file]]});
 
