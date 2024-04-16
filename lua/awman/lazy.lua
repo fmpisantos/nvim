@@ -11,42 +11,32 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require('lazy').setup({
+require("lazy").setup({
     -- Detect tabstop and shiftwidth automatically
-    'tpope/vim-sleuth',
-    -- {
-    --     -- Set lualine as statusline
-    --     'nvim-lualine/lualine.nvim',
-    --     -- See `:help lualine.txt`
-    --     opts = {
-    --         options = {
-    --             icons_enabled = false,
-    --             theme = 'ayu_mirage',
-    --             component_separators = '|',
-    --             section_separators = '',
-    --         },
-    --     },
-    -- },
-    -- {
-    --     'liuchengxu/space-vim-dark',
-    --     config = function()
-    --         vim.cmd('colorscheme space-vim-dark')
-    --         vim.cmd('hi Comment guifg=#5C6370 ctermfg=59')
-    --     end,
-    -- },
-    { import = "awman.plugins" },
-    {
-        "catppuccin/nvim",
-        name = "catppuccin",
-        priority = 1000,
-        opts = {
-            -- your custom plugins
-            options = {
-                flavour = "mocha"
-            }
+    spec = {
+        "tpope/vim-sleuth",
+        {
+            import = "awman.plugins",
         },
-        config = function()
-            vim.cmd.colorscheme("catppuccin")
-        end
     },
-}, {});
+    defaults = {
+        lazy = false,
+        version = false,          -- always use the latest git commit
+    },
+    notify = { enabled = false }, -- automatically notify when plugins are updated
+    performance = {
+        rtp = {
+            -- disable some rtp plugins
+            disabled_plugins = {
+                "gzip",
+                -- "matchit",
+                -- "matchparen",
+                -- "netrwPlugin",
+                "tarPlugin",
+                "tohtml",
+                "tutor",
+                "zipPlugin",
+            },
+        },
+    },
+})
