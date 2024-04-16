@@ -114,6 +114,7 @@ return {
                         telemetry = { enable = false },
                     },
                 },
+                jdtls = {},
             }
 
             require('neodev').setup()
@@ -124,6 +125,10 @@ return {
                 ensure_installed = vim.tbl_keys(servers),
             }
 
+            local function noop()
+                -- This function does nothing (equivalent to `lsp_zero.noop` in the previous example)
+            end
+
             mason_lspconfig.setup_handlers {
                 function(server_name)
                     require('lspconfig')[server_name].setup {
@@ -133,6 +138,7 @@ return {
                         filetypes = (servers[server_name] or {}).filetypes,
                     }
                 end,
+                jdtls = noop
             }
 
             local cmp = require 'cmp'

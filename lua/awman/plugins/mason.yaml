@@ -1,0 +1,4 @@
+# mason.yaml
+dependencies:
+  - name: java-test
+  - name: java-debug-adapter

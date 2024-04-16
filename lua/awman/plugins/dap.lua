@@ -4,48 +4,27 @@ return {
     config = function()
         local dap = require('dap')
 
-        -- Java debugger configuration
-        dap.adapters.java = {
-            type = 'executable',
-            command = 'java',
-            args = { '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005' },
-            env = {
-                JAVA_HOME = os.getenv('JAVA_HOME')
-            },
-            name = "Java"
-        }
-
         dap.configurations.java = {
-          {
-            type = 'java',
-            request = 'attach',
-            name = "Debug (Attach) - Remote",
-            hostName = "127.0.0.1",
-            port = 5005,
-          },
+            {
+                type = 'java',
+                request = 'attach',
+                name = "Debug (Attach) - Remote",
+                hostName = "127.0.0.1",
+                port = 5005,
+            },
         }
-        --
-        -- dap.configurations.java = {
-        --     {
-        --         type = 'java',
-        --         name = 'Debug (Launch)',
-        --         request = 'launch',
-        --         cwd = '${workspaceFolder}',
-        --         startup = "${file}",
-        --         stopOnEntry = true,
-        --         classpath = '${workspaceFolder}/bin',
-        --         options = {
-        --             classpath = '${workspaceFolder}/bin'
-        --         }
-        --     }
-        -- }
 
         -- Key mappings for debugging
-        vim.api.nvim_set_keymap('n', '<F5>', ":lua require'dap'.continue()<CR>", { noremap = true })
-        vim.api.nvim_set_keymap('n', '<Shift-F5>', ":lua require'dap'.stop()<CR>", { noremap = true })
-        vim.api.nvim_set_keymap('n', '<F9>', ":lua require'dap'.toggle_breakpoint()<CR>", { noremap = true })
-        vim.api.nvim_set_keymap('n', '<F10>', ":lua require'dap'.step_over()<CR>", { noremap = true })
-        vim.api.nvim_set_keymap('n', '<Shift-F11>', ":lua require'dap'.step_out()<CR>", { noremap = true })
-        vim.api.nvim_set_keymap('n', '<F11>', ":lua require'dap'.step_into()<CR>", { noremap = true })
+        local jdtls = require("jdtls");
+        vim.keymap.set('n', "<leader>dc", function() jdtls.test_class() end, { desc = "[D]ebug [C]lass" })
+        vim.keymap.set('n', '<leader>dm', function() require('jdtls').test_nearest_method() end,
+            { desc = '[D]ebug [M]ethod' })
+        vim.keymap.set('n', '<F5>', function() dap.continue() end, { noremap = true, desc = "Degub Continue" })
+        vim.keymap.set('n', '<Shift-F5>', function() dap.stop() end, { noremap = true, desc = "Debug Stop" })
+        vim.keymap.set('n', '<F9>', function() dap.toggle_breakpoint() end,
+            { noremap = true, desc = "Debug Toggle Breakpoint" })
+        vim.keymap.set('n', '<F10>', function() dap.step_over() end, { noremap = true, desc = "Debug Step Over" })
+        vim.keymap.set('n', '<Shift-F11>', function() dap.step_out() end, { noremap = true, desc = "Debug Step Out" })
+        vim.keymap.set('n', '<F11>', function() dap.step_into() end, { noremap = true, desc = "Debug Step Into" })
     end,
 }
