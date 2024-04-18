@@ -138,7 +138,7 @@ return {
                         filetypes = (servers[server_name] or {}).filetypes,
                     }
                 end,
-                jdtls = noop
+                -- jdtls = noop
             }
 
             local cmp = require 'cmp'

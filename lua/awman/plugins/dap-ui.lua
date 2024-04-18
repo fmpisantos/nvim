@@ -46,7 +46,11 @@ return {
                     elements = {
                         {
                             id = "stacks",
-                            size = 1
+                            size = 0.5
+                        },
+                        {
+                            id = "console",
+                            size = 0.5
                         }
                     },
                     position = "left",
@@ -79,9 +83,9 @@ return {
             }
         })
 
-        vim.keymap.set( 'n', '<leader>dw',function() dapui.elements.watches.add() end, { noremap = true, silent = true } )
-        vim.keymap.set( 'n', '<leader>dh',function() dapui.eval() end, { noremap = true, silent = true } )
-        vim.keymap.set( 'n', '<leader>dh',function() dapui.eval() end, { noremap = true, silent = true } )
+        vim.keymap.set('n', '<leader>dw', function() dapui.elements.watches.add() end, { noremap = true, silent = true })
+        vim.keymap.set('n', '<S-F9>', function() dapui.eval() end, { noremap = true, silent = true })
+        vim.keymap.set('n', '<S-F9>', function() dapui.eval() end, { noremap = true, silent = true })
 
         dap.listeners.before.attach.dapui_config = function()
             dapui.open()
