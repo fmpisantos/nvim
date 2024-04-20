@@ -9,12 +9,23 @@ return {
             'folke/neodev.nvim',
             {
                 'hrsh7th/nvim-cmp',
+                event = 'InsertEnter',
                 dependencies = {
-                    'L3MON4D3/LuaSnip',
+                    {
+                        'L3MON4D3/LuaSnip',
+                        build = (function()
+                            if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
+                                return
+                            end
+                            return 'make install_jsregexp'
+                        end)(),
+                        dependencies = {
+                        },
+                    },
                     'saadparwaiz1/cmp_luasnip',
                     'hrsh7th/cmp-nvim-lsp',
                     'hrsh7th/cmp-path',
-                },
+                }
             },
             { 'folke/which-key.nvim', opts = {} }
         },
@@ -131,12 +142,28 @@ return {
 
             mason_lspconfig.setup_handlers {
                 function(server_name)
-                    require('lspconfig')[server_name].setup {
-                        capabilities = capabilities,
-                        on_attach = on_attach,
-                        settings = servers[server_name],
-                        filetypes = (servers[server_name] or {}).filetypes,
-                    }
+                    if (server_name == "jdtls") then
+                        local jdtls_config = require("awman.plugins.java.config")
+                        local function _on_attach(client, bufnr)
+                            on_attach(client, bufnr)
+                            jdtls_config.jdtls_on_attach(client, bufnr)
+                        end
+                        local cmd = jdtls_config.jdtls_setup()
+                        require('lspconfig')[server_name].setup {
+                            cmd = cmd,
+                            capabilities = capabilities,
+                            on_attach = _on_attach,
+                            settings = servers[server_name],
+                            filetypes = (servers[server_name] or {}).filetypes,
+                        }
+                    else
+                        require('lspconfig')[server_name].setup {
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = servers[server_name],
+                            filetypes = (servers[server_name] or {}).filetypes,
+                        }
+                    end
                 end,
                 -- jdtls = noop
             }

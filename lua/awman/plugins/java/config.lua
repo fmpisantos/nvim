@@ -1,13 +1,7 @@
+local M = {}
+
 local java_cmds = vim.api.nvim_create_augroup('java_cmds', { clear = true })
 local cache_vars = {}
-
-local root_files = {
-    '.git',
-    'mvnw',
-    'gradlew',
-    'pom.xml',
-    'build.gradle',
-}
 
 local features = {
     -- change this to `true` to enable codelens
@@ -101,6 +95,14 @@ local function get_jdtls_paths()
     return path
 end
 
+local function enable_debugger(_)
+    local dap_config = require("awman.plugins.java.dap_java_config");
+    dap_config.setup_dap({ hotcodereplace = 'auto' })
+    dap_config.setup_dap_main_class_configs()
+
+    -- local opts = { buffer = bufnr }
+end
+
 local function enable_codelens(bufnr)
     pcall(vim.lsp.codelens.refresh)
 
@@ -114,14 +116,7 @@ local function enable_codelens(bufnr)
     })
 end
 
-local function enable_debugger(bufnr)
-    require('jdtls').setup_dap({ hotcodereplace = 'auto' })
-    require('jdtls.dap').setup_dap_main_class_configs()
-
-    local opts = { buffer = bufnr }
-end
-
-local function jdtls_on_attach(client, bufnr)
+function M.jdtls_on_attach(_,bufnr)
     if features.debugger then
         enable_debugger(bufnr)
     end
@@ -134,25 +129,10 @@ local function jdtls_on_attach(client, bufnr)
     vim.keymap.set('n', '<A-o>', "<cmd>lua require('jdtls').organize_imports()<cr>", opts)
 end
 
-local function jdtls_setup(event)
-    local jdtls = require('jdtls')
-
+function M.jdtls_setup(_)
     local path = get_jdtls_paths()
     local data_dir = path.data_dir .. '/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 
-    if cache_vars.capabilities == nil then
-        jdtls.extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-
-        local ok_cmp, cmp_lsp = pcall(require, 'cmp_nvim_lsp')
-        cache_vars.capabilities = vim.tbl_deep_extend(
-            'force',
-            vim.lsp.protocol.make_client_capabilities(),
-            ok_cmp and cmp_lsp.default_capabilities() or {}
-        )
-    end
-
-    -- The command that starts the language server
-    -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
     local cmd = {
         -- 💀
         'java',
@@ -183,88 +163,20 @@ local function jdtls_setup(event)
         data_dir,
     }
 
-    local lsp_settings = {
-        java = {
-            -- jdt = {
-            --   ls = {
-            --     vmargs = "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx1G -Xms100m"
-            --   }
-            -- },
-            eclipse = {
-                downloadSources = true,
-            },
-            configuration = {
-                updateBuildConfiguration = 'interactive',
-                runtimes = path.runtimes,
-            },
-            maven = {
-                downloadSources = true,
-            },
-            implementationsCodeLens = {
-                enabled = true,
-            },
-            referencesCodeLens = {
-                enabled = true,
-            },
-            -- inlayHints = {
-            --   parameterNames = {
-            --     enabled = 'all' -- literals, all, none
-            --   }
-            -- },
-            format = {
-                enabled = true,
-                -- settings = {
-                --   profile = 'asdf'
-                -- },
-            }
-        },
-        signatureHelp = {
-            enabled = true,
-        },
-        completion = {
-            favoriteStaticMembers = {
-                'org.hamcrest.MatcherAssert.assertThat',
-                'org.hamcrest.Matchers.*',
-                'org.hamcrest.CoreMatchers.*',
-                'org.junit.jupiter.api.Assertions.*',
-                'java.util.Objects.requireNonNull',
-                'java.util.Objects.requireNonNullElse',
-                'org.mockito.Mockito.*',
-            },
-        },
-        contentProvider = {
-            preferred = 'fernflower',
-        },
-        extendedClientCapabilities = jdtls.extendedClientCapabilities,
-        sources = {
-            organizeImports = {
-                starThreshold = 9999,
-                staticStarThreshold = 9999,
-            }
-        },
-        codeGeneration = {
-            toString = {
-                template = '${object.className}{${member.name()}=${member.value}, ${otherMembers}}',
-            },
-            useBlocks = true,
-        },
-    }
+    return cmd
 
     -- This starts a new client & server,
     -- or attaches to an existing client & server depending on the `root_dir`.
-    jdtls.start_or_attach({
-        cmd = cmd,
-        settings = lsp_settings,
-        on_attach = jdtls_on_attach,
-        capabilities = cache_vars.capabilities,
-        root_dir = jdtls.setup.find_root(root_files),
-        flags = {
-            allow_incremental_sync = true,
-        },
-        init_options = {
-            bundles = path.bundles,
-        },
-    })
+    -- jdtls.start_or_attach({
+    --     cmd = cmd,
+    --     on_attach = jdtls_on_attach,
+    --     flags = {
+    --         allow_incremental_sync = true,
+    --     },
+    --     init_options = {
+    --         bundles = path.bundles,
+    --     },
+    -- })
 end
 
-jdtls_setup()
+return M

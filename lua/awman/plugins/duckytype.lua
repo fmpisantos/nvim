@@ -1,5 +1,6 @@
 return {
     "kwakzalver/duckytype.nvim",
+    event = { "BufReadPost", "BufWritePost", "BufNewFile", "VeryLazy" },
     branch = "main",
     config = function()
         require("duckytype").setup({
