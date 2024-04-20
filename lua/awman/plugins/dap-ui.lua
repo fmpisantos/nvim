@@ -45,26 +45,26 @@ return {
                 {
                     elements = {
                         {
-                            id = "stacks",
+                            id = "console",
                             size = 0.5
                         },
                         {
-                            id = "console",
+                            id = "stacks",
                             size = 0.5
-                        }
+                        },
                     },
                     position = "left",
                     size = 30
                 }, {
                 elements = {
                     {
-                        id = "scopes",
+                        id = "watches",
                         size = 0.5
                     },
                     {
-                        id = "watches",
+                        id = "scopes",
                         size = 0.5
-                    }
+                    },
                 },
                 position = "bottom",
                 size = 10
