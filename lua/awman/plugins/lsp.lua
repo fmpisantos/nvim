@@ -46,8 +46,18 @@ return {
                 local nmap = function(keys, func, desc)
                     xmap('n', keys, func, desc)
                 end
+
+                local function custom_rename()
+                    local new_name = vim.fn.input('New name: ')
+                    if new_name ~= nil and new_name ~= '' then
+                        vim.lsp.buf.rename(new_name)
+                    else
+                        print("Invalid name, rename canceled.")
+                    end
+                end
+
                 nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-                nmap('<leader>vvv', vim.lsp.buf.rename, '[R]e[n]ame')
+                nmap('<leader>rN', custom_rename, '[R]e[n]ame')
                 nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
                 nmap('<leader>vca', vim.lsp.buf.code_action, '[V]iew [C]ode [A]ction')
                 nmap('<leader>vd', vim.diagnostic.open_float, '[V]iew [D]ialog');
