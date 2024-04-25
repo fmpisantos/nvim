@@ -158,13 +158,16 @@ return {
                             on_attach(client, bufnr)
                             jdtls_config.jdtls_on_attach(client, bufnr)
                         end
-                        local cmd = jdtls_config.jdtls_setup()
+                        local cmd, path = jdtls_config.jdtls_setup()
                         require('lspconfig')[server_name].setup {
                             cmd = cmd,
                             capabilities = capabilities,
                             on_attach = _on_attach,
                             settings = servers[server_name],
                             filetypes = (servers[server_name] or {}).filetypes,
+                            init_options = {
+                                bundles = path.bundles,
+                            },
                         }
                     else
                         require('lspconfig')[server_name].setup {

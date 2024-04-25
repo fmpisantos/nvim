@@ -16,7 +16,7 @@ return {
 
 
         local function compile_mvn()
-            local handle = io.popen('mvn compile 2>&1')
+            local handle = io.popen('mvn clean install -DskipTests 2>&1')
             if handle then
                 local result = handle:read('*a')
                 handle:close()

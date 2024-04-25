@@ -163,7 +163,7 @@ function M.jdtls_setup(_)
         data_dir,
     }
 
-    return cmd
+    return cmd, path
 
     -- This starts a new client & server,
     -- or attaches to an existing client & server depending on the `root_dir`.
