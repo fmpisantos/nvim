@@ -116,7 +116,7 @@ local function enable_codelens(bufnr)
     })
 end
 
-function M.jdtls_on_attach(_,bufnr)
+function M.jdtls_on_attach(_, bufnr)
     if features.debugger then
         enable_debugger(bufnr)
     end
@@ -143,7 +143,8 @@ function M.jdtls_setup(_)
         '-Dlog.protocol=true',
         '-Dlog.level=ALL',
         '-javaagent:' .. path.java_agent,
-        '-Xms1g',
+        '-Xms2g',
+        '-Xmx4g',
         '--add-modules=ALL-SYSTEM',
         '--add-opens',
         'java.base/java.util=ALL-UNNAMED',
