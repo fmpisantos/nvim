@@ -39,7 +39,7 @@ return {
         vim.keymap.set('n', '<F5>', function() Dap.continue() end, { noremap = true, desc = "Degub Continue" })
         vim.keymap.set('n', '<S-F5>', function() Dap.terminate() end, { noremap = true, desc = "Debug Stop" })
         vim.keymap.set('n', '<C-S-F5>', function()
-            Dap.terminate(); Dap.run_last();
+            Dap.terminate(); compile_mvn(); Dap.run_last();
         end, { noremap = true, desc = "Debug Stop" })
         vim.keymap.set('n', '<F9>', function() Dap.toggle_breakpoint() end,
             { noremap = true, desc = "Debug Toggle Breakpoint" })
