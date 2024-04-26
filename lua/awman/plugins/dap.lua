@@ -31,10 +31,10 @@ return {
         end
 
         local jdtls = require("jdtls");
-        vim.keymap.set('n', '<leader>dr', function() compile_mvn(); Dap.run_last() end,
+        vim.keymap.set('n', '<leader>Dr', function() compile_mvn(); Dap.run_last() end,
             { noremap = true, desc = "Debug run_last" })
-        vim.keymap.set('n', "<leader>dc", function() compile_mvn(); jdtls.test_class() end, { desc = "[D]ebug [C]lass" })
-        vim.keymap.set('n', '<leader>dm', function() compile_mvn(); require('jdtls').test_nearest_method() end,
+        vim.keymap.set('n', "<leader>Dc", function() compile_mvn(); jdtls.test_class() end, { desc = "[D]ebug [C]lass" })
+        vim.keymap.set('n', '<leader>Dm', function() compile_mvn(); require('jdtls').test_nearest_method() end,
             { desc = '[D]ebug [M]ethod' })
         vim.keymap.set('n', '<F5>', function() Dap.continue() end, { noremap = true, desc = "Degub Continue" })
         vim.keymap.set('n', '<S-F5>', function() Dap.terminate() end, { noremap = true, desc = "Debug Stop" })
