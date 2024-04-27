@@ -31,10 +31,16 @@ return {
         end
 
         local jdtls = require("jdtls");
-        vim.keymap.set('n', '<leader>Dr', function() compile_mvn(); Dap.run_last() end,
+        vim.keymap.set('n', '<leader>Dr', function()
+                compile_mvn(); Dap.run_last()
+            end,
             { noremap = true, desc = "Debug run_last" })
-        vim.keymap.set('n', "<leader>Dc", function() compile_mvn(); jdtls.test_class() end, { desc = "[D]ebug [C]lass" })
-        vim.keymap.set('n', '<leader>Dm', function() compile_mvn(); require('jdtls').test_nearest_method() end,
+        vim.keymap.set('n', "<leader>Dc", function()
+            compile_mvn(); jdtls.test_class()
+        end, { desc = "[D]ebug [C]lass" })
+        vim.keymap.set('n', '<leader>Dm', function()
+                compile_mvn(); require('jdtls').test_nearest_method()
+            end,
             { desc = '[D]ebug [M]ethod' })
         vim.keymap.set('n', '<F5>', function() Dap.continue() end, { noremap = true, desc = "Degub Continue" })
         vim.keymap.set('n', '<S-F5>', function() Dap.terminate() end, { noremap = true, desc = "Debug Stop" })
@@ -49,5 +55,13 @@ return {
             { noremap = true, desc = "Debug Step Out" })
         vim.keymap.set('n', '<F11>', function() Dap.step_into() end,
             { noremap = true, desc = "Debug Step Into" })
+
+        vim.api.nvim_create_user_command("DapClearBreakpoints", function()
+            Dap.clear_breakpoints()
+        end, { nargs = 0, complete = 'customlist,v:lua.Dap.get_breakpoints', desc = "Clear all breakpoints" })
+
+        vim.api.nvim_create_user_command("DapTerminal", function()
+            Dap.repl.open()
+        end, { nargs = 0, complete = 'customlist,v:lua.Dap.get_breakpoints', desc = "Clear all breakpoints" })
     end,
 }
