@@ -18,6 +18,7 @@ vim.keymap.set("n", "<M-j>", ":m+<CR>==", { desc = "Switch present line with lin
 vim.keymap.set("n", "<M-k>", ":m-2<CR>==", { desc = "Switch present line with line bellow" });
 
 function OpenBufferDirectory()
+    print("Hi")
     local buffer_dir = vim.fn.expand('%:p:h')
     local open_command
     if vim.fn.has('win32') == 1 then

@@ -58,10 +58,10 @@ return {
 
         vim.api.nvim_create_user_command("DapClearBreakpoints", function()
             Dap.clear_breakpoints()
-        end, { nargs = 0, complete = 'customlist,v:lua.Dap.get_breakpoints', desc = "Clear all breakpoints" })
+        end, { desc = "Clear all breakpoints" })
 
         vim.api.nvim_create_user_command("DapTerminal", function()
             Dap.repl.open()
-        end, { nargs = 0, complete = 'customlist,v:lua.Dap.get_breakpoints', desc = "Clear all breakpoints" })
+        end, { desc = "Clear all breakpoints" })
     end,
 }
