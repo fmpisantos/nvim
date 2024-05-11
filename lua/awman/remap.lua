@@ -16,6 +16,7 @@ vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Remove tab for selected lines" }
 vim.keymap.set("v", "<Tab>", ">gv", { desc = "Add tab to selected lines" });
 vim.keymap.set("n", "<M-j>", ":m+<CR>==", { desc = "Switch present line with line above" });
 vim.keymap.set("n", "<M-k>", ":m-2<CR>==", { desc = "Switch present line with line bellow" });
+vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
 
 function OpenBufferDirectory()
     print("Hi")
@@ -32,10 +33,10 @@ end
 
 vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end,
     { desc = "Open Current Directory in explorer" })
-
--- define a function so that I can use :Open to run the OopenBufferDirectory function
 vim.cmd([[command! Open :lua OpenBufferDirectory()]])
 
+
+vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
 --vim.keymap.set("sb", "a", "adds file to stage or unstage list", {--[[Adds file to stage or unstage list]]});
 --vim.keymap.set("sb", "X", "resets changes to file", {--[[Resets changes to file]]});
 
