@@ -24,6 +24,6 @@ return {
         })
 
         vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", { desc = "Toggle [S]ide [B]ar" });
-        vim.keymap.set("n", "<leader>pv", "<cmd>:NvimTreeToggle<CR>", { desc = "Toggle [P]roject [V]iew" });
+        -- vim.keymap.set("n", "<leader>pv", "<cmd>:NvimTreeToggle<CR>", { desc = "Toggle [P]roject [V]iew" });
     end
 }
