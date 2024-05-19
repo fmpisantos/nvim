@@ -209,6 +209,14 @@ return {
                     { name = 'path' },
                 },
             }
+
+            cmp.setup.filetype({ "sql" }, {
+                sources = {
+                    { name = "vim-dadbod-completion" },
+                    { name = "buffer" },
+                }
+            })
+
             vim.diagnostic.config({
                 float = {
                     focusable = true,
