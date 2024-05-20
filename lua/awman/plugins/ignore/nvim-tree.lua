@@ -7,12 +7,7 @@ return {
         vim.g.loaded_netrw = 1
         vim.g.loaded_netrwPlugin = 1
 
-        -- set termguicolors to enable highlight groups
         vim.opt.termguicolors = true
-        -- empty setup using defaults
-        -- require("nvim-tree").setup()
-
-        -- OR setup with some options
         require("nvim-tree").setup({
             view = {
                 width = 30,
@@ -29,6 +24,6 @@ return {
         })
 
         vim.keymap.set("n", "<leader>sb", "<cmd>:NvimTreeToggle<CR>", { desc = "Toggle [S]ide [B]ar" });
-        vim.keymap.set("n", "<leader>pv", "<cmd>:NvimTreeToggle<CR>", { desc = "Toggle [P]roject [V]iew" });
-    end -- disable netrw at the very start of your init.lua
+        -- vim.keymap.set("n", "<leader>pv", "<cmd>:NvimTreeToggle<CR>", { desc = "Toggle [P]roject [V]iew" });
+    end
 }

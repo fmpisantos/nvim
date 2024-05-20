@@ -1,5 +1,6 @@
 return {
     'tomasky/bookmarks.nvim',
+    event = { "BufReadPost", "BufWritePost", "BufNewFile", "VeryLazy" },
     config = function()
         vim.keymap.set("n", "<leader>bm", function() require("bookmarks").bookmark_toggle() end,
             { desc = "add or remove bookmark at current line" });

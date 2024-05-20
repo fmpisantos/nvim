@@ -10,12 +10,23 @@ return {
             'folke/neodev.nvim',
             {
                 'hrsh7th/nvim-cmp',
+                event = 'InsertEnter',
                 dependencies = {
-                    'L3MON4D3/LuaSnip',
+                    {
+                        'L3MON4D3/LuaSnip',
+                        build = (function()
+                            if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
+                                return
+                            end
+                            return 'make install_jsregexp'
+                        end)(),
+                        dependencies = {
+                        },
+                    },
                     'saadparwaiz1/cmp_luasnip',
                     'hrsh7th/cmp-nvim-lsp',
                     'hrsh7th/cmp-path',
-                },
+                }
             },
             { 'folke/which-key.nvim', opts = {} }
         },
@@ -36,8 +47,18 @@ return {
                 local nmap = function(keys, func, desc)
                     xmap('n', keys, func, desc)
                 end
+
+                local function custom_rename()
+                    local new_name = vim.fn.input('New name: ')
+                    if new_name ~= nil and new_name ~= '' then
+                        vim.lsp.buf.rename(new_name)
+                    else
+                        print("Invalid name, rename canceled.")
+                    end
+                end
+
                 nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-                nmap('<leader>vvv', vim.lsp.buf.rename, '[R]e[n]ame')
+                nmap('<leader>rN', custom_rename, '[R]e[n]ame')
                 nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
                 nmap('<leader>vca', vim.lsp.buf.code_action, '[V]iew [C]ode [A]ction')
                 nmap('<leader>vd', vim.diagnostic.open_float, '[V]iew [D]ialog');
@@ -115,6 +136,7 @@ return {
                         telemetry = { enable = false },
                     },
                 },
+                jdtls = {},
             }
 
             require('neodev').setup()
@@ -125,15 +147,39 @@ return {
                 ensure_installed = vim.tbl_keys(servers),
             }
 
+            local function noop()
+                -- This function does nothing (equivalent to `lsp_zero.noop` in the previous example)
+            end
+
             mason_lspconfig.setup_handlers {
                 function(server_name)
-                    require('lspconfig')[server_name].setup {
-                        capabilities = capabilities,
-                        on_attach = on_attach,
-                        settings = servers[server_name],
-                        filetypes = (servers[server_name] or {}).filetypes,
-                    }
+                    if (server_name == "jdtls") then
+                        local jdtls_config = require("awman.plugins.java.config")
+                        local function _on_attach(client, bufnr)
+                            on_attach(client, bufnr)
+                            jdtls_config.jdtls_on_attach(client, bufnr)
+                        end
+                        local cmd, path = jdtls_config.jdtls_setup()
+                        require('lspconfig')[server_name].setup {
+                            cmd = cmd,
+                            capabilities = capabilities,
+                            on_attach = _on_attach,
+                            settings = servers[server_name],
+                            filetypes = (servers[server_name] or {}).filetypes,
+                            init_options = {
+                                bundles = path.bundles,
+                            },
+                        }
+                    else
+                        require('lspconfig')[server_name].setup {
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = servers[server_name],
+                            filetypes = (servers[server_name] or {}).filetypes,
+                        }
+                    end
                 end,
+                -- jdtls = noop
             }
 
             local cmp = require 'cmp'
@@ -163,6 +209,24 @@ return {
                     { name = 'path' },
                 },
             }
+
+            cmp.setup.filetype({ "sql" }, {
+                sources = {
+                    { name = "vim-dadbod-completion" },
+                    { name = "buffer" },
+                }
+            })
+
+            vim.diagnostic.config({
+                float = {
+                    focusable = true,
+                    style = "minimal",
+                    border = "rounded",
+                    source = "always",
+                    header = "",
+                    prefix = "",
+                },
+            })
         end
     }
 }
