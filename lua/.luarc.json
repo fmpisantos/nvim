@@ -3,6 +3,7 @@
         "param-type-mismatch"
     ],
     "diagnostics.globals": [
-        "show_current_line_popup"
+        "show_current_line_popup",
+        "trim"
     ]
 }

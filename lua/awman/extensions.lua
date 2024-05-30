@@ -1,7 +1,13 @@
 local api = vim.api
 
+function trim(s)
+    return s:match("^%s*(.-)%s*$")
+end
+
 function show_current_line_popup()
     local current_line = api.nvim_get_current_line()
+    current_line = trim(current_line)
+
     local bufnr = api.nvim_create_buf(false, true)
     api.nvim_buf_set_option(bufnr, 'textwidth', 60) -- set textwidth for wrapping
 
@@ -31,7 +37,7 @@ function show_current_line_popup()
     -- map 'q' to close the floating window
     api.nvim_buf_set_keymap(bufnr, 'n', 'q', '<cmd>lua vim.api.nvim_win_close(' .. win_id .. ', true)<cr>',
         { noremap = true, silent = true })
-
 end
 
-api.nvim_set_keymap("n", "<leader>l", ":lua show_current_line_popup()<cr>", { noremap = true, silent = true, desc = "show current line in popup" });
+api.nvim_set_keymap("n", "<leader>l", ":lua show_current_line_popup()<cr>",
+    { noremap = true, silent = true, desc = "show current line in popup" });
