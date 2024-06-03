@@ -74,7 +74,7 @@ return {
                 nmap('<leader>ps', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[P]roject [S]ymbols')
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
                 imap('<M-k>', vim.lsp.buf.hover, 'Signature help')
-                imap('<C-k>', vim.lsp.buf.signature_help, 'Signature help')
+                imap('<C-k>', vim.lsp.buf.signature_help, 'Signature help');
                 local function format()
                     vim.cmd('setlocal expandtab')
                     vim.cmd('setlocal shiftwidth=4')
@@ -146,10 +146,6 @@ return {
             mason_lspconfig.setup {
                 ensure_installed = vim.tbl_keys(servers),
             }
-
-            local function noop()
-                -- This function does nothing (equivalent to `lsp_zero.noop` in the previous example)
-            end
 
             mason_lspconfig.setup_handlers {
                 function(server_name)
