@@ -6,8 +6,26 @@ local nmap = function(keys, func, desc)
     vim.keymap.set('n', keys, func, { desc = desc })
 end
 -- Remaps
-nmap("<C-F7", "<cmd>:!powershell.exe -File W:\\env\\etc\\crossbow\\validation\\sihot_style_compiler.ps1 -FILE %:p<CR>",
-    "Parse layout")
+local CompileFile = function()
+    -- Get the current file's full path
+    local file_path = vim.fn.expand('%:p')
+
+    -- Build the command
+    local command = 'powershell.exe -File W:\\env\\etc\\crossbow\\validation\\sihot_style_compiler.ps1 -FILE ' ..
+    file_path
+
+    -- Execute the command and capture the output
+    local output = vim.fn.system(command)
+
+    -- Print the output
+    print(output)
+end
+
+-- Create a command to call the function
+vim.api.nvim_create_user_command('CompileFile', CompileFile, {})
+
+-- Optionally, you can map the function to a key binding
+vim.keymap.set('n', '<C-F7>', ':CompileFile<CR>', { desc = 'Run CompileFile command' })
 
 -- Named functions
 
