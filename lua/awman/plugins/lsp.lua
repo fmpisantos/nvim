@@ -196,7 +196,7 @@ return {
                     ['<C-p>'] = cmp.mapping.select_prev_item(),
                     ['<C-y>'] = cmp.mapping.confirm({ select = true }),
                     ['<C-Space>'] = nil,
-                    ['<Tab>'] = cmp.mapping.confirm({ select = true }),
+                    ['<Tab>'] = nil,
                     ['<S-Tab>'] = cmp.mapping.complete {},
                 },
                 sources = {
