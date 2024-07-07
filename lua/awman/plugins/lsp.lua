@@ -72,8 +72,8 @@ return {
                 nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
                 nmap('<leader>ps', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[P]roject [S]ymbols')
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-                imap('<M-k>', vim.lsp.buf.hover, 'Signature help')
-                imap('<C-k>', vim.lsp.buf.signature_help, 'Signature help');
+                nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
+                imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
                 local function format()
                     vim.cmd('setlocal expandtab')
                     vim.cmd('setlocal shiftwidth=4')
@@ -195,9 +195,9 @@ return {
                     ['<C-n>'] = cmp.mapping.select_next_item(),
                     ['<C-p>'] = cmp.mapping.select_prev_item(),
                     ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                    ['<C-Space>'] = cmp.mapping.complete {},
-                    ['<Tab>'] = nil,
-                    ['<S-Tab>'] = nil,
+                    ['<C-Space>'] = nil,
+                    ['<Tab>'] = cmp.mapping.confirm({ select = true }),
+                    ['<S-Tab>'] = cmp.mapping.complete {},
                 },
                 sources = {
                     { name = 'nvim_lsp' },
