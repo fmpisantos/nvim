@@ -30,9 +30,9 @@ vim.keymap.set('n', '<C-F7>', ':CompileFile<CR>', { desc = 'Run CompileFile comm
 -- Named functions
 
 local function getVersionString(v)
-    if v < 100 then
+    if v < 10 then
         return "00" .. v
-    elseif v < 10 then
+    elseif v < 100 then
         return "0" .. v
     end
     return v
