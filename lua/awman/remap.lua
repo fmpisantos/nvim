@@ -19,6 +19,8 @@ vim.keymap.set("n", "<M-k>", ":m-2<CR>==", { desc = "Switch present line with li
 vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
 vim.keymap.set("n", "<M-.>", "<C-W>5<", { desc = "Decrease window width" });
 vim.keymap.set("n", "<M-,>", "<C-W>5>", { desc = "Increase window width" });
+vim.keymap.set("n", "<C-->", "<C-o>", { noremap = true, silent = true, desc = "Go back" });
+vim.keymap.set("n", "<C-_>", "<C-i>", { noremap = true, silent = true, desc = "Go forward" });
 
 function OpenBufferDirectory()
     local buffer_dir = vim.fn.expand('%:p:h')
