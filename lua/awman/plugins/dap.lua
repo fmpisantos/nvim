@@ -73,7 +73,7 @@ return {
             require("awman.plugins.java.config").clear_data_dir();
             compile_mvn();
         end
-        vim.api.nvim_create_user_command("mvnnt", mvnnt, { desc = "Maven clean install with no tests" })
+        vim.api.nvim_create_user_command("Mvnnt", mvnnt, { desc = "Maven clean install with no tests" })
         vim.api.nvim_create_user_command("DapCleanInstall", mvnnt, { desc = "Maven clean install with no tests" })
 
     end,
