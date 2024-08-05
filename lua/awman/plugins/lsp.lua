@@ -56,6 +56,7 @@ return {
                     end
                 end
 
+                nmap('<C-r><C-r>', vim.lsp.buf.rename, '[R]e[n]ame')
                 nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
                 nmap('<leader>rN', custom_rename, '[R]e[n]ame')
                 nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
@@ -72,8 +73,8 @@ return {
                 nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
                 nmap('<leader>ps', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[P]roject [S]ymbols')
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-                imap('<M-k>', vim.lsp.buf.hover, 'Signature help')
-                imap('<C-k>', vim.lsp.buf.signature_help, 'Signature help')
+                nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
+                imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
                 local function format()
                     vim.cmd('setlocal expandtab')
                     vim.cmd('setlocal shiftwidth=4')
@@ -146,10 +147,6 @@ return {
                 ensure_installed = vim.tbl_keys(servers),
             }
 
-            local function noop()
-                -- This function does nothing (equivalent to `lsp_zero.noop` in the previous example)
-            end
-
             mason_lspconfig.setup_handlers {
                 function(server_name)
                     if (server_name == "jdtls") then
@@ -199,9 +196,9 @@ return {
                     ['<C-n>'] = cmp.mapping.select_next_item(),
                     ['<C-p>'] = cmp.mapping.select_prev_item(),
                     ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                    ['<C-Space>'] = cmp.mapping.complete {},
+                    ['<C-Space>'] = nil,
                     ['<Tab>'] = nil,
-                    ['<S-Tab>'] = nil,
+                    ['<S-Tab>'] = cmp.mapping.complete {},
                 },
                 sources = {
                     { name = 'nvim_lsp' },
@@ -209,6 +206,14 @@ return {
                     { name = 'path' },
                 },
             }
+
+            cmp.setup.filetype({ "sql" }, {
+                sources = {
+                    { name = "vim-dadbod-completion" },
+                    { name = "buffer" },
+                }
+            })
+
             vim.diagnostic.config({
                 float = {
                     focusable = true,

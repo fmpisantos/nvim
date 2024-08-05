@@ -10,8 +10,15 @@ return {
         })
 
         local dap, dapui = require("dap"), require("dapui")
+        function Toggle_console()
+            local console_buf = dapui.elements.console.buffer()
+            if console_buf then
+                vim.cmd('split')
+                vim.api.nvim_set_current_buf(console_buf)
+            end
+        end
 
-        dapui.setup({
+        local normal_config = {
             controls = {
                 element = "repl",
                 enabled = true,
@@ -44,13 +51,13 @@ return {
             layouts = {
                 {
                     elements = {
-                        {
-                            id = "console",
-                            size = 0.5
-                        },
+                        -- {
+                        --     id = "console",
+                        --     size = 0.5
+                        -- },
                         {
                             id = "stacks",
-                            size = 0.5
+                            size = 1
                         },
                     },
                     position = "left",
@@ -80,8 +87,12 @@ return {
             render = {
                 indent = 1,
                 max_value_lines = 100
-            }
-        })
+            },
+        }
+
+        vim.api.nvim_create_user_command("DapConsole", Toggle_console, { desc = "Open console" })
+        vim.api.nvim_create_user_command("DapTerminal", Toggle_console, { desc = "Open console" })
+        dapui.setup(normal_config)
 
         vim.keymap.set('n', '<leader>Dw', function() dapui.elements.watches.add() end, { noremap = true, silent = true })
         vim.keymap.set('n', '<S-F9>', function() dapui.eval() end, { noremap = true, silent = true })
@@ -93,6 +104,12 @@ return {
             dapui.open()
         end
         dap.listeners.before.event_terminated.dapui_config = function()
+            local console_buf = dapui.elements.console.buffer()
+            if console_buf then
+                vim.cmd('split')
+                vim.api.nvim_set_current_buf(console_buf)
+                vim.api.nvim_win_set_cursor(0, { vim.api.nvim_buf_line_count(console_buf), 0 })
+            end
             dapui.close()
         end
         dap.listeners.before.event_exited.dapui_config = function()

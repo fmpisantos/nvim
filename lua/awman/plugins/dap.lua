@@ -42,7 +42,12 @@ return {
                 compile_mvn(); require('jdtls').test_nearest_method()
             end,
             { desc = '[D]ebug [M]ethod' })
-        vim.keymap.set('n', '<F5>', function() Dap.continue() end, { noremap = true, desc = "Degub Continue" })
+        vim.keymap.set('n', '<F5>', function()
+            if Dap.session() ~= nil then
+                compile_mvn();
+            end
+            Dap.continue()
+        end, { noremap = true, desc = "Degub Continue" })
         vim.keymap.set('n', '<S-F5>', function() Dap.terminate() end, { noremap = true, desc = "Debug Stop" })
         vim.keymap.set('n', '<C-S-F5>', function()
             Dap.terminate(); compile_mvn(); Dap.run_last();
@@ -60,8 +65,16 @@ return {
             Dap.clear_breakpoints()
         end, { desc = "Clear all breakpoints" })
 
-        vim.api.nvim_create_user_command("DapTerminal", function()
+        vim.api.nvim_create_user_command("DapRepl", function()
             Dap.repl.open()
-        end, { desc = "Clear all breakpoints" })
+        end, { desc = "Open REPL" })
+
+        local function mvnnt()
+            require("awman.plugins.java.config").clear_data_dir();
+            compile_mvn();
+        end
+        vim.api.nvim_create_user_command("Mvnnt", mvnnt, { desc = "Maven clean install with no tests" })
+        vim.api.nvim_create_user_command("DapCleanInstall", mvnnt, { desc = "Maven clean install with no tests" })
+
     end,
 }
