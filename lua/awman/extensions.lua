@@ -45,7 +45,7 @@ api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setqflist({ open 
 api.nvim_set_keymap('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
     { noremap = true, silent = true })
 api.nvim_set_keymap('n', '<leader>dq',
-    '<cmd>lua diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
+    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
     { noremap = true, silent = true })
 api.nvim_set_keymap('n', '<leader>dt',
     '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
