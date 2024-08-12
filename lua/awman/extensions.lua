@@ -40,7 +40,13 @@ end
 
 api.nvim_set_keymap("n", "<leader>l", ":lua show_current_line_popup()<cr>",
     { noremap = true, silent = true, desc = "show current line in popup" });
-api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setqflist({ open = true })<CR>',
+api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
     { noremap = true, silent = true })
-api.nvim_set_keymap('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true })<CR>',
+api.nvim_set_keymap('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
+    { noremap = true, silent = true })
+api.nvim_set_keymap('n', '<leader>dq',
+    '<cmd>lua diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
+    { noremap = true, silent = true })
+api.nvim_set_keymap('n', '<leader>dt',
+    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
     { noremap = true, silent = true })
