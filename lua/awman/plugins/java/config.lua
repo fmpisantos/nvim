@@ -129,6 +129,12 @@ function M.jdtls_on_attach(_, bufnr)
     vim.keymap.set('n', '<A-o>', "<cmd>lua require('jdtls').organize_imports()<cr>", opts)
 end
 
+function M.clear_data_dir()
+    local path = get_jdtls_paths()
+    local data_dir = path.data_dir .. '/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+    vim.fn.delete(data_dir, 'rf')
+end
+
 function M.jdtls_setup(_)
     local path = get_jdtls_paths()
     local data_dir = path.data_dir .. '/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
