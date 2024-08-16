@@ -2,7 +2,8 @@ return {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-        vim.keymap.set('n', '<leader>tt', function() require("trouble").toggle() end, { desc = "[T]rouble [T]oggle" })
+        vim.keymap.set('n', '<leader>tt', function() require("trouble").toggle("diagnostics") end,
+            { desc = "[T]rouble [T]oggle" })
         vim.keymap.set('n', '<leader>pt', function() require("trouble").toggle("workspace_diagnostics") end,
             { desc = "[T]rouble [P]roject [R]efresh" })
         vim.keymap.set('n', '<leader>dt', function() require("trouble").toggle("document_diagnostics") end,
@@ -13,5 +14,7 @@ return {
             { desc = "Next [D]iagnostic" })
         vim.keymap.set('n', '[t', function() require("trouble").previous({ skip_groups = true, jump = true }) end,
             { desc = "Previous [D]iagnostic" })
+        vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setqflist({ open = true })<CR>',
+            { noremap = true, silent = true })
     end,
 }

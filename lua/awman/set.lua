@@ -69,3 +69,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     end,
 })
 
+<<<<<<< HEAD
+=======
+-- MacOS only
+if vim.loop.os_uname().sysname == 'Darwin' then
+    vim.cmd('set shell=/bin/zsh')
+    vim.cmd('set shellcmdflag=-ic')
+end
+>>>>>>> master
