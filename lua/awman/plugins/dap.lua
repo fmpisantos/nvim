@@ -52,9 +52,7 @@ return {
         vim.keymap.set('n', '<C-S-F5>', function()
             Dap.terminate(); compile_mvn(); Dap.run_last();
         end, { noremap = true, desc = "Debug Stop" })
-        vim.keymap.set('n', '<F9>', function()
-                Dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-            end,
+        vim.keymap.set('n', '<F9>', function() Dap.toggle_breakpoint() end,
             { noremap = true, desc = "Debug Toggle Breakpoint" })
         vim.keymap.set('n', '<F10>', function() Dap.step_over() end,
             { noremap = true, desc = "Debug Step Over" })
