@@ -19,7 +19,7 @@ return {
         end
 
         function Toggle_stacks()
-            local stacks_buf = dapui.elements.stacks.buffer()
+            local stacks_buf = dapui.elements.stacks.render()
             if stacks_buf then
                 vim.cmd('vsplit')
                 vim.api.nvim_set_current_buf(stacks_buf)
@@ -27,7 +27,7 @@ return {
         end
 
         function Toggle_breakpoints()
-            local breakpoints_buf = dapui.elements.breakpoints.buffer()
+            local breakpoints_buf = dapui.elements.breakpoints.render()
             if breakpoints_buf then
                 vim.cmd('vsplit')
                 vim.api.nvim_set_current_buf(breakpoints_buf)
@@ -35,7 +35,7 @@ return {
         end
 
         function Toggle_watches()
-            local watches_buf = dapui.elements.watches.buffer()
+            local watches_buf = dapui.elements.watches.render()
             if watches_buf then
                 vim.cmd('split')
                 vim.api.nvim_set_current_buf(watches_buf)
@@ -129,12 +129,17 @@ return {
         vim.api.nvim_create_user_command("DapWatch", Toggle_watches, { desc = "Open watches" })
         vim.api.nvim_create_user_command("DapRunToCursor", Run_To_Cursor, { desc = "Run until cursor" })
         vim.api.nvim_create_user_command("DapFocus", Run_Focus, { desc = "Focus cursor to current frame" })
+        vim.api.nvim_create_user_command("DapBreakpointCondition", function()
+                dap.set_breakpiont(vim.fn.input("Breakpoint condition: "))
+            end,
+            { desc = "Add a breakpoint with the given condition" })
         vim.keymap.set("n", "<leader>Dt", Toggle_terminal, { desc = "Open terminal" })
         vim.keymap.set("n", "<leader>Ds", Toggle_stacks, { desc = "Open stacks" })
         vim.keymap.set("n", "<leader>Dw", Toggle_watches, { desc = "Open watches" })
         vim.keymap.set("n", "<leader>Db", Toggle_breakpoints, { desc = "List breakpoints" })
         vim.keymap.set("n", "<leader>Dgc", Run_To_Cursor, { desc = "Run until cursor" })
         vim.keymap.set("n", "<leader>Df", Run_Focus, { desc = "Focus cursor to current frame" })
+
         dapui.setup(normal_config)
 
         vim.keymap.set('n', '<leader>Dw', function() dapui.elements.watches.add() end, { noremap = true, silent = true })
