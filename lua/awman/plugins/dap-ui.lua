@@ -10,11 +10,27 @@ return {
         })
 
         local dap, dapui = require("dap"), require("dapui")
-        function Toggle_console()
+        function Toggle_terminal()
             local console_buf = dapui.elements.console.buffer()
             if console_buf then
                 vim.cmd('split')
                 vim.api.nvim_set_current_buf(console_buf)
+            end
+        end
+
+        function Toggle_stacks()
+            local stacks_buf = dapui.elements.stack.buffer()
+            if stacks_buf then
+                vim.cmd('split')
+                vim.api.nvim_set_current_buf(stacks_buf)
+            end
+        end
+
+        function Toggle_watches()
+            local watches_buf = dapui.elements.watches.buffer()
+            if watches_buf then
+                vim.cmd('split')
+                vim.api.nvim_set_current_buf(watches_buf)
             end
         end
 
@@ -49,33 +65,34 @@ return {
                 expanded = ""
             },
             layouts = {
+                -- {
+                --     elements = {
+                --         {
+                --             id = "console",
+                --             size = 0.5
+                --         },
+                --         {
+                --             id = "stacks",
+                --             size = 1
+                --         },
+                --     },
+                --     position = "left",
+                --     size = 30
+                -- },
                 {
                     elements = {
-                        -- {
-                        --     id = "console",
-                        --     size = 0.5
-                        -- },
                         {
-                            id = "stacks",
-                            size = 1
+                            id = "watches",
+                            size = 0.5
+                        },
+                        {
+                            id = "scopes",
+                            size = 0.5
                         },
                     },
-                    position = "left",
-                    size = 30
-                }, {
-                elements = {
-                    {
-                        id = "watches",
-                        size = 0.5
-                    },
-                    {
-                        id = "scopes",
-                        size = 0.5
-                    },
-                },
-                position = "bottom",
-                size = 10
-            } },
+                    position = "bottom",
+                    size = 15
+                } },
             mappings = {
                 edit = "e",
                 expand = { "<CR>", "<2-LeftMouse>" },
@@ -90,8 +107,13 @@ return {
             },
         }
 
-        vim.api.nvim_create_user_command("DapConsole", Toggle_console, { desc = "Open console" })
-        vim.api.nvim_create_user_command("DapTerminal", Toggle_console, { desc = "Open console" })
+        vim.api.nvim_create_user_command("DapConsole", Toggle_terminal, { desc = "Open terminal" })
+        vim.api.nvim_create_user_command("DapTerminal", Toggle_terminal, { desc = "Open terminal" })
+        vim.api.nvim_create_user_command("DapStacks", Toggle_stacks, { desc = "Open stacks" })
+        vim.api.nvim_create_user_command("DapWatch", Toggle_watches, { desc = "Open watches" })
+        vim.keymap.set("n", "<leader>Dt", Toggle_terminal, { desc = "Open terminal" })
+        vim.keymap.set("n", "<leader>Ds", Toggle_stacks, { desc = "Open stacks" })
+        vim.keymap.set("n", "<leader>Dw", Toggle_watches, { desc = "Open watches" })
         dapui.setup(normal_config)
 
         vim.keymap.set('n', '<leader>Dw', function() dapui.elements.watches.add() end, { noremap = true, silent = true })

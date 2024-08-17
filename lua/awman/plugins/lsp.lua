@@ -62,7 +62,7 @@ return {
                     end
                 end
 
-                nmap('<C-r><C-r>', vim.lsp.buf.rename, '[R]e[n]ame')
+                -- nmap('<C-r><C-r>', vim.lsp.buf.rename, '[R]e[n]ame')
                 nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
                 nmap('<leader>rN', custom_rename, '[R]e[n]ame')
                 nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
