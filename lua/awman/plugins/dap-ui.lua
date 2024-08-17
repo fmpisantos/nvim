@@ -130,7 +130,7 @@ return {
         vim.api.nvim_create_user_command("DapRunToCursor", Run_To_Cursor, { desc = "Run until cursor" })
         vim.api.nvim_create_user_command("DapFocus", Run_Focus, { desc = "Focus cursor to current frame" })
         vim.api.nvim_create_user_command("DapBreakpointCondition", function()
-                dap.set_breakpiont(vim.fn.input("Breakpoint condition: "))
+                dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
             end,
             { desc = "Add a breakpoint with the given condition" })
         vim.keymap.set("n", "<leader>Dt", Toggle_terminal, { desc = "Open terminal" })
