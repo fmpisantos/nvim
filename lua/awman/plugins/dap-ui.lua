@@ -133,7 +133,7 @@ return {
         vim.keymap.set("n", "<leader>Ds", Toggle_stacks, { desc = "Open stacks" })
         vim.keymap.set("n", "<leader>Dw", Toggle_watches, { desc = "Open watches" })
         vim.keymap.set("n", "<leader>Db", Toggle_breakpoints, { desc = "List breakpoints" })
-        vim.keymap.set("n", "<leader>Dc", Run_To_Cursor, { desc = "Run until cursor" })
+        vim.keymap.set("n", "<leader>Dgc", Run_To_Cursor, { desc = "Run until cursor" })
         vim.keymap.set("n", "<leader>Df", Run_Focus, { desc = "Focus cursor to current frame" })
         dapui.setup(normal_config)
 
