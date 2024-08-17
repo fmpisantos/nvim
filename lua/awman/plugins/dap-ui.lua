@@ -160,5 +160,10 @@ return {
         dap.listeners.before.event_exited.dapui_config = function()
             dapui.close()
         end
+
+        require('which-key').add({
+            { '<leader>D', desc = '[D]ap' },
+            { '<leader>Dg', desc = '[D]ap [G]oto' },
+        })
     end
 }
