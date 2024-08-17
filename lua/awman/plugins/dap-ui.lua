@@ -19,7 +19,7 @@ return {
         end
 
         function Toggle_stacks()
-            local stacks_buf = dapui.elements.stacks.render()
+            local stacks_buf = dapui.elements.stacks.buffer()
             if stacks_buf then
                 vim.cmd('vsplit')
                 vim.api.nvim_set_current_buf(stacks_buf)
@@ -27,15 +27,12 @@ return {
         end
 
         function Toggle_breakpoints()
-            local breakpoints_buf = dapui.elements.breakpoints.render()
-            if breakpoints_buf then
-                vim.cmd('vsplit')
-                vim.api.nvim_set_current_buf(breakpoints_buf)
-            end
+            vim.cmd('vsplit')
+            dap.list_breapoints()
         end
 
         function Toggle_watches()
-            local watches_buf = dapui.elements.watches.render()
+            local watches_buf = dapui.elements.watches.buffer()
             if watches_buf then
                 vim.cmd('split')
                 vim.api.nvim_set_current_buf(watches_buf)
