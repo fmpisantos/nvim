@@ -42,6 +42,14 @@ return {
             end
         end
 
+        function Run_To_Cursor()
+            dap.run_to_cursor()
+        end
+
+        function Run_Focus()
+            dap.focus_frame()
+        end
+
         local normal_config = {
             controls = {
                 element = "repl",
@@ -116,14 +124,17 @@ return {
         }
 
         vim.api.nvim_create_user_command("DapConsole", Toggle_terminal, { desc = "Open terminal" })
-        vim.api.nvim_create_user_command("DapTerminal", Toggle_terminal, { desc = "Open terminal" })
         vim.api.nvim_create_user_command("DapStacks", Toggle_stacks, { desc = "Open stacks" })
         vim.api.nvim_create_user_command("DapBreakpointsList", Toggle_breakpoints, { desc = "List breakpoints" })
         vim.api.nvim_create_user_command("DapWatch", Toggle_watches, { desc = "Open watches" })
+        vim.api.nvim_create_user_command("DapRunToCursor", Run_To_Cursor, { desc = "Run until cursor" })
+        vim.api.nvim_create_user_command("DapFocus", Run_Focus, { desc = "Focus cursor to current frame" })
         vim.keymap.set("n", "<leader>Dt", Toggle_terminal, { desc = "Open terminal" })
         vim.keymap.set("n", "<leader>Ds", Toggle_stacks, { desc = "Open stacks" })
         vim.keymap.set("n", "<leader>Dw", Toggle_watches, { desc = "Open watches" })
         vim.keymap.set("n", "<leader>Db", Toggle_breakpoints, { desc = "List breakpoints" })
+        vim.keymap.set("n", "<leader>Dc", Run_To_Cursor, { desc = "Run until cursor" })
+        vim.keymap.set("n", "<leader>Df", Run_Focus, { desc = "Focus cursor to current frame" })
         dapui.setup(normal_config)
 
         vim.keymap.set('n', '<leader>Dw', function() dapui.elements.watches.add() end, { noremap = true, silent = true })
