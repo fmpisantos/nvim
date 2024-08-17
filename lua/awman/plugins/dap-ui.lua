@@ -19,10 +19,18 @@ return {
         end
 
         function Toggle_stacks()
-            local stacks_buf = dapui.elements.stack.buffer()
+            local stacks_buf = dapui.elements.stacks.buffer()
             if stacks_buf then
-                vim.cmd('split')
+                vim.cmd('vsplit')
                 vim.api.nvim_set_current_buf(stacks_buf)
+            end
+        end
+
+        function Toggle_breakpoints()
+            local breakpoints_buf = dapui.elements.breakpoints.buffer()
+            if breakpoints_buf then
+                vim.cmd('vsplit')
+                vim.api.nvim_set_current_buf(breakpoints_buf)
             end
         end
 
@@ -110,10 +118,12 @@ return {
         vim.api.nvim_create_user_command("DapConsole", Toggle_terminal, { desc = "Open terminal" })
         vim.api.nvim_create_user_command("DapTerminal", Toggle_terminal, { desc = "Open terminal" })
         vim.api.nvim_create_user_command("DapStacks", Toggle_stacks, { desc = "Open stacks" })
+        vim.api.nvim_create_user_command("DapBreakpointsList", Toggle_breakpoints, { desc = "List breakpoints" })
         vim.api.nvim_create_user_command("DapWatch", Toggle_watches, { desc = "Open watches" })
         vim.keymap.set("n", "<leader>Dt", Toggle_terminal, { desc = "Open terminal" })
         vim.keymap.set("n", "<leader>Ds", Toggle_stacks, { desc = "Open stacks" })
         vim.keymap.set("n", "<leader>Dw", Toggle_watches, { desc = "Open watches" })
+        vim.keymap.set("n", "<leader>Db", Toggle_breakpoints, { desc = "List breakpoints" })
         dapui.setup(normal_config)
 
         vim.keymap.set('n', '<leader>Dw', function() dapui.elements.watches.add() end, { noremap = true, silent = true })
