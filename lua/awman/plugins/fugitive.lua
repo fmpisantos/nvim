@@ -11,5 +11,8 @@ return {
         vim.keymap.set("n", "<leader>gc", "<cmd>:Git commit<CR>", { desc = "Git commit" });
         vim.keymap.set("n", "<leader>gp", "<cmd>:Git push -u origin<CR>", { desc = "Git commit" });
         vim.keymap.set("n", "<leader>gb", "<cmd>: Git blame<CR>", { desc = "Git blame" });
+        require('which-key').add({
+            { '<leader>g', desc = '[G]it' },
+        });
     end
 }

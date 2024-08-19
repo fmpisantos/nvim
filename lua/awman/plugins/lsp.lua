@@ -63,7 +63,7 @@ return {
                     end
                 end
 
-                nmap('<C-r><C-r>', vim.lsp.buf.rename, '[R]e[n]ame')
+                -- nmap('<C-r><C-r>', vim.lsp.buf.rename, '[R]e[n]ame')
                 nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
                 nmap('<leader>rN', custom_rename, '[R]e[n]ame')
                 nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
@@ -120,20 +120,20 @@ return {
             end
 
             require('which-key').add({
-                { '<leader>c', 'which_key_ignore', desc = '[C]ode' },
-                { '<leader>v', 'which_key_ignore', desc = '[V]iew' },
-                { '<leader>d', 'which_key_ignore', desc = '[D]ocument' },
-                { '<leader>p', 'which_key_ignore', desc = '[P]roject' },
-                { '<leader>g', 'which_key_ignore', desc = '[G]it' },
-                { '<leader>h', 'which_key_ignore', desc = 'Git [H]unk' },
-                { '<leader>r', 'which_key_ignore', desc = '[R]ename' },
-                { '<leader>s', 'which_key_ignore', desc = '[S]earch' },
-                { '<leader>t', 'which_key_ignore', desc = '[T]oggle' },
-                { '<leader>w', 'which_key_ignore', desc = '[W]orkspace' },
+                { '<leader>c',  desc = '[C]ode' },
+                { '<leader>v',  desc = '[V]iew' },
+                { '<leader>d',  desc = '[D]ocument' },
+                { '<leader>p',  desc = '[P]roject' },
+                { '<leader>g',  desc = '[G]it' },
+                { '<leader>h',  desc = 'Git [H]unk' },
+                { '<leader>r',  desc = '[R]ename' },
+                { '<leader>s',  desc = '[S]earch' },
+                { '<leader>t',  desc = '[T]oggle' },
+                { '<leader>w',  desc = '[W]orkspace' },
             });
             require('which-key').add({
-                { '<leader>',  'which_key_ignore', desc = 'VISUAL <leader>' },
-                { '<leader>h', 'which_key_ignore', desc = 'Git [H]unk' }
+                { '<leader>',   desc = 'VISUAL <leader>' },
+                { '<leader>h',  desc = 'Git [H]unk' }
             }, { mode = 'v' })
 
             require('mason').setup()

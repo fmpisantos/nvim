@@ -10,12 +10,41 @@ return {
         })
 
         local dap, dapui = require("dap"), require("dapui")
-        function Toggle_console()
+        function Toggle_terminal()
             local console_buf = dapui.elements.console.buffer()
             if console_buf then
                 vim.cmd('split')
                 vim.api.nvim_set_current_buf(console_buf)
             end
+        end
+
+        function Toggle_stacks()
+            local stacks_buf = dapui.elements.stacks.buffer()
+            if stacks_buf then
+                vim.cmd('vsplit')
+                vim.api.nvim_set_current_buf(stacks_buf)
+            end
+        end
+
+        function Toggle_breakpoints()
+            vim.cmd('vsplit')
+            dap.list_breapoints()
+        end
+
+        function Toggle_watches()
+            local watches_buf = dapui.elements.watches.buffer()
+            if watches_buf then
+                vim.cmd('split')
+                vim.api.nvim_set_current_buf(watches_buf)
+            end
+        end
+
+        function Run_To_Cursor()
+            dap.run_to_cursor()
+        end
+
+        function Run_Focus()
+            dap.focus_frame()
         end
 
         local normal_config = {
@@ -49,33 +78,34 @@ return {
                 expanded = ""
             },
             layouts = {
+                -- {
+                --     elements = {
+                --         {
+                --             id = "console",
+                --             size = 0.5
+                --         },
+                --         {
+                --             id = "stacks",
+                --             size = 1
+                --         },
+                --     },
+                --     position = "left",
+                --     size = 30
+                -- },
                 {
                     elements = {
-                        -- {
-                        --     id = "console",
-                        --     size = 0.5
-                        -- },
                         {
-                            id = "stacks",
-                            size = 1
+                            id = "watches",
+                            size = 0.5
+                        },
+                        {
+                            id = "scopes",
+                            size = 0.5
                         },
                     },
-                    position = "left",
-                    size = 30
-                }, {
-                elements = {
-                    {
-                        id = "watches",
-                        size = 0.5
-                    },
-                    {
-                        id = "scopes",
-                        size = 0.5
-                    },
-                },
-                position = "bottom",
-                size = 10
-            } },
+                    position = "bottom",
+                    size = 15
+                } },
             mappings = {
                 edit = "e",
                 expand = { "<CR>", "<2-LeftMouse>" },
@@ -90,8 +120,23 @@ return {
             },
         }
 
-        vim.api.nvim_create_user_command("DapConsole", Toggle_console, { desc = "Open console" })
-        vim.api.nvim_create_user_command("DapTerminal", Toggle_console, { desc = "Open console" })
+        vim.api.nvim_create_user_command("DapConsole", Toggle_terminal, { desc = "Open terminal" })
+        vim.api.nvim_create_user_command("DapStacks", Toggle_stacks, { desc = "Open stacks" })
+        vim.api.nvim_create_user_command("DapBreakpointsList", Toggle_breakpoints, { desc = "List breakpoints" })
+        vim.api.nvim_create_user_command("DapWatch", Toggle_watches, { desc = "Open watches" })
+        vim.api.nvim_create_user_command("DapRunToCursor", Run_To_Cursor, { desc = "Run until cursor" })
+        vim.api.nvim_create_user_command("DapFocus", Run_Focus, { desc = "Focus cursor to current frame" })
+        vim.api.nvim_create_user_command("DapBreakpointCondition", function()
+                dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+            end,
+            { desc = "Add a breakpoint with the given condition" })
+        vim.keymap.set("n", "<leader>Dt", Toggle_terminal, { desc = "Open terminal" })
+        vim.keymap.set("n", "<leader>Ds", Toggle_stacks, { desc = "Open stacks" })
+        vim.keymap.set("n", "<leader>Dw", Toggle_watches, { desc = "Open watches" })
+        vim.keymap.set("n", "<leader>Db", Toggle_breakpoints, { desc = "List breakpoints" })
+        vim.keymap.set("n", "<leader>Dgc", Run_To_Cursor, { desc = "Run until cursor" })
+        vim.keymap.set("n", "<leader>Df", Run_Focus, { desc = "Focus cursor to current frame" })
+
         dapui.setup(normal_config)
 
         vim.keymap.set('n', '<leader>Dw', function() dapui.elements.watches.add() end, { noremap = true, silent = true })
@@ -115,5 +160,10 @@ return {
         dap.listeners.before.event_exited.dapui_config = function()
             dapui.close()
         end
+
+        require('which-key').add({
+            { '<leader>D', desc = '[D]ap' },
+            { '<leader>Dg', desc = '[D]ap [G]oto' },
+        })
     end
 }
