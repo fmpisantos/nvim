@@ -12,7 +12,7 @@ local CompileFile = function()
 
     -- Build the command
     local command = 'powershell.exe -File W:\\env\\etc\\crossbow\\validation\\sihot_style_compiler.ps1 -FILE ' ..
-    file_path
+        file_path
 
     -- Execute the command and capture the output
     local output = vim.fn.system(command)
@@ -146,3 +146,99 @@ end, { desc = "Deprecat service" })
 vim.api.nvim_create_user_command("AddDeprecated", function(_)
     addDeprecatedInfo()
 end, { desc = "Add deprecated info" })
+
+vim.keymap.set('v', '<leader>sid', function(_)
+    Get_And_Match_TextIDs()
+end, { noremap = true, desc = "Get TextID values" })
+
+vim.keymap.set('v', '<leader>id', function(_)
+    Match_TextIDs()
+end, { noremap = true, desc = "Get ids values" })
+
+local getEnvDirectory = function()
+    local current_dir = vim.fn.getcwd()
+    local env_dir = current_dir:match("(D:\\src\\.-\\env\\)")
+    return env_dir
+end
+
+local getTextForTextIDs = function(ids)
+    local filename = getEnvDirectory()
+    filename = filename .. "en.txt"
+
+    local file = io.open(filename, "r")
+
+    if not file then
+        vim.print("Could not open file: " .. filename)
+        return ""
+    end
+
+    local matches = {}
+    local addLine = false
+    for line in file:lines() do
+        local id = line:match("^(%d+)")
+        if not id then
+            if addLine then
+                if addLine then
+                    table.insert(matches, line)
+                    table.insert(matches, "")
+                    addLine = false
+                end
+            end
+        else
+            id = tonumber(id)
+            if ids[id] then
+                table.insert(matches, line)
+                addLine = true
+            end
+        end
+    end
+
+    file:close()
+    return matches
+end
+
+function Get_And_Match_TextIDs()
+    local idSet = {}
+    local selectedText = GetSelectedText()
+    local pattern = 'TextID="(%d+)"'
+
+    for line in string.gmatch(selectedText, "([^\n]*)\n?") do
+        local id = line:match(pattern)
+        if id then
+            idSet[tonumber(id)] = true
+        end
+    end
+    local matches = getTextForTextIDs(idSet)
+    if matches then
+        OpenFloatingWindow(matches)
+    else
+        vim.print("No ids found")
+    end
+end
+
+function Match_TextIDs()
+    local idSet = {}
+    local selectedText = GetSelectedText()
+    for line in string.gmatch(selectedText, "([^\n]*)\n?") do
+        local accumulated_number = ""
+        for char in line:gmatch(".") do
+            if char:match("%d") then
+                accumulated_number = accumulated_number .. char
+            else
+                break
+            end
+        end
+        local id = tonumber(accumulated_number)
+        if id then
+            idSet[id] = true
+        else
+            vim.print("Error: Invalid ID found: " .. line)
+        end
+    end
+    local matches = getTextForTextIDs(idSet)
+    if matches then
+        OpenFloatingWindow(matches)
+    else
+        vim.print("No ids found")
+    end
+end
