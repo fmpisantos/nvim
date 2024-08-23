@@ -127,7 +127,6 @@ return {
                 { '<leader>h',  desc = 'Git [H]unk' },
                 { '<leader>r',  desc = '[R]ename' },
                 { '<leader>s',  desc = '[S]earch' },
-                { '<leader>t',  desc = '[T]oggle' },
                 { '<leader>w',  desc = '[W]orkspace' },
             });
             require('which-key').add({

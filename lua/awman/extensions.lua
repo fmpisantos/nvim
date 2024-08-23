@@ -85,18 +85,19 @@ function show_current_line_popup()
     --     { noremap = true, silent = true })
 end
 
-api.nvim_set_keymap("n", "<leader>l", ":lua show_current_line_popup()<cr>",
+vim.keymap.set("n", "<leader>l", ":lua show_current_line_popup()<cr>",
     { noremap = true, silent = true, desc = "show current line in popup" });
-api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
-    { noremap = true, silent = true })
-api.nvim_set_keymap('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
-    { noremap = true, silent = true })
-api.nvim_set_keymap('n', '<leader>dq',
+vim.keymap.set('n', '<leader>te',
+    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity = vim.diagnostic.severity.ERROR })<CR>',
+    { noremap = true, silent = true, desc = "[T]rouble [E]rrors" })
+vim.keymap.set('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
+    { noremap = true, silent = true, desc = "[T]rouble [T]oggle" })
+vim.keymap.set('n', '<leader>dte',
     '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
-    { noremap = true, silent = true })
-api.nvim_set_keymap('n', '<leader>dt',
+    { noremap = true, silent = true, desc = "[D]ocument [E]rrors" })
+vim.keymap.set('n', '<leader>dt',
     '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
-    { noremap = true, silent = true })
+    { noremap = true, silent = true, desc = "[D]ocument [T]oggle" })
 
 function Exit_visual_and_wait_for_marks()
     vim.cmd('normal! <Esc>')
