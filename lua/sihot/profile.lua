@@ -158,6 +158,9 @@ end, { noremap = true, desc = "Get ids values" })
 local getEnvDirectory = function()
     local current_dir = vim.fn.getcwd()
     local env_dir = current_dir:match("(D:\\src\\.-\\env\\)")
+    if (not env_dir) then
+        env_dir = "D:\\src\\develop\\env\\"
+    end
     return env_dir
 end
 
