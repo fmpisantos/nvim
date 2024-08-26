@@ -36,6 +36,7 @@ return {
                     return false
                 end,
             },
+            skip_confirm_for_simple_edits = true,
         }
         vim.keymap.set("n", "-", require('oil').open, { noremap = true, silent = true, desc = "Open file" });
         vim.keymap.set("n", "<leader>pv", require('oil').open,
