@@ -86,6 +86,9 @@ return {
                     vim.cmd('setlocal shiftwidth=4')
                     local before = vim.fn.getline(1, '$')
                     vim.lsp.buf.format()
+                    if vim.bo.filetype == 'java' then
+                        require('jdtls').organize_imports()
+                    end
                     local after = vim.fn.getline(1, '$')
                     if before ~= after then
                         vim.cmd('update')
@@ -119,19 +122,19 @@ return {
             end
 
             require('which-key').add({
-                { '<leader>c',  desc = '[C]ode' },
-                { '<leader>v',  desc = '[V]iew' },
-                { '<leader>d',  desc = '[D]ocument' },
-                { '<leader>p',  desc = '[P]roject' },
-                { '<leader>g',  desc = '[G]it' },
-                { '<leader>h',  desc = 'Git [H]unk' },
-                { '<leader>r',  desc = '[R]ename' },
-                { '<leader>s',  desc = '[S]earch' },
-                { '<leader>w',  desc = '[W]orkspace' },
+                { '<leader>c', desc = '[C]ode' },
+                { '<leader>v', desc = '[V]iew' },
+                { '<leader>d', desc = '[D]ocument' },
+                { '<leader>p', desc = '[P]roject' },
+                { '<leader>g', desc = '[G]it' },
+                { '<leader>h', desc = 'Git [H]unk' },
+                { '<leader>r', desc = '[R]ename' },
+                { '<leader>s', desc = '[S]earch' },
+                { '<leader>w', desc = '[W]orkspace' },
             });
             require('which-key').add({
-                { '<leader>',   desc = 'VISUAL <leader>' },
-                { '<leader>h',  desc = 'Git [H]unk' }
+                { '<leader>',  desc = 'VISUAL <leader>' },
+                { '<leader>h', desc = 'Git [H]unk' }
             }, { mode = 'v' })
 
             require('mason').setup()
