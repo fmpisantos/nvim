@@ -63,10 +63,10 @@ vim.keymap.set('n', '<leader>te',
     { noremap = true, silent = true, desc = "[T]rouble [E]rrors" })
 vim.keymap.set('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
     { noremap = true, silent = true, desc = "[T]rouble [T]oggle" })
-vim.keymap.set('n', '<leader>dte',
+vim.keymap.set('n', '<leader>tde',
     '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
     { noremap = true, silent = true, desc = "[D]ocument [E]rrors" })
-vim.keymap.set('n', '<leader>dt',
+vim.keymap.set('n', '<leader>td',
     '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
     { noremap = true, silent = true, desc = "[D]ocument [T]oggle" })
 

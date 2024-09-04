@@ -35,29 +35,42 @@ return {
                 compile_mvn(); Dap.run_last()
             end,
             { noremap = true, desc = "Debug run_last" })
+
         vim.keymap.set('n', "<leader>Dc", function()
             compile_mvn(); jdtls.test_class()
         end, { desc = "[D]ebug [C]lass" })
+
         vim.keymap.set('n', '<leader>Dm', function()
-                compile_mvn(); require('jdtls').test_nearest_method()
+                compile_mvn(); jdtls.test_nearest_method()
             end,
             { desc = '[D]ebug [M]ethod' })
+
+        vim.keymap.set("n", "<leader>Dl", function() jdtls.pick_test() end,
+            { desc = "[D]ebug pick tests" })
+
+
         vim.keymap.set('n', '<F5>', function()
             if Dap.session() == nil then
                 compile_mvn();
             end
             Dap.continue()
         end, { noremap = true, desc = "Degub Continue" })
+
         vim.keymap.set('n', '<S-F5>', function() Dap.terminate() end, { noremap = true, desc = "Debug Stop" })
+
         vim.keymap.set('n', '<C-S-F5>', function()
             Dap.terminate(); compile_mvn(); Dap.run_last();
         end, { noremap = true, desc = "Debug Stop" })
+
         vim.keymap.set('n', '<F9>', function() Dap.toggle_breakpoint() end,
             { noremap = true, desc = "Debug Toggle Breakpoint" })
+
         vim.keymap.set('n', '<F10>', function() Dap.step_over() end,
             { noremap = true, desc = "Debug Step Over" })
+
         vim.keymap.set('n', '<S-F11>', function() Dap.step_out() end,
             { noremap = true, desc = "Debug Step Out" })
+
         vim.keymap.set('n', '<F11>', function() Dap.step_into() end,
             { noremap = true, desc = "Debug Step Into" })
 
