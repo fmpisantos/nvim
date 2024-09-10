@@ -41,7 +41,7 @@ function OpenFloatingWindow(content)
         border = 'single',
     })
 
-    api.nvim_win_set_option(win, 'wrap', false)
+    api.nvim_win_set_option(win, 'wrap', true)
     api.nvim_win_set_option(win, 'cursorline', false)
     api.nvim_win_set_option(win, 'number', false)
 
