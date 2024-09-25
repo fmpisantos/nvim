@@ -16,7 +16,7 @@ set expandtab
 set nowrap
 
 " Key mappings
-" nnoremap <Esc> :nohlsearch<CR>
+nnoremap <Esc> :nohlsearch<CR>
 
 " Feedback for yanking text
 nnoremap <leader>y :echo "Text yanked!"<CR>
@@ -38,3 +38,18 @@ vnoremap <Tab> >gv
 nnoremap <M-j> :m+<CR>==
 nnoremap <M-k> :m-2<CR>==
 nnoremap zZ zszH
+
+nnoremap <leader>pf :vsc Edit.GoToFile<CR>
+nnoremap <leader>pg :vsc Edit.GoToText<CR>
+
+nnoremap <leader>rn :vsc VAssistX.RefactorRename<CR>
+nnoremap gd :vsc VAssistX.GotoImplementation<CR>
+nnoremap <C-o> :vsc View.NavigateBack<CR>
+nnoremap <C-i> :vsc View.NavigateForward<CR>
+nnoremap <leader>Ds :vsc Debug.CallStack<CR>
+nnoremap <leader>Dw :vsc Debug.Watch1<CR>
+" Debug.ParallelWatch1
+nnoremap <leader>Dgc :vsc Debug.RunToCursor<CR>
+nnoremap <leader>vr :vsc Edit.FindAllReferences<CR>
+
+nnoremap <leader>R :so ~/.vsvimrc<CR>:echo "Reloaded config @~./vsvimrc"<CR>
