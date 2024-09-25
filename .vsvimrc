@@ -1,0 +1,40 @@
+" Set leader keys
+let mapleader = " "
+let maplocalleader = " "
+
+" Number settings
+set number
+set relativenumber
+
+" Tab settings
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+
+" Line wrapping
+set nowrap
+
+" Key mappings
+nnoremap <Esc> :nohlsearch<CR>
+
+" Feedback for yanking text
+nnoremap <leader>y :echo "Text yanked!"<CR>
+
+nnoremap n nzzzv
+nnoremap N Nzzzv
+xnoremap <leader>p [["_dP]]
+xnoremap <leader>y [["+y]]
+nnoremap <leader>Y [["+Y]]
+xnoremap <leader>d [["_d]]
+nnoremap <leader>k :cnext<CR>zz
+nnoremap <F3> :cnext<CR>zz
+nnoremap <leader>j :cprev<CR>zz
+nnoremap <S-F3> :cprev<CR>zz
+nnoremap <S-Tab> <<hhhh
+nnoremap <leader><Tab> >>llll
+vnoremap <S-Tab> <gv
+vnoremap <Tab> >gv
+nnoremap <M-j> :m+<CR>==
+nnoremap <M-k> :m-2<CR>==
+nnoremap zZ zszH

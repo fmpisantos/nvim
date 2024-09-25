@@ -75,5 +75,13 @@ return {
         vim.keymap.set('n', '<leader><leader>', "<cmd>:Telescope keymaps<CR>", { desc = "Grep over keymaps" });
 
         vim.keymap.set('n', '<leader>?', "<cmd>:Telescope help_tags<CR>", { desc = "Search helper tags" });
+
+        local TelescopeRegex = function(string)
+            -- vim.print(string.args)
+            -- builtin.string_grep({use_regex = true, search = string.args})
+            builtin.live_grep({ search_dirs = { vim.fn.expand("%:p") }, args = "--regexp" })
+        end
+
+        vim.api.nvim_create_user_command('TelescopeRegex', TelescopeRegex, {})
     end
 }
