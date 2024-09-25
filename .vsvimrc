@@ -51,5 +51,8 @@ nnoremap <leader>Dw :vsc Debug.Watch1<CR>
 " Debug.ParallelWatch1
 nnoremap <leader>Dgc :vsc Debug.RunToCursor<CR>
 nnoremap <leader>vr :vsc Edit.FindAllReferences<CR>
+nnoremap <leader>te :vsc View.ErrorList<CR>
+nnoremap [d :vsc View.NextError<CR>
+nnoremap ]d :vsc View.PreviousError<CR>
 
 nnoremap <leader>R :so ~/.vsvimrc<CR>:echo "Reloaded config @~./vsvimrc"<CR>
