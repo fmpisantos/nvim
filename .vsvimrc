@@ -16,17 +16,17 @@ set expandtab
 set nowrap
 
 " Key mappings
-nnoremap <Esc> :nohlsearch<CR>
+" nnoremap <Esc> :nohlsearch<CR>
 
 " Feedback for yanking text
 nnoremap <leader>y :echo "Text yanked!"<CR>
 
 nnoremap n nzzzv
 nnoremap N Nzzzv
-xnoremap <leader>p [["_dP]]
-xnoremap <leader>y [["+y]]
-nnoremap <leader>Y [["+Y]]
-xnoremap <leader>d [["_d]]
+xnoremap <leader>p "_dP
+xnoremap <leader>y "+y
+nnoremap <leader>Y "+Y
+xnoremap <leader>d "_d
 nnoremap <leader>k :cnext<CR>zz
 nnoremap <F3> :cnext<CR>zz
 nnoremap <leader>j :cprev<CR>zz
