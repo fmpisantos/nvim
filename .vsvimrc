@@ -54,5 +54,10 @@ nnoremap <leader>vr :vsc Edit.FindAllReferences<CR>
 nnoremap <leader>te :vsc View.ErrorList<CR>
 nnoremap [d :vsc View.NextError<CR>
 nnoremap ]d :vsc View.PreviousError<CR>
+nnoremap <C-w>q :q<CR>
+nnoremap <C-w>o :only<CR>
+
+nnoremap <leader>en :vsc AddQuickFile<CR>
+" AddQuickFile
 
 nnoremap <leader>R :so ~/.vsvimrc<CR>:echo "Reloaded config @~./vsvimrc"<CR>
