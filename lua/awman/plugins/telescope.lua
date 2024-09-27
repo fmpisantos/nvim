@@ -41,10 +41,12 @@ return {
         pcall(require('telescope').load_extension, 'ui-select')
 
         local builtin = require('telescope.builtin')
-        vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = "[P]roject [F]ile" });
+        vim.keymap.set('n', '<leader>pf', function()
+            builtin.find_files({ hidden = true })
+        end, { desc = "[P]roject [F]ile" });
         vim.keymap.set('v', '<leader>pf', function()
             local text = vim.getVisualSelection()
-            builtin.find_files({ default_text = text })
+            builtin.find_files({ default_text = text, hidden = true })
         end, { desc = "[P]roject [F]ile" });
 
         vim.keymap.set('n', '<leader>pg', builtin.live_grep, { desc = "[P]roject [G]rep" });

@@ -4,15 +4,15 @@ return {
     config = function()
         _G.Dap = require('dap')
 
-        Dap.configurations.java = {
-            {
-                type = 'java',
-                request = 'attach',
-                name = "Debug (Attach) - Remote",
-                hostName = "127.0.0.1",
-                port = 5005,
-            },
-        }
+        -- Dap.configurations.java = {
+        --     {
+        --         type = 'java',
+        --         request = 'attach',
+        --         name = "Debug (Attach) - Remote",
+        --         hostName = "127.0.0.1",
+        --         port = 5005,
+        --     },
+        -- }
 
 
         local function compile_mvn()
