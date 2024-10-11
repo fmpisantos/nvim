@@ -86,8 +86,11 @@ local function deprecate()
 
     local version = current_buffer_name:match("_v(%d+)%.xml$")
     if not version then
-        print("Error: Unable to extract version number from file name.")
-        return
+        version = current_buffer_name:match("_V(%d+)%.xml$")
+        if not version then
+            print("Error: Unable to extract version number from file name.")
+            return
+        end
     end
     local old_version = version
     version = tonumber(version) + 1
@@ -97,11 +100,14 @@ local function deprecate()
 
     local service_name = new_file_name.match(new_file_name, "s_(.-)_v%d+")
     if not service_name then
-        print("Error: cannot get service name")
-        if new_file_name then
-            print(" from (" .. new_file_name .. ")")
+        service_name = new_file_name.match(new_file_name, "s_(.-)_V%d+")
+        if not service_name then
+            print("Error: cannot get service name")
+            if new_file_name then
+                print(" from (" .. new_file_name .. ")")
+            end
+            return
         end
-        return
     end
     local service_name_uppercase = service_name:upper()
     service_name_uppercase = "S_" .. service_name_uppercase
@@ -245,3 +251,47 @@ function Match_TextIDs()
         vim.print("No ids found")
     end
 end
+
+function CreateTemplate(task, codeReviewers, description)
+    local task_id = string.match(task, "TaskID%-%d+")
+    return task .. "\n\n" .. description .. "\n\n" .. "**COMMIT-ID:" .. task_id .. "**CODEREVIEW:" .. codeReviewers
+end
+
+local function parse_input(input)
+    local objects = {}
+    local current_object = {}
+
+    for line in input:gmatch("[^\r\n]+") do
+        line = line:match("^%s*(.-)%s*$") -- Trim leading and trailing whitespace
+        if line:find("id") then
+            if next(current_object) then
+                table.insert(objects, current_object)         -- Save the current object
+            end
+            current_object = { id = line:match("id%s+(.+)") } -- Extract ID
+        elseif line:find("description") then
+            local description = line:match("description%s+(.+)")
+            if description then
+                current_object.description = description -- Extract Description
+            end
+        end
+    end
+
+    -- Insert the last object if it exists
+    if next(current_object) then
+        table.insert(objects, current_object)
+    end
+
+    return objects
+end
+
+function SCommit()
+    local tasks = Run_windows_command("GetTasks")
+    local _tasks = parse_input(tasks)
+    Custom_picker_id_description(_tasks, "Task picker", function(task)
+        Input_from_file("Write and save the description for the commit:", function(description)
+            local commit_message = CreateTemplate(task, codeReviewers, description)
+        end)
+    end)
+end
+
+vim.api.nvim_create_user_command('SCommit', SCommit, {})

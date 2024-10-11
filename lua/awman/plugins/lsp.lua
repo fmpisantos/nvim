@@ -120,6 +120,29 @@ return {
                     format_all_files()
                 end, { desc = 'Format all project files with LSP' })
                 nmap('<leader>pF', ':FormatAll<CR>', '[P]roject [F]ormat')
+
+                local function rename_file()
+                    local current_name = vim.fn.expand('%:t')
+                    local new_name = vim.fn.input('New file name: ', current_name)
+
+                    if new_name == '' then
+                        print("No new name provided, aborting.")
+                        return
+                    end
+
+                    vim.lsp.buf.rename(new_name)
+
+                    local current_path = vim.fn.expand('%:p')
+                    local new_path = vim.fn.fnamemodify(current_path, ':h') .. '/' .. new_name
+                    vim.fn.rename(current_path, new_path)
+
+                    vim.cmd('e ' .. new_path)
+                    vim.cmd('bwipeout ' .. current_path)
+                end
+
+                vim.api.nvim_buf_create_user_command(bufnr, 'Rename', function(_)
+                    rename_file()
+                end, { desc = 'Rename current file and update lsp_references' });
             end
 
             require('which-key').add({
