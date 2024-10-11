@@ -146,3 +146,119 @@ end
 
 vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
     { noremap = true, silent = true, desc = "[Q]uickFixList [F]ilter" })
+
+function Custom_picker(opts, title, callback)
+    local actions = require('telescope.actions')
+    local action_state = require('telescope.actions.state')
+    local pickers = require('telescope.pickers')
+    local finders = require('telescope.finders')
+    local conf = require('telescope.config').values
+
+    local _title = title
+    if #title == 0 then
+        _title = "Custom Picker"
+    end
+
+    pickers.new({}, {
+        prompt_title = _title,
+        finder = finders.new_table {
+            results = opts,
+        },
+        sorter = conf.generic_sorter({}),
+        attach_mappings = function(prompt_bufnr, _)
+            actions.select_default:replace(function()
+                local selection = action_state.get_selected_entry()
+                actions.close(prompt_bufnr)
+                if selection and selection.value then
+                    callback(selection.value)
+                end
+            end)
+            return true
+        end,
+    }):find()
+end
+
+function Custom_picker_id_description(opts, title, callback)
+    local actions = require('telescope.actions')
+    local action_state = require('telescope.actions.state')
+    local pickers = require('telescope.pickers')
+    local finders = require('telescope.finders')
+    local conf = require('telescope.config').values
+
+    local _title = title or "Custom Picker"
+
+    pickers.new({}, {
+        prompt_title = _title,
+        finder = finders.new_table {
+            results = opts,
+            entry_maker = function(entry)
+                return {
+                    value = entry,
+                    display = entry.description,
+                    ordinal = entry.description,
+                }
+            end,
+        },
+        sorter = conf.generic_sorter({}),
+        attach_mappings = function(prompt_bufnr, _)
+            actions.select_default:replace(function()
+                local selection = action_state.get_selected_entry()
+                actions.close(prompt_bufnr)
+                if selection and selection.value then
+                    callback(selection.value)
+                end
+            end)
+            return true
+        end,
+    }):find()
+end
+
+function Run_windows_command(cmd)
+    local full_command = 'powershell -Command "' .. cmd .. '"'
+    local handle = io.popen(full_command)
+    if handle == nil then
+        print("Error: Failed to run the command: " .. cmd)
+        return nil
+    end
+    local result = handle:read("*a")
+    handle:close()
+    return result
+end
+
+function Input_from_file(title, callback)
+    print(title)
+    _G.temp_callback = callback
+
+    local function write_to_temp_file()
+        local temp_file = os.tmpname() .. os.time()
+        vim.cmd('split ' .. temp_file)
+        local bufnr = vim.api.nvim_get_current_buf()
+
+        vim.api.nvim_create_autocmd({ "BufLeave" }, {
+            buffer = bufnr,
+            callback = function()
+                ReadAndDeleteFile(temp_file)
+            end
+        })
+
+        return temp_file
+    end
+
+    function ReadAndDeleteFile(temp_file)
+        local file = io.open(temp_file, "r")
+        if file then
+            local content = file:read("*a")
+            file:close()
+            os.remove(temp_file)
+
+            if _G.temp_callback then
+                _G.temp_callback(content)
+                _G.temp_callback = nil
+            else
+            end
+        else
+        end
+    end
+
+    write_to_temp_file()
+end
