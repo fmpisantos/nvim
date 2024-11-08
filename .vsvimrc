@@ -44,7 +44,7 @@ nnoremap <leader>pg :vsc Edit.GoToText<CR>
 
 nnoremap <leader>rn :vsc VAssistX.RefactorRename<CR>
 nnoremap gd :vsc VAssistX.GotoImplementation<CR>
-nnoremap <C-o> :vsc View.NavigateBack<CR>
+nnoremap <C-o> :vsc VAssistX.NavigateBack<CR>
 nnoremap <C-i> :vsc View.NavigateForward<CR>
 nnoremap <leader>Ds :vsc Debug.CallStack<CR>
 nnoremap <leader>Dw :vsc Debug.Watch1<CR>
@@ -61,3 +61,6 @@ nnoremap <leader>en :vsc AddQuickFile<CR>
 " AddQuickFile
 
 nnoremap <leader>R :so ~/.vsvimrc<CR>:echo "Reloaded config @~./vsvimrc"<CR>
+noremap K :vsc Edit.QuickInfo<CR>
+
+nnoremap <leader>gb :vsc Team.Git.Annotate<CR>
