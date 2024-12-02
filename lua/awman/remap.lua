@@ -23,6 +23,16 @@ vim.keymap.set("n", "<M-Up>", "<C-W>5-", { desc = "Decrease window width" });
 vim.keymap.set("n", "<M-Down>", "<C-W>5+", { desc = "Increase window width" });
 vim.keymap.set("n", "<C-->", "<C-o>", { noremap = true, silent = true, desc = "Go back" });
 vim.keymap.set("n", "<C-_>", "<C-i>", { noremap = true, silent = true, desc = "Go forward" });
+vim.api.nvim_set_keymap('n', '<leader>zi', ':lua ToggleFoldUnderCursor()<CR>', { noremap = true, silent = true })
+
+function ToggleFoldUnderCursor()
+    local cursor_line = vim.fn.line('.')
+    if vim.fn.foldclosed(cursor_line) ~= -1 then
+        vim.cmd('normal! zO')
+    else
+        vim.cmd('normal! zC')
+    end
+end
 
 function OpenBufferDirectory()
     local buffer_dir = vim.fn.expand('%:p:h')

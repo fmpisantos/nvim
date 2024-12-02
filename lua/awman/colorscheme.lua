@@ -7,7 +7,7 @@ vim.api.nvim_set_hl(0, 'LineNrBelow', { fg = 'white' })
 vim.cmd.colorscheme 'catppuccin-macchiato'
 -- vim.cmd.colorscheme 'catppuccin-mocha'
 
--- vim.o.background = "dark"
+-- vim.o.background = "light"
 -- vim.cmd.colorscheme "neg"
 
 -- vim.cmd.colorscheme("tokyonight-storm")

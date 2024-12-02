@@ -1,6 +1,12 @@
 return {
     'tpope/vim-fugitive',
     config = function()
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = "git*",
+            callback = function()
+                vim.wo.foldmethod = "syntax"
+            end,
+        })
         vim.keymap.set("n", "<leader>gs", vim.cmd.Git, { desc = "[G]it [S]tart" });
         vim.keymap.set("n", "<leader>gs", vim.cmd.Git, { desc = "Git commit" });
         vim.keymap.set("n", "<leader>gd", "<cmd>:Gdiff<CR>", { desc = "Git difference" });
