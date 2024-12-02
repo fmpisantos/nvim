@@ -7,6 +7,7 @@ return {
                 vim.wo.foldmethod = "syntax"
             end,
         })
+        vim.keymap.set("n", "<leader>zM", ":localset foldmethod=syntax<CR>zM", { desc = "Fold all git" });
         vim.keymap.set("n", "<leader>gs", vim.cmd.Git, { desc = "[G]it [S]tart" });
         vim.keymap.set("n", "<leader>gs", vim.cmd.Git, { desc = "Git commit" });
         vim.keymap.set("n", "<leader>gd", "<cmd>:Gdiff<CR>", { desc = "Git difference" });
