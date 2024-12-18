@@ -75,7 +75,7 @@ local function enrich_dap_config(config_, on_config)
                     )
                 else
                     vim.notify(
-                    "Could not resolve classpaths. Project may have compile errors or unresolved dependencies",
+                        "Could not resolve classpaths. Project may have compile errors or unresolved dependencies",
                         vim.log.levels.WARN)
                 end
                 on_config(config)
@@ -290,7 +290,7 @@ local function get_method_lens_above_cursor(lenses_tree, lnum)
             if result.best_match then
                 local best_match = assert(result.best_match)
                 best_match_line = best_match.location and best_match.location.range.start.line or
-                best_match.range.start.line
+                    best_match.range.start.line
             end
             if is_method and line <= lnum and (best_match_line == nil or line > best_match_line) then
                 result.best_match = lens
@@ -611,7 +611,8 @@ function M.fetch_main_configs(opts, callback)
             local project = mc.projectName
             with_java_executable(mainclass, project, function(java_exec)
                 fetch_needs_preview(mainclass, project, function(use_preview)
-                    util.execute_command({ command = 'vscode.java.resolveClasspath', arguments = { mainclass, project } },
+                    util.execute_command(
+                        { command = 'vscode.java.resolveClasspath', arguments = { mainclass, project } },
                         function(err1, paths)
                             remaining = remaining - 1
                             if err1 then

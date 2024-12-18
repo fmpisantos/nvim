@@ -23,6 +23,16 @@ vim.keymap.set("n", "<M-Up>", "<C-W>5-", { desc = "Decrease window width" });
 vim.keymap.set("n", "<M-Down>", "<C-W>5+", { desc = "Increase window width" });
 vim.keymap.set("n", "<C-->", "<C-o>", { noremap = true, silent = true, desc = "Go back" });
 vim.keymap.set("n", "<C-_>", "<C-i>", { noremap = true, silent = true, desc = "Go forward" });
+vim.api.nvim_set_keymap('n', '<leader>zi', ':lua ToggleFoldUnderCursor()<CR>', { noremap = true, silent = true })
+
+function ToggleFoldUnderCursor()
+    local cursor_line = vim.fn.line('.')
+    if vim.fn.foldclosed(cursor_line) ~= -1 then
+        vim.cmd('normal! zO')
+    else
+        vim.cmd('normal! zC')
+    end
+end
 
 function OpenBufferDirectory()
     local buffer_dir = vim.fn.expand('%:p:h')
@@ -41,19 +51,50 @@ vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end,
 vim.cmd([[command! Open :lua OpenBufferDirectory()]])
 
 
---vim.keymap.set("sb", "a", "adds file to stage or unstage list", {--[[Adds file to stage or unstage list]]});
---vim.keymap.set("sb", "X", "resets changes to file", {--[[Resets changes to file]]});
+vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
 
---vim.keymap.set("sb", "a", "new file/dir", {--[[Crete new file or dir (ends in /)]]});
---vim.keymap.set("sb", "r", "rename", {--[[Rename]]});
---vim.keymap.set("sb", "<C-r>", "rename without initial name", {--[[Rename without initial name]]});
---vim.keymap.set("sb", "d", "delete", {--[[Delete]]});
---vim.keymap.set("sb", "x", "cut", {--[[Cut]]});
---vim.keymap.set("sb", "p", "paste", {--[[Paste]]});
---vim.keymap.set("sb", "c", "copy", {--[[Copy]]});
---vim.keymap.set("sb", "y", "copy filename", {--[[Copy filename]]});
---vim.keymap.set("sb", "Y", "copy filename with relative path", {--[[Copy filename with relative path]]});
---vim.keymap.set("sb", "g+y", "copy filename with absolute path", {--[[Copy filename with absolute path]]});
---vim.keymap.set("sb", "Tab", "open file but keepcursor on tree", {--[[Open file but keepcursor on tree]]});
---vim.keymap.set("sb", "<C-v>", "open file w/ vertical split", {--[[Open file with vertical split]]});
---vim.keymap.set("sb", "<C-h>", "open file w/ horizontal split", {--[[Open file with horizontal split]]});
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+vim.keymap.set('t', "<esc>", "<C-\\><C-n>");
+
+vim.keymap.set('n', '<leader>te',
+    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity = vim.diagnostic.severity.ERROR })<CR>',
+    { noremap = true, silent = true, desc = "[T]rouble [E]rrors" })
+vim.keymap.set('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
+    { noremap = true, silent = true, desc = "[T]rouble [T]oggle" })
+vim.keymap.set('n', '<leader>tde',
+    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
+    { noremap = true, silent = true, desc = "[D]ocument [E]rrors" })
+vim.keymap.set('n', '<leader>td',
+    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
+    { noremap = true, silent = true, desc = "[D]ocument [T]oggle" })
+
+vim.keymap.set("n", "<leader>l", ":lua show_current_line_popup()<cr>",
+    { noremap = true, silent = true, desc = "show current line in popup" });
+
+vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
+    { noremap = true, silent = true, desc = "[Q]uickFixList [F]ilter" })
+
+local job_id = 0
+vim.keymap.set("n", "<leader>ts", function()
+    vim.cmd.vnew()
+    vim.cmd.term()
+    vim.cmd.wincmd("J")
+    vim.api.nvim_win_set_height(0, 20)
+    job_id = vim.bo.channel
+end, { desc = "Open [T]erminal [S]mall" })
+
+vim.keymap.set("n", "<leader>example", function()
+    -- make
+    -- mvn clean install
+    -- mvn spring-boot:run
+    -- mvn clean test
+    vim.fn.chansend(job_id, "echo 'Hello World'\r\n")
+end, { desc = "Send example command to terminal" })

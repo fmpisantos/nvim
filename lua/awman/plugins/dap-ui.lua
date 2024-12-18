@@ -162,7 +162,7 @@ return {
         end
 
         require('which-key').add({
-            { '<leader>D', desc = '[D]ap' },
+            { '<leader>D',  desc = '[D]ap' },
             { '<leader>Dg', desc = '[D]ap [G]oto' },
         })
     end
