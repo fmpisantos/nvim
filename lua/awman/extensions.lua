@@ -4,6 +4,47 @@ function trim(s)
     return s:match("^%s*(.-)%s*$")
 end
 
+_G.CreateFloatingTerminal = function(opts)
+    local ui = vim.api.nvim_list_uis()[1]
+    if not ui then
+        vim.notify("Unable to get UI dimensions!", vim.log.levels.ERROR)
+        return
+    end
+
+    local default_width = math.floor(ui.width * 0.8)
+    local default_height = math.floor(ui.height * 0.8)
+
+    local width = opts and opts.width or default_width
+    local height = opts and opts.height or default_height
+
+    width = math.min(width, ui.width)
+    height = math.min(height, ui.height)
+
+    local col = math.floor((ui.width - width) / 2)
+    local row = math.floor((ui.height - height) / 2)
+
+    local buf = nil
+    if opts and opts.buf and vim.api.nvim_buf_is_valid(opts.buf) then
+        buf = opts.buf
+    else
+        buf = vim.api.nvim_create_buf(false, true)
+    end
+
+    local win_opts = {
+        relative = "editor",
+        width = width,
+        height = height,
+        row = row,
+        col = col,
+        style = "minimal",
+        border = "rounded",
+    }
+
+    local win = vim.api.nvim_open_win(buf, true, win_opts)
+
+    return { buf = buf, win = win }
+end
+
 function OpenFloatingWindow(content)
     local screen_width = vim.o.columns
     local screen_height = vim.o.lines
@@ -49,26 +90,12 @@ function OpenFloatingWindow(content)
         { noremap = true, silent = true })
 end
 
-function show_current_line_popup()
+_G.show_current_line_popup = function()
     local current_line = api.nvim_get_current_line()
     current_line = trim(current_line)
 
     OpenFloatingWindow({ current_line })
 end
-
-vim.keymap.set("n", "<leader>l", ":lua show_current_line_popup()<cr>",
-    { noremap = true, silent = true, desc = "show current line in popup" });
-vim.keymap.set('n', '<leader>te',
-    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity = vim.diagnostic.severity.ERROR })<CR>',
-    { noremap = true, silent = true, desc = "[T]rouble [E]rrors" })
-vim.keymap.set('n', '<leader>tt', '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true })<CR>',
-    { noremap = true, silent = true, desc = "[T]rouble [T]oggle" })
-vim.keymap.set('n', '<leader>tde',
-    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
-    { noremap = true, silent = true, desc = "[D]ocument [E]rrors" })
-vim.keymap.set('n', '<leader>td',
-    '<cmd>lua vim.diagnostic.setqflist({ open = true, severity_sort = true, bufnr = 0 })<CR>',
-    { noremap = true, silent = true, desc = "[D]ocument [T]oggle" })
 
 function Exit_visual_and_wait_for_marks()
     vim.cmd('normal! <Esc>')
@@ -122,9 +149,7 @@ function GetSelectedText()
     return table.concat(lines, "\n")
 end
 
-vim.api.nvim_set_keymap("v", "<leader>vl", "<cmd>lua GetSelectedText()<cr>", { noremap = true })
-
-function FilterQFListToFile()
+_G.FilterQFListToFile = function()
     local replace_string = vim.fn.input(':%s/')
     if replace_string ~= nil and replace_string ~= '' then
         vim.cmd('copen')
@@ -143,9 +168,6 @@ function FilterQFListToFile()
         vim.cmd('put a')
     end
 end
-
-vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
-    { noremap = true, silent = true, desc = "[Q]uickFixList [F]ilter" })
 
 function Custom_picker(opts, title, callback)
     local actions = require('telescope.actions')
