@@ -81,20 +81,3 @@ vim.keymap.set("n", "<leader>l", ":lua show_current_line_popup()<cr>",
 
 vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
     { noremap = true, silent = true, desc = "[Q]uickFixList [F]ilter" })
-
-local job_id = 0
-vim.keymap.set("n", "<leader>ts", function()
-    vim.cmd.vnew()
-    vim.cmd.term()
-    vim.cmd.wincmd("J")
-    vim.api.nvim_win_set_height(0, 20)
-    job_id = vim.bo.channel
-end, { desc = "Open [T]erminal [S]mall" })
-
-vim.keymap.set("n", "<leader>example", function()
-    -- make
-    -- mvn clean install
-    -- mvn spring-boot:run
-    -- mvn clean test
-    vim.fn.chansend(job_id, "echo 'Hello World'\r\n")
-end, { desc = "Send example command to terminal" })
