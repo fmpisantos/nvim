@@ -36,7 +36,7 @@ vim.keymap.set({ 'n', 't' }, "<leader>tf", function()
     end
 end, { noremap = true, silent = true, desc = "Open floating terminal" })
 
-vim.keymap.set("n", "<leader>ts", function()
+vim.keymap.set({ "n", "t" }, "<leader>ts", function()
     local buf = -1
     if vim.api.nvim_buf_is_valid(state.shared.buf) then
         buf = state.shared.buf
@@ -67,7 +67,7 @@ vim.keymap.set("n", "<leader>ts", function()
 end, { desc = "Open [T]erminal [S]mall" })
 
 local job_id = 0
-vim.keymap.set("n", "<leader>tn", function()
+vim.keymap.set({ "n", "t" }, "<leader>tn", function()
     vim.cmd.vnew()
     vim.cmd.term()
     vim.cmd.wincmd("J")
