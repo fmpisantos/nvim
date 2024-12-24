@@ -2,10 +2,9 @@ return {
     {
         'neovim/nvim-lspconfig',
         dependencies = {
-            -- Automatically install LSPs to stdpath for neovim
             'williamboman/mason.nvim',
             'williamboman/mason-lspconfig.nvim',
-            -- { 'j-hui/fidget.nvim',    opts = {} },
+            { 'j-hui/fidget.nvim', opts = {} },
             'folke/neodev.nvim',
             {
                 'hrsh7th/nvim-cmp',
@@ -208,7 +207,6 @@ return {
                         }
                     end
                 end,
-                -- jdtls = noop
             }
 
             local cmp = require 'cmp'
