@@ -21,7 +21,7 @@ vim.keymap.set({ 'n' }, "<leader>df", function()
         vim.api.nvim_win_hide(state.floating.wins[1])
         vim.api.nvim_win_hide(state.floating.wins[2])
     else
-        local first_win = CreateFloatingWindow { buf = state.floating.bufs[1], width = width, height = height, col = col, row = row }
+        local first_win = CreateFloatingWindow { buf = get_bufNr(1), width = width, height = height, col = col, row = row }
 
         if first_win == nil then
             return
@@ -31,7 +31,7 @@ vim.keymap.set({ 'n' }, "<leader>df", function()
         local _buf = state.floating.bufs[2]
 
         if not vim.api.nvim_buf_is_valid(_buf) then
-            _buf = vim.api.nvim_create_buf(false, true)
+            _buf = get_bufNr(2)
             state.floating.bufs = { first_win.buf, _buf }
         end
 
@@ -51,7 +51,7 @@ end, { noremap = true, silent = true, desc = "Open floating diff" })
 vim.keymap.set({ 'v' }, "<leader>d1", function()
     local lines = _G.GetSelectedText(true);
     if not vim.api.nvim_buf_is_valid(state.floating.bufs[1]) then
-        state.floating.bufs[1] = vim.api.nvim_create_buf(false, true)
+        state.floating.bufs[1] = get_bufNr(1)
     end
     vim.api.nvim_buf_set_lines(state.floating.bufs[1], 0, -1, false, lines)
 end, { noremap = true, silent = true, desc = "Diff fill window 1" })
@@ -59,7 +59,7 @@ end, { noremap = true, silent = true, desc = "Diff fill window 1" })
 vim.keymap.set({ 'v' }, "<leader>d2", function()
     local lines = _G.GetSelectedText(true);
     if not vim.api.nvim_buf_is_valid(state.floating.bufs[2]) then
-        state.floating.bufs[2] = vim.api.nvim_create_buf(false, true)
+        state.floating.bufs[2] = get_bufNr(2)
     end
     vim.api.nvim_buf_set_lines(state.floating.bufs[2], 0, -1, false, lines)
 end, { noremap = true, silent = true, desc = "Diff fill window 2" })
