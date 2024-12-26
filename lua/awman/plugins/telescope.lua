@@ -30,42 +30,6 @@ return {
     },
     config = function()
         require('telescope').setup {
-            file_ignore_patterns = {
-                "node_modules/",
-                "logs/",
-                "%.log",
-                "npm-debug.log.*",
-                "yarn-debug.log.*",
-                "yarn-error.log.*",
-                "%.env",
-                "%.env%..*%.local",
-                "dist/",
-                "build/",
-                "%.cache/",
-                "%.cache%-loader/",
-                "%.cache",
-                "%.tsbuildinfo",
-                "%.d.ts.map",
-                "coverage/",
-                "%.lcov",
-                "%.vscode/",
-                "%.idea/",
-                "%.suo",
-                "%.ntvs.*",
-                "%.njsproj",
-                "%.sln",
-                "%.DS_Store",
-                "Thumbs.db",
-                "%.tmp",
-                "%.temp",
-                "package%-lock.json",
-                "yarn.lock",
-                "pnpm%-lock.yaml",
-                "%.eslintcache",
-                "%.stylelintcache",
-                "%.next/",
-                "out/"
-            },
             extensions = {
                 ['ui-select'] = {
                     require('telescope.themes').get_dropdown(),
@@ -113,13 +77,5 @@ return {
         vim.keymap.set('n', '<leader><leader>', "<cmd>:Telescope keymaps<CR>", { desc = "Grep over keymaps" });
 
         vim.keymap.set('n', '<leader>?', "<cmd>:Telescope help_tags<CR>", { desc = "Search helper tags" });
-
-        local TelescopeRegex = function(string)
-            -- vim.print(string.args)
-            -- builtin.string_grep({use_regex = true, search = string.args})
-            builtin.live_grep({ search_dirs = { vim.fn.expand("%:p") }, args = "--regexp" })
-        end
-
-        vim.api.nvim_create_user_command('TelescopeRegex', TelescopeRegex, {})
     end
 }

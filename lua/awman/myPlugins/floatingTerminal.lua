@@ -25,7 +25,7 @@ vim.keymap.set({ 'n', 't' }, "<leader>tf", function()
     end
 
     if not vim.api.nvim_win_is_valid(state.floating.win) then
-        state.floating = CreateFloatingTerminal { buf = buf }
+        state.floating = CreateFloatingWindow { buf = buf }
         state.shared.buf = state.floating.buf
         if vim.api.nvim_buf_get_option(state.floating.buf, "buftype") ~= "terminal" then
             vim.cmd.terminal()

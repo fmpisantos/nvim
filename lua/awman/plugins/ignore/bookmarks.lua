@@ -10,8 +10,6 @@ return {
             { desc = "add or edit mark annotation at current line" });
         vim.keymap.set("n", "<leader>be", function() require("bookmarks").bookmark_ann() end,
             { desc = "add or edit mark annotation at current line" });
-        vim.keymap.set("n", "<leader>bC", function() require("bookmarks").bookmark_clean_all() end,
-            { desc = "clean all marks" });
         vim.keymap.set("n", "<leader>bc", function() require("bookmarks").bookmark_clean() end,
             { desc = "clean all marks in local buffer" });
         vim.keymap.set("n", "<leader>bn", function() require("bookmarks").bookmark_next() end,

@@ -2,11 +2,9 @@ return {
     {
         'neovim/nvim-lspconfig',
         dependencies = {
-            -- Automatically install LSPs to stdpath for neovim
             'williamboman/mason.nvim',
             'williamboman/mason-lspconfig.nvim',
-            -- Additional lua configuration, makes nvim stuff amazing!
-            -- { 'j-hui/fidget.nvim',    opts = {} },
+            { 'j-hui/fidget.nvim', opts = {} },
             'folke/neodev.nvim',
             {
                 'hrsh7th/nvim-cmp',
@@ -80,7 +78,9 @@ return {
                 nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
                 nmap('<leader>ps', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[P]roject [S]ymbols')
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-                imap('<C-k>', vim.lsp.buf.signature_help, 'Signature help'); local function format()
+                nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
+                imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
+                local function format()
                     vim.cmd('setlocal expandtab')
                     vim.cmd('setlocal shiftwidth=4')
                     local before = vim.fn.getline(1, '$')
@@ -207,13 +207,13 @@ return {
                         }
                     end
                 end,
-                -- jdtls = noop
             }
 
             local cmp = require 'cmp'
             local luasnip = require 'luasnip'
             require('luasnip.loaders.from_vscode').lazy_load()
             luasnip.config.setup {}
+
             cmp.setup {
                 snippet = {
                     expand = function(args)

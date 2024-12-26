@@ -8,7 +8,6 @@ vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 
-vim.opt.textwidth = 120
 vim.opt.smartindent = true
 
 vim.opt.wrap = false
@@ -77,3 +76,18 @@ if vim.loop.os_uname().sysname == 'Darwin' then
     vim.cmd('set shellquote=')
     vim.cmd('set shellxquote=')
 end
+
+-- Set up the autocmd for redrawing
+vim.api.nvim_create_autocmd('VimResume', {
+    callback = function() vim.cmd('redraw!') end
+})
+
+-- Tmux sessionizer if not in command mode
+vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
+    if vim.fn.mode() == 'c' then
+        return '<C-f>'
+    else
+        vim.fn.jobstart('tmux neww ~/.local/bin/tmux-sessionizer')
+        return ''
+    end
+end, { expr = true })

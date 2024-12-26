@@ -4,7 +4,7 @@ function trim(s)
     return s:match("^%s*(.-)%s*$")
 end
 
-_G.CreateFloatingTerminal = function(opts)
+_G.CreateFloatingWindow = function(opts)
     local ui = vim.api.nvim_list_uis()[1]
     if not ui then
         vim.notify("Unable to get UI dimensions!", vim.log.levels.ERROR)
@@ -20,8 +20,8 @@ _G.CreateFloatingTerminal = function(opts)
     width = math.min(width, ui.width)
     height = math.min(height, ui.height)
 
-    local col = math.floor((ui.width - width) / 2)
-    local row = math.floor((ui.height - height) / 2)
+    local col = opts and opts.col or math.floor((ui.width - width) / 2)
+    local row = opts and opts.row or math.floor((ui.height - height) / 2)
 
     local buf = nil
     if opts and opts.buf and vim.api.nvim_buf_is_valid(opts.buf) then
@@ -111,7 +111,8 @@ function Exit_visual_and_wait_for_marks()
     end, 100)
 end
 
-function GetSelectedText()
+_G.GetSelectedText = function(hasTable)
+    local _hasTable = hasTable or false
     local mode = vim.api.nvim_get_mode().mode
     Exit_visual_and_wait_for_marks()
 
@@ -144,7 +145,13 @@ function GetSelectedText()
             table.insert(lines, line)
         end
     elseif mode == '<C-v>' then
+        if _hasTable then
+            return {}
+        end
         return ""
+    end
+    if _hasTable then
+        return lines
     end
     return table.concat(lines, "\n")
 end
