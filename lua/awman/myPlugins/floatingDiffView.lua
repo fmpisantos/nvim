@@ -5,6 +5,15 @@ local state = {
     }
 }
 
+local shared_buffs = require("awman.myPlugins.shared_buffer");
+
+function get_bufNr(idx)
+    if not vim.api.nvim_buf_is_valid(state.floating.bufs[idx]) then
+        state.floating.bufs[idx] = shared_buffs.setup(shared_buffs.buffers.floatingDiff[idx])
+    end
+    return state.floating.bufs[idx]
+end
+
 vim.keymap.set({ 'n' }, "<leader>df", function()
     local ui = vim.api.nvim_list_uis()[1]
     if not ui then
