@@ -291,3 +291,7 @@ function Input_from_file(title, callback)
 
     write_to_temp_file()
 end
+
+vim.api.nvim_create_user_command('DelAllMarks', function(_)
+    vim.cmd('delm A-Z 0-9 a-z')
+end, { desc = 'Clear all marks (0-9 A-Z a-z)' })
