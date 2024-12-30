@@ -14,7 +14,16 @@ function get_bufNr(idx)
     return state.floating.bufs[idx]
 end
 
-vim.keymap.set({ 'n' }, "<leader>df", function()
+function hideDiffView()
+    if vim.api.nvim_win_is_valid(state.floating.wins[1]) then
+        vim.api.nvim_win_hide(state.floating.wins[1])
+    end
+    if vim.api.nvim_win_is_valid(state.floating.wins[2]) then
+        vim.api.nvim_win_hide(state.floating.wins[2])
+    end
+end
+
+function showDiffView()
     local ui = vim.api.nvim_list_uis()[1]
     if not ui then
         vim.notify("Unable to get UI dimensions!", vim.log.levels.ERROR)
@@ -55,7 +64,10 @@ vim.keymap.set({ 'n' }, "<leader>df", function()
         state.floating.bufs = { first_win.buf, second_win.buf }
         state.floating.wins = { first_win.win, second_win.win }
     end
-end, { noremap = true, silent = true, desc = "Open floating diff" })
+end
+
+vim.api.nvim_create_user_command("DiffView", showDiffView, {});
+vim.keymap.set({ 'n' }, "<leader>df", hideDiffView, { noremap = true, silent = true, desc = "Open floating diff" })
 
 vim.keymap.set({ 'v' }, "<leader>d1", function()
     local lines = _G.GetSelectedText(true);
