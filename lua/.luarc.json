@@ -5,6 +5,9 @@
     "diagnostics.globals": [
         "show_current_line_popup",
         "trim",
-        "CreateFloatingTerminal"
+        "CreateFloatingTerminal",
+        "showDiffView",
+        "get_bufNr",
+        "hideDiffView"
     ]
 }
