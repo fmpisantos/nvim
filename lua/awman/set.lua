@@ -77,6 +77,10 @@ if vim.loop.os_uname().sysname == 'Darwin' then
     vim.cmd('set shellxquote=')
 end
 
+vim.cmd('set shell=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe')
+vim.cmd('set shellquote=\\')
+vim.cmd('set shellxquote=')
+
 -- Set up the autocmd for redrawing
 vim.api.nvim_create_autocmd('VimResume', {
     callback = function() vim.cmd('redraw!') end
@@ -91,3 +95,9 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
         return ''
     end
 end, { expr = true })
+
+vim.filetype.add({
+    extension = {
+        sln = "cpp"
+    }
+});
