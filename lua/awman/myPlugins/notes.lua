@@ -200,32 +200,47 @@ local function make_todo()
 end
 
 local function make_note(filepath)
-    if filepath == nil then
-        filepath = vim.fn.expand("%:p")
+    filepath = filepath or vim.fn.expand("%:p")
+
+    if not filepath or filepath == "" then
+        print("Error: Invalid file path.")
+        return
     end
-    if is_in_todo() then
-        local lines = io.open(filepath, "r+");
-        if lines == nil then
-            print("Error: Unable to open note file.")
+
+    if is_in_todo(filepath) then
+        local file = io.open(filepath, "r")
+        if not file then
+            print("Error: Unable to open the file for reading.")
             return
         end
-        local _lines = {}
-        for line in lines:lines() do
+
+        local lines = {}
+        for line in file:lines() do
             if not contains(line, tags.todo) then
-                table.insert(_lines, line);
+                table.insert(lines, line)
             end
         end
-        lines:close();
-        local file = io.open(vim.fn.expand('%:p'), "w");
-        if file == nil then
-            print("Error: Unable to open note file.")
+        file:close()
+
+        file = io.open(filepath, "w")
+        if not file then
+            print("Error: Unable to open the file for writing.")
             return
         end
-        for _, line in ipairs(_lines) do
-            file:write(line .. "\n");
+
+        for _, line in ipairs(lines) do
+            file:write(line .. "\n")
         end
-        file:close();
-        move_file(vim.fn.expand("%:p"), state.path .. "/notes" .. vim.fn.expand("%:t"))
+        file:close()
+
+        if not state or not state.path then
+            print("Error: Invalid state or path.")
+            return
+        end
+        local notes_dir = state.path .. "/notes/"
+        local target_path = notes_dir .. vim.fn.fnamemodify(filepath, ":t")
+
+        move_file(filepath, target_path)
     end
 end
 
@@ -356,6 +371,7 @@ local function add_file(to, filepath)
             break;
         end
     end
+    note:close();
     if title == nil then
         title = vim.fn.expand("%:t:r")
     else
@@ -387,19 +403,6 @@ local function add_file(to, filepath)
 end
 
 local function remove_file(filename)
-    local file = io.open(state.path .. "/todos.md", "r")
-    if not file then
-        return
-    end
-
-    local lines = {}
-    for line in file:lines() do
-        if not contains(line, "](" .. filename .. ")") then
-            table.insert(lines, line)
-        end
-    end
-    file:close()
-
     _update_todo_md(function(line, _)
         if contains(line, "](" .. filename .. ")") then
             return false
@@ -582,7 +585,13 @@ local function on_todo_md_save()
     end, true);
 
     for _, file in ipairs(to_remove) do
-        make_note(file:match("%((.-)%)"));
+        local filePath = file:match("%((.-)%)");
+        if not filePath then
+            goto continue;
+        end
+
+        make_note(filePath);
+        ::continue::
     end
 
     for _, info in ipairs(update) do
