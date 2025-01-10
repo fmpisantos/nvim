@@ -20,9 +20,31 @@ if state == nil then
     return
 end
 
+local function get_file_extension(filename)
+    return filename:match("^.+(%..+)$")
+end
+
 local function is_directory(path)
     local stat = vim.loop.fs_stat(path)
     return stat and stat.type == "directory"
+end
+
+local function open_buffer(destination)
+    local buf_list = vim.api.nvim_list_bufs()
+    local buf_exists = false
+    for _, buf in ipairs(buf_list) do
+        if vim.api.nvim_buf_get_name(buf) == destination then
+            buf_exists = true
+            vim.api.nvim_set_current_buf(buf)
+            vim.cmd("edit!")
+            break
+        end
+    end
+
+    if not buf_exists then
+        vim.api.nvim_buf_set_name(vim.api.nvim_get_current_buf(), destination)
+        vim.cmd("edit!")
+    end
 end
 
 local function open_floating_window()
@@ -54,7 +76,7 @@ local function move_file(source, destination)
         return
     end
 
-    vim.api.nvim_buf_set_name(vim.api.nvim_get_current_buf(), destination);
+    open_buffer(destination);
 end
 
 local function parse_path(path)
@@ -71,6 +93,59 @@ local function contains(str1, str2)
     local clean_str2 = parse_path(str2:lower():gsub("%[.*%]", ""):gsub("[()%[%]]", ""))
     return clean_str1:find(clean_str2, 1, true) ~= nil
 end
+
+local function update_first_line(newPath, newType)
+    if newPath == nil or newPath == "" then
+        return;
+    end
+    local file = io.open(newPath, "r");
+    if not file then
+        return;
+    end
+    local lines = file:lines();
+    local newLines = {}
+    local newLine = newType == "todo" and tags.todo or tags.done[1];
+    for line in lines do
+        if #newLines == 0 then
+            for _, tag in ipairs(tags.done) do
+                if contains(line, tag) then
+                    if newType == "notes" then
+                        goto continue
+                    end
+                    table.insert(newLines, newLine);
+                    goto continue
+                end
+            end
+            if contains(line, tags.todo) then
+                if newType == "notes" then
+                    goto continue
+                end
+                table.insert(newLines, newLine);
+                goto continue
+            end
+            table.insert(newLines, newLine);
+            table.insert(newLines, "\n");
+            goto continue
+        end
+        if #newLines == 1 and (line == "" or line == "\n") and newType == "notes" then
+            goto continue
+        end
+        table.insert(newLines, line);
+        ::continue::
+    end
+    file:close();
+    file = io.open(newPath, "w");
+    if file then
+        for i, line in ipairs(newLines) do
+            if i ~= 1 then
+                file:write("\n");
+            end
+            file:write(line);
+        end
+        file:close();
+    end
+end
+
 
 local function starts_with(str, prefix)
     return string.sub(str, 1, #prefix) == prefix
@@ -185,13 +260,6 @@ local function type_of_file_location(path)
 end
 
 local function update_state(oldType, newType, oldPath, newPath, title)
-    -- vim.print("Updating state");
-    -- vim.print("oldType: " .. (oldType or "") ..
-    --     " newType: " .. newType ..
-    --     " oldPath: " .. (oldPath or "") ..
-    --     " newPath: " .. newPath ..
-    --     " title: " .. title);
-    -- vim.print("oldState: " .. vim.inspect(state));
     if state == nil then
         return;
     end
@@ -215,7 +283,6 @@ local function update_state(oldType, newType, oldPath, newPath, title)
             state.closed[newPath] = title;
         end
     end
-    -- vim.print("state: " .. vim.inspect(state));
 
     save(state);
 end
@@ -235,9 +302,36 @@ local function get_title(path)
     return nil;
 end
 
+local function get_files(directory, filetype)
+    local uv = vim.loop
+    local handle = uv.fs_opendir(directory)
+    if not handle then
+        print("Error opening directory: " .. directory)
+        return
+    end
+
+    local files = {}
+
+    while true do
+        local entry = uv.fs_readdir(handle)
+        if not entry then break end
+        for _, file in ipairs(entry) do
+            if file.type == "file" then
+                if get_file_extension(file.name) == ".md" then
+                    local path = directory .. "/" .. file.name;
+                    files[path] = get_title(path);
+                    update_first_line(path, filetype);
+                end
+            end
+        end
+    end
+
+    uv.fs_closedir(handle)
+
+    return files
+end
+
 local function update_todos_md()
-    -- vim.print("Updating todos.md");
-    -- vim.print(state);
     local todo_file = io.open(state.path .. "/todos.md", "w")
     if todo_file then
         todo_file:write("# TODOS:\n\n## Open:\n")
@@ -252,66 +346,11 @@ local function update_todos_md()
     end
 end
 
-local function update_first_line(newPath, newType)
-    vim.print("Updating first line");
-    -- vim.print("newPath: " .. newPath);
-    -- vim.print("newType: " .. newType);
-    if newPath == nil or newPath == "" then
-        return;
-    end
-    local file = io.open(newPath, "r");
-    if not file then
-        return;
-    end
-    local lines = file:lines();
-    local newLines = {}
-    local newLine = newType == "todo" and tags.todo or tags.done[1];
-    vim.print(newLine);
-    for line in lines do
-        if #newLines == 0 then
-            for _, tag in ipairs(tags.done) do
-                if contains(line, tag) then
-                    if newType == "notes" then
-                        goto continue
-                    end
-                    vim.print("Skipping line(from done): " .. line);
-                    vim.print("For line: " .. newLine);
-                    table.insert(newLines, newLine);
-                    goto continue
-                end
-            end
-            if contains(line, tags.todo) then
-                if newType == "notes" then
-                    goto continue
-                end
-                vim.print("Skipping line(from todo): " .. line);
-                vim.print("For line: " .. newLine);
-                table.insert(newLines, newLine);
-                goto continue
-            end
-            vim.print("Skipping line(): " .. line);
-            vim.print("For line: " .. newLine);
-            table.insert(newLines, newLine);
-            table.insert(newLines, "\n");
-            goto continue
-        end
-        if #newLines == 1 and (line == "" or line == "\n") and newType == "notes" then
-            goto continue
-        end
-        table.insert(newLines, line);
-        ::continue::
-    end
-    file:close();
-    file = io.open(newPath, "w");
-    if file then
-        for i, line in ipairs(newLines) do
-            if i ~= 1 then
-                file:write("\n");
-            end
-            file:write(line);
-        end
-        file:close();
-    end
+local function refresh()
+    state.opened = get_files(state.path .. "/todos", "todo");
+    state.closed = get_files(state.path .. "/todos/done", "done");
+    update_todos_md();
+    vim.cmd("e!");
 end
 
 local function new_file(path)
@@ -329,10 +368,6 @@ local function new_file(path)
 end
 
 local function update(_oldPath, newType, dont_update_todos_md, newPath)
-    -- vim.print("update(" ..
-    --     tostring(_oldPath) ..
-    --     ", " .. tostring(newType) .. ", " .. tostring(dont_update_todos_md) .. ", " .. tostring(newPath) ..
-    --     ")");
     dont_update_todos_md = dont_update_todos_md or false;
     if not _oldPath then
         _oldPath = vim.fn.expand('%:p');
@@ -355,7 +390,7 @@ local function update(_oldPath, newType, dont_update_todos_md, newPath)
     end
     newPath = newPath or get_location_from_type(newType) .. "/" .. vim.fn.fnamemodify(_oldPath, ":t");
 
-    local title = get_title(newPath) or newPath;
+    local title = get_title(_oldPath) or newPath;
     if newType ~= oldType then
         update_state(oldType, newType, _oldPath, newPath, title)
         move_file(_oldPath, newPath);
@@ -366,9 +401,7 @@ local function update(_oldPath, newType, dont_update_todos_md, newPath)
 end
 
 local function on_file_delete(filepath)
-    vim.print("on_file_delete(" .. filepath .. ")");
     local type = type_of_file_location(filepath);
-    vim.print(state);
     if type == "todo" then
         state.opened[filepath] = nil;
     else
@@ -490,6 +523,7 @@ function M.setup()
         open(path);
     end, { nargs = 0 })
     vim.api.nvim_create_user_command("Todo", open_new_todo, { nargs = 0 })
+    vim.api.nvim_create_user_command("TodosRefresh", refresh, { nargs = 0 })
 
     if not is_note_folder() then
         return
@@ -523,13 +557,13 @@ function M.setup()
         pattern = { state.path .. '/todos.md' },
         callback = function()
             on_todos_md_updated()
+            vim.cmd("e " .. state.path .. "/todos.md");
         end,
     });
 
     vim.api.nvim_create_autocmd('BufDelete', {
         pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
         callback = function(event)
-            vim.print("BufDelete");
             local filepath = vim.api.nvim_buf_get_name(event.buf)
             on_file_delete(filepath)
         end,
