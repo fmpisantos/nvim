@@ -523,7 +523,10 @@ function M.setup()
         open(path);
     end, { nargs = 0 })
     vim.api.nvim_create_user_command("Todo", open_new_todo, { nargs = 0 })
+    vim.api.nvim_create_user_command("NotesRestart", refresh, { nargs = 0 })
+    vim.api.nvim_create_user_command("TodosRestart", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("TodosRefresh", refresh, { nargs = 0 })
+    vim.api.nvim_create_user_command("NotesRefresh", refresh, { nargs = 0 })
 
     if not is_note_folder() then
         return
