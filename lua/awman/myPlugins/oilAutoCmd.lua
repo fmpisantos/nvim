@@ -15,7 +15,7 @@ local function file_matches_patterns(filepath, patterns)
     return false
 end
 
-local function get_actual_path(path)
+M.get_actual_path = function(path)
     return path:gsub("file://", ""):gsub("oil://", "")
 end
 
@@ -35,7 +35,7 @@ M.setup = function(fileDeleteCallback, fileMoveCallback, paths)
                     goto continue
                 end
                 if action.type == "delete" then
-                    local path = get_actual_path(action.url);
+                    local path = M.get_actual_path(action.url);
                     if M.paths and #M.paths then
                         if file_matches_patterns(path, M.paths) then
                             M.fileDeleteCallback(path)
@@ -44,8 +44,8 @@ M.setup = function(fileDeleteCallback, fileMoveCallback, paths)
                         M.fileDeleteCallback(path)
                     end
                 elseif action.type == "move" then
-                    local dest = get_actual_path(action.dest_url);
-                    local src = get_actual_path(action.src_url);
+                    local dest = M.get_actual_path(action.dest_url);
+                    local src = M.get_actual_path(action.src_url);
                     if M.paths and #M.paths then
                         if file_matches_patterns(dest, M.paths) or file_matches_patterns(src, M.paths) then
                             M.fileMoveCallback(src, dest)

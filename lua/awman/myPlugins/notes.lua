@@ -1,6 +1,7 @@
 local M = {}
 
 local oil = require("oil")
+local oilAutoCMD = require("awman.myPlugins.oilAutoCmd")
 
 local tags = {
     todo = "!TODO",
@@ -81,11 +82,12 @@ end
 
 local function parse_path(path)
     if path == nil then
-        return path
+        return path;
     end
-    path = string.gsub(path, "\\", "/")
-    path = string.gsub(path, "//", "/")
-    return path
+    path = oilAutoCMD.get_actual_path(path);
+    path = string.gsub(path, "\\", "/");
+    path = string.gsub(path, "//", "/");
+    return path;
 end
 
 local function contains(str1, str2)
@@ -505,8 +507,8 @@ local function open_new_todo()
     open(path);
 end
 
-local function set_Path(path)
-    update_path(path);
+local function set_Path()
+    update_path();
     refresh();
 end
 
@@ -528,7 +530,7 @@ function M.setup()
     vim.api.nvim_create_user_command("TodosRestart", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("TodosRefresh", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("NotesRefresh", refresh, { nargs = 0 })
-    vim.api.nvim_create_user_command("NotesSetPath", set_Path, { nargs = 1 })
+    vim.api.nvim_create_user_command("NotesSetPath", set_Path, { nargs = 0 })
 
     if not is_note_folder() then
         return
@@ -574,7 +576,7 @@ function M.setup()
         end,
     });
 
-    require("awman.myPlugins.oilAutoCmd").setup(
+    oilAutoCMD.setup(
         function(path)
             on_file_delete(path)
         end,
