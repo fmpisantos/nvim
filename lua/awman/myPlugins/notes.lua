@@ -178,12 +178,8 @@ local function update_path(path)
     end
     path = parse_path(path)
     state.path = path
-    if state.opened == nil then
-        state.opened = {}
-    end
-    if state.closed == nil then
-        state.closed = {}
-    end
+    state.opened = {}
+    state.closed = {}
     save(state)
 end
 
@@ -509,6 +505,11 @@ local function open_new_todo()
     open(path);
 end
 
+local function set_Path(path)
+    update_path(path);
+    refresh();
+end
+
 function M.setup()
     vim.api.nvim_create_user_command("NotesSetup", create_notes_directory, { nargs = 0 })
     vim.api.nvim_create_user_command("Notes", function()
@@ -527,6 +528,7 @@ function M.setup()
     vim.api.nvim_create_user_command("TodosRestart", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("TodosRefresh", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("NotesRefresh", refresh, { nargs = 0 })
+    vim.api.nvim_create_user_command("NotesSetPath", set_Path, { nargs = 1 })
 
     if not is_note_folder() then
         return
@@ -584,10 +586,6 @@ function M.setup()
     );
 end
 
--- For testing
-state.opened = {}
-state.closed = {}
-save(state)
 M.setup()
 
 return M;
