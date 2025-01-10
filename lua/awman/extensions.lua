@@ -27,7 +27,11 @@ _G.CreateFloatingWindow = function(opts)
     if opts and opts.buf and vim.api.nvim_buf_is_valid(opts.buf) then
         buf = opts.buf
     else
-        buf = vim.api.nvim_create_buf(false, true)
+        local scratch = true;
+        if opts and opts.keep then
+            scratch = false;
+        end
+        buf = vim.api.nvim_create_buf(false, scratch);
     end
 
     local win_opts = {
@@ -36,9 +40,12 @@ _G.CreateFloatingWindow = function(opts)
         height = height,
         row = row,
         col = col,
-        style = "minimal",
         border = "rounded",
     }
+
+    if not (opts and opts.keepStyle) then
+        win_opts.style = "minimal"
+    end
 
     local win = vim.api.nvim_open_win(buf, true, win_opts)
 

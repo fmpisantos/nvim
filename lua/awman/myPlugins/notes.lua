@@ -1,4 +1,5 @@
 local M = {}
+
 local oil = require("oil")
 
 local tags = {
@@ -11,10 +12,49 @@ local floating_window = {
     win = -1
 }
 
+local pre = {}
+
 local shared_buffs = require("awman.myPlugins.shared_buffer");
 local state, save = shared_buffs.setup("notes")
 if state == nil then
     return
+end
+
+local function is_directory(path)
+    local stat = vim.loop.fs_stat(path)
+    return stat and stat.type == "directory"
+end
+
+local function open_floating_window()
+    if floating_window.win ~= -1 and vim.api.nvim_win_is_valid(floating_window.win) then
+        vim.api.nvim_win_hide(floating_window.win)
+        return
+    end
+    floating_window = CreateFloatingWindow { buf = floating_window.buf, keepStyle = true };
+end
+
+local function get_location_from_type(type)
+    if type == "todo" then
+        return state.path .. "/todos"
+    else
+        if type == "done" then
+            return state.path .. "/todos/done"
+        end
+    end
+    return state.path .. "/notes"
+end
+
+local function move_file(source, destination)
+    if is_directory(destination) then
+        destination = destination .. "/" .. vim.fn.fnamemodify(source, ":t")
+    end
+    local success, err = os.rename(source, destination)
+    if not success then
+        vim.print("Error moving file:", err)
+        return
+    end
+
+    vim.api.nvim_buf_set_name(vim.api.nvim_get_current_buf(), destination);
 end
 
 local function parse_path(path)
@@ -30,6 +70,28 @@ local function contains(str1, str2)
     local clean_str1 = parse_path(str1:lower():gsub("%[.*%]", ""):gsub("[()%[%]]", ""))
     local clean_str2 = parse_path(str2:lower():gsub("%[.*%]", ""):gsub("[()%[%]]", ""))
     return clean_str1:find(clean_str2, 1, true) ~= nil
+end
+
+local function starts_with(str, prefix)
+    return string.sub(str, 1, #prefix) == prefix
+end
+
+local function is_in_path_dir(base_path)
+    local current_dir = parse_path(oil.get_current_dir())
+    base_path = parse_path(base_path)
+    current_dir = parse_path(current_dir)
+    if not current_dir or current_dir == "" then
+        return false
+    end
+
+    return contains(current_dir, base_path)
+end
+
+local function is_note_folder()
+    if not state.path then
+        return
+    end
+    return is_in_path_dir(state.path)
 end
 
 local function update_path(path)
@@ -48,6 +110,25 @@ local function update_path(path)
         state.closed = {}
     end
     save(state)
+end
+
+local function get_todo_info()
+    local file = io.open(vim.fn.expand('%:p'), "r");
+    if not file then
+        return false, false
+    end
+    local line = file:read("*l")
+    file:close();
+    if contains(line, tags.todo) then
+        for _, tag in ipairs(tags.done) do
+            if contains(line, tag) then
+                return true, true
+            end
+        end
+        return true, false
+    else
+        return false, false;
+    end
 end
 
 local function create_notes_directory()
@@ -87,60 +168,8 @@ local function create_notes_directory()
     update_path(notes_path);
 end
 
-local function is_in_path_dir(base_path)
-    local current_dir = parse_path(oil.get_current_dir())
-    base_path = parse_path(base_path)
-    current_dir = parse_path(current_dir)
-    if not current_dir or current_dir == "" then
-        return false
-    end
-
-    return contains(current_dir, base_path)
-end
-
-local function is_in_path(base_path)
-    local current_dir = parse_path(vim.fn.expand("%:p"))
-    base_path = parse_path(base_path)
-    current_dir = parse_path(current_dir)
-    if not current_dir or current_dir == "" then
-        return false
-    end
-
-    return contains(current_dir, base_path)
-end
-
-local function get_next_id(prefix)
-    local notes = vim.fn.glob(state.path .. "/" .. prefix .. "*.md", false, true)
-    local max = 0
-    for _, note in ipairs(notes) do
-        local id = tonumber(note:match("note(%d+).md"))
-        if not id then
-            goto continue
-        end
-        if id > max then
-            max = id
-        end
-        ::continue::
-    end
-    return max + 1
-end
-
-local function create_note()
-    vim.cmd("edit " .. state.path .. "/notes/" .. "note" .. get_next_id("note") .. ".md")
-end
-
-local function create_todo()
-    vim.cmd("edit " .. state.path .. "/todos/" .. "todo" .. get_next_id("todo") .. ".md");
-    vim.api.nvim_put({ "!TODO", "", "# " }, "l", false, false);
-    vim.cmd("normal! Gk$");
-end
-
-local function is_in_todo_done()
-    return is_in_path(state.path .. "/todos/done")
-end
-
-local function type_of_file_location()
-    local current_file = vim.fn.expand("%:p")
+local function type_of_file_location(path)
+    local current_file = vim.fn.expand(path .. ":p")
     current_file = parse_path(current_file)
     local base_path = parse_path(state.path)
     if not current_file or current_file == "" then
@@ -155,507 +184,324 @@ local function type_of_file_location()
     return "note"
 end
 
-local function is_in_todo(path)
-    path = path or state.path
-    return is_in_path(state.path .. "/todos")
-end
-
-local function append_to_first_line(filepath, new_first_line)
-    local file = io.open(filepath, "r")
-    local content = ""
-    if file then
-        content = file:read("*a")
-        file:close()
-    else
-        print("Error: Unable to open file.")
-        return
-    end
-
-    file = io.open(filepath, "w")
-    if file then
-        file:write(new_first_line)
-        file:write(content)
-        file:close()
-    else
-        print("Error: Unable to open file for writing.")
-    end
-end
-
-local function move_file(source, destination)
-    local success, err = os.rename(source, destination)
-    if not success then
-        print("Error moving file:", err)
-        return
-    end
-    vim.cmd("bdelete");
-    vim.cmd("edit " .. destination);
-end
-
-local function make_todo()
-    if is_in_todo() then
-        local file = io.open(vim.fn.expand('%:p'), "r");
-        if not file then
-            print("Error: Unable to open note file.");
-            return;
-        end
-        local line = file:read("*l");
-        file:close();
-        if contains(line, tags.todo) then
-            return
-        else
-            append_to_first_line(vim.fn.expand('%:p'), tags.todo .. "\n\n")
-        end
-    else
-        append_to_first_line(vim.fn.expand("%:p"), tags.todo .. "\n\n")
-        move_file(vim.fn.expand("%:p"), state.path .. "/todos/" .. vim.fn.expand("%:t"))
-    end
-end
-
-local function make_note(filepath)
-    filepath = filepath or vim.fn.expand("%:p")
-
-    if not filepath or filepath == "" then
-        print("Error: Invalid file path.")
-        return
-    end
-
-    if is_in_todo(filepath) then
-        local file = io.open(filepath, "r")
-        if not file then
-            print("Error: Unable to open the file for reading.")
-            return
-        end
-
-        local lines = {}
-        for line in file:lines() do
-            if not contains(line, tags.todo) then
-                table.insert(lines, line)
-            end
-        end
-        file:close()
-
-        file = io.open(filepath, "w")
-        if not file then
-            print("Error: Unable to open the file for writing.")
-            return
-        end
-
-        for _, line in ipairs(lines) do
-            file:write(line .. "\n")
-        end
-        file:close()
-
-        if not state or not state.path then
-            print("Error: Invalid state or path.")
-            return
-        end
-        local notes_dir = state.path .. "/notes/"
-        local target_path = notes_dir .. vim.fn.fnamemodify(filepath, ":t")
-
-        move_file(filepath, target_path)
-    end
-end
-
-local function open_floating_window()
-    if floating_window.win ~= -1 then
-        vim.api.nvim_win_hide(floating_window.win)
-        return
-    end
-    floating_window = CreateFloatingWindow { buf = floating_window.buf }
-end
-
-local function open_notes()
-    open_floating_window()
-    vim.cmd("edit " .. state.path .. "/notes")
-end
-
-local function open_todos()
-    open_floating_window()
-    vim.cmd("edit " .. state.path .. "/todos.md")
-end
-
-local function open_new_note()
-    open_floating_window()
-    create_note()
-end
-
-local function open_new_todo()
-    open_floating_window()
-    create_todo()
-end
-
-local function get_todo_info()
-    local file = io.open(vim.fn.expand('%:p'), "r");
-    if not file then
-        return false, false
-    end
-    local line = file:read("*l")
-    file:close();
-    if contains(line, tags.todo) then
-        for _, tag in ipairs(tags.done) do
-            if contains(line, tag) then
-                return true, true
-            end
-        end
-        return true, false
-    else
-        return false, false;
-    end
-end
-
-local function _update_todo_md(func, to_remove)
-    local file = io.open(state.path .. "/todos.md", "r+");
-    local hasStarted = false;
-    local isOpened = true;
-    local opened = {};
-    local closed = {};
-    if not file then
-        vim.print("Error: Unable to open todos.md file.");
-        return
-    end
-
-    local lines = {}
-    for line in file:lines() do
-        if contains(line, "## Open:") then
-            hasStarted = true;
-        end
-        if contains(line, "## Closed:") then
-            isOpened = false;
-        end
-        if func(line, lines) then
-            if hasStarted then
-                if isOpened then
-                    table.insert(opened, line);
-                else
-                    table.insert(closed, line);
-                end
-            end
-            table.insert(lines, line)
-        end
-    end
-    file:close()
-
-    file = io.open(state.path .. "/todos.md", "w")
-    if not file then
+local function update_state(oldType, newType, oldPath, newPath, title)
+    -- vim.print("Updating state");
+    -- vim.print("oldType: " .. (oldType or "") ..
+    --     " newType: " .. newType ..
+    --     " oldPath: " .. (oldPath or "") ..
+    --     " newPath: " .. newPath ..
+    --     " title: " .. title);
+    -- vim.print("oldState: " .. vim.inspect(state));
+    if state == nil then
         return;
     end
-
-    for _, line in ipairs(lines) do
-        file:write(line .. "\n")
+    if state.closed == nil then
+        state.closed = {};
     end
-    file:close()
-
-    local _to_remove = {};
-    if to_remove then
-        for _, line in ipairs(state.closed) do
-            if not closed[line] then
-                table.insert(_to_remove, line);
-            end
-        end
-        for _, line in ipairs(state.opened) do
-            if not opened[line] then
-                table.insert(_to_remove, line);
-            end
+    if state.opened == nil then
+        state.opened = {};
+    end
+    if oldType == "todo" then
+        state.opened[oldPath] = nil;
+    else
+        if oldType == "done" then
+            state.closed[oldPath] = nil;
         end
     end
-
-    state.opened = opened;
-    state.closed = closed;
-    if not save then
-        print("Error: Unable to save state.");
-        return;
+    if newType == "todo" then
+        state.opened[newPath] = title;
+    else
+        if newType == "done" then
+            state.closed[newPath] = title;
+        end
     end
+    -- vim.print("state: " .. vim.inspect(state));
+
     save(state);
-    return _to_remove;
 end
 
-local function add_file(to, filepath)
-    local note = io.open(filepath, "r+");
-    if note == nil then
-        print("Error: Unable to open note file (" .. filepath .. ")");
-        return;
-    end
-
-    local title = "";
-    for line in note:lines() do
-        if contains(line, "# ") then
-            title = line;
-            break;
-        end
-    end
-    note:close();
-    if title == nil then
-        title = vim.fn.expand("%:t:r")
-    else
-        title = title:sub(3);
-    end
-
-    local append = "";
-    if to == "todo" then
-        append = "- [ ] [" .. title .. "](" .. filepath .. ")\n";
-    else
-        append = "- [x] [" .. title .. "](" .. filepath .. ")\n";
-    end
-
-    _update_todo_md(function(line, lines)
-        if contains(line, "## Closed:") then
-            if to == "todo" then
-                table.insert(lines, append)
-            else
-                table.insert(lines, line)
-                table.insert(lines, append)
-                return false;
-            end
-        end
-        return true;
-    end);
-end
-
-local function remove_file(filename)
-    _update_todo_md(function(line, _)
-        if contains(line, "](" .. filename .. ")") then
-            return false
-        end
-        return true
-    end)
-end
-
-local function update_todo_md(to, from, filepath, oldpath)
-    -- vim.print("To: " .. to .. ", From: " .. from .. ", Filepath: " .. filepath .. ", OldPath: " .. oldpath);
-    if from == "" then
-        add_file(to, filepath)
-        return;
-    end
-    if to == "todo" then
-        if from == "done" then
-            remove_file(oldpath)
-        end
-        add_file(to, filepath)
-    else
-        if to == "done" then
-            if from == "todo" then
-                remove_file(oldpath)
-            end
-            add_file(to, filepath)
-        else
-            if to == "note" then
-                remove_file(oldpath)
-            end
-        end
-    end
-end
-
-local function update_title()
-    local file = io.open(vim.fn.expand("%:p"), "r+")
+local function get_title(path)
+    local file = io.open(path, "r");
     if not file then
-        return
+        return nil;
     end
-
-    local title = nil
     for line in file:lines() do
-        if contains(line, "# ") then
-            title = line:sub(3)
-            break;
+        if line:find("#") then
+            file:close();
+            return line;
         end
     end
-    file:close()
-
-    if title == nil then
-        return
-    end
-
-    _update_todo_md(function(line, lines)
-        if contains(line, "](" .. vim.fn.expand("%:p") .. ")") then
-            lines[#lines] = "  - [ ] [" .. title .. "](" .. vim.fn.expand("%:p") .. ")"
-        end
-        return true;
-    end);
+    file:close();
+    return nil;
 end
 
-local function on_file_save_check(first)
-    local oldtype;
-    if first then
-        oldtype = ""
-    else
-        oldtype = type_of_file_location();
+local function update_todos_md()
+    -- vim.print("Updating todos.md");
+    -- vim.print(state);
+    local todo_file = io.open(state.path .. "/todos.md", "w")
+    if todo_file then
+        todo_file:write("# TODOS:\n\n## Open:\n")
+        for path, title in pairs(state.opened) do
+            todo_file:write("- [ ] [" .. title .. "](" .. path .. ")\n")
+        end
+        todo_file:write("\n## Closed:\n")
+        for path, title in pairs(state.closed) do
+            todo_file:write("- [x] [" .. title .. "](" .. path .. ")\n")
+        end
+        todo_file:close()
     end
-    local oldpath = vim.fn.expand("%:p");
-    if is_in_todo() then
-        local todo, done = get_todo_info()
-        if todo then
-            if is_in_todo_done() then
-                if not done then
-                    move_file(oldpath, state.path .. "/todos/" .. vim.fn.expand("%:t"))
-                    update_todo_md("todo", oldtype, vim.fn.expand("%:p"), oldpath)
-                else
-                    if todo == oldtype then
-                        update_title()
-                    else
-                        update_todo_md("done", oldtype, vim.fn.expand("%:p"), oldpath)
+end
+
+local function update_first_line(newPath, newType)
+    vim.print("Updating first line");
+    -- vim.print("newPath: " .. newPath);
+    -- vim.print("newType: " .. newType);
+    if newPath == nil or newPath == "" then
+        return;
+    end
+    local file = io.open(newPath, "r");
+    if not file then
+        return;
+    end
+    local lines = file:lines();
+    local newLines = {}
+    local newLine = newType == "todo" and tags.todo or tags.done[1];
+    vim.print(newLine);
+    for line in lines do
+        if #newLines == 0 then
+            for _, tag in ipairs(tags.done) do
+                if contains(line, tag) then
+                    if newType == "notes" then
+                        goto continue
                     end
-                end
-            else
-                if done then
-                    move_file(oldpath, state.path .. "/todos/done/" .. vim.fn.expand("%:t"))
-                    update_todo_md("done", oldtype, vim.fn.expand("%:p"), oldpath)
-                else
-                    if todo == oldtype then
-                        update_title()
-                    else
-                        update_todo_md("todo", oldtype, vim.fn.expand("%:p"), oldpath)
-                    end
+                    vim.print("Skipping line(from done): " .. line);
+                    vim.print("For line: " .. newLine);
+                    table.insert(newLines, newLine);
+                    goto continue
                 end
             end
-        else
-            move_file(oldpath, state.path .. "/notes/" .. vim.fn.expand("%:t"))
-            update_todo_md("notes", oldtype, vim.fn.expand("%:p"), oldpath)
+            if contains(line, tags.todo) then
+                if newType == "notes" then
+                    goto continue
+                end
+                vim.print("Skipping line(from todo): " .. line);
+                vim.print("For line: " .. newLine);
+                table.insert(newLines, newLine);
+                goto continue
+            end
+            vim.print("Skipping line(): " .. line);
+            vim.print("For line: " .. newLine);
+            table.insert(newLines, newLine);
+            table.insert(newLines, "\n");
+            goto continue
         end
+        if #newLines == 1 and (line == "" or line == "\n") and newType == "notes" then
+            goto continue
+        end
+        table.insert(newLines, line);
+        ::continue::
+    end
+    file:close();
+    file = io.open(newPath, "w");
+    if file then
+        for i, line in ipairs(newLines) do
+            if i ~= 1 then
+                file:write("\n");
+            end
+            file:write(line);
+        end
+        file:close();
+    end
+end
+
+local function new_file(path)
+    local todo, done = get_todo_info();
+    local type = "note";
+    if done then
+        type = "done";
     else
-        local todo, done = get_todo_info()
+        if todo then
+            type = "todo";
+        end
+    end
+    update_state(nil, type, nil, path, get_title(path));
+    update_todos_md();
+end
+
+local function update(_oldPath, newType, dont_update_todos_md, newPath)
+    -- vim.print("update(" ..
+    --     tostring(_oldPath) ..
+    --     ", " .. tostring(newType) .. ", " .. tostring(dont_update_todos_md) .. ", " .. tostring(newPath) ..
+    --     ")");
+    dont_update_todos_md = dont_update_todos_md or false;
+    if not _oldPath then
+        _oldPath = vim.fn.expand('%:p');
+    end
+    local oldType = type_of_file_location(_oldPath);
+
+    if not newType then
+        local todo, done = get_todo_info();
         if todo then
             if done then
-                move_file(oldpath, state.path .. "/todos/done/" .. vim.fn.expand("%:t"))
-                update_todo_md("done", oldtype, vim.fn.expand("%:p"), oldpath)
+                newType = "done";
             else
-                move_file(oldpath, state.path .. "/todos/" .. vim.fn.expand("%:t"))
-                update_todo_md("todo", oldtype, vim.fn.expand("%:p"), oldpath)
+                newType = "todo";
             end
-        end
-    end
-end
-
-local function type_of_file(filepath)
-    local file = io.open(filepath, "r")
-    if not file then
-        return "note"
-    end
-
-    local line = file:read("*l")
-    file:close()
-
-    for _, tag in ipairs(tags.done) do
-        if contains(line, tag) then
-            return "done"
-        end
-    end
-
-    if contains(line, tags.todo) then
-        return "todo"
-    end
-
-    return "note"
-end
-
-local function on_file_moved(old_path, new_path)
-    local new_type = type_of_file(new_path)
-    local old_type = type_of_file(old_path)
-    if new_type == old_type then
-        return
-    end
-    if new_type == "todo" then
-        if old_type == "note" then
-            remove_file(old_path)
         else
-            update_todo_md("todo", "done", new_path)
+            newType = "note";
         end
     else
-        if new_type == "done" then
-            if old_type == "todo" then
-                update_todo_md("done", "todo", new_path)
-            else
-                remove_file(old_path)
-            end
-        else
-            remove_file(old_path)
-        end
+        update_first_line(_oldPath, newType);
+    end
+    newPath = newPath or get_location_from_type(newType) .. "/" .. vim.fn.fnamemodify(_oldPath, ":t");
+
+    local title = get_title(newPath) or newPath;
+    if newType ~= oldType then
+        update_state(oldType, newType, _oldPath, newPath, title)
+        move_file(_oldPath, newPath);
+    end
+    if not dont_update_todos_md then
+        update_todos_md();
     end
 end
 
 local function on_file_delete(filepath)
-    local type = type_of_file(filepath)
-    if type ~= "note" then
-        remove_file(filepath)
+    vim.print("on_file_delete(" .. filepath .. ")");
+    local type = type_of_file_location(filepath);
+    vim.print(state);
+    if type == "todo" then
+        state.opened[filepath] = nil;
+    else
+        if type == "done" then
+            state.closed[filepath] = nil;
+        end
     end
+    save(state);
+    update_todos_md();
 end
 
-local function on_todo_md_save()
-    local update = {};
+local function on_todos_md_updated()
+    local file = io.open(state.path .. "/todos.md", "r");
+    if not file then
+        return;
+    end
+    local lines = file:lines();
+    local opened = {}
+    local closed = {}
+    local to_update = {}
+    local to_remove = {}
     local hasStarted = false;
-    local isOpen = true;
-    local to_remove = _update_todo_md(function(line, _)
-        if contains(line, "## Open:") then
+    for line in lines do
+        if starts_with(line, "## Open:") then
             hasStarted = true;
-            return true;
+            goto continue
         end
-        if hasStarted then
-            if contains(line, "## Closed:") then
-                isOpen = false;
-            end
-            if isOpen then
-                if not state.opened[line] then
-                    table.insert(update, {
-                        from = state.closed[line] and "done" or "note",
-                        to = "todo",
-                        line = line
-                    });
+        if starts_with(line, "## Closed:") then
+            hasStarted = true;
+            goto continue
+        end
+        if not hasStarted then
+            goto continue
+        end
+        if line and line ~= "" then
+            local checkbox = line:match("%- %[(%S)%]") == "x";
+            local title = line:match("%[(.-)%]");
+            local path = line:match("%((.-)%)");
+
+            if checkbox then
+                closed[path] = title;
+                if not state.closed[path] then
+                    to_update[path] = { type = "done", title };
                 end
             else
-                if not state.closed[line] then
-                    table.insert(update, {
-                        from = state.opened[line] and "todo" or "note",
-                        to = "done",
-                        line = line
-                    });
+                opened[path] = title;
+                if not state.opened[path] then
+                    to_update[path] = { type = "todo", title };
                 end
             end
         end
-        return true
-    end, true);
-
-    for _, file in ipairs(to_remove) do
-        local filePath = file:match("%((.-)%)");
-        if not filePath then
-            goto continue;
-        end
-
-        make_note(filePath);
         ::continue::
     end
-
-    for _, info in ipairs(update) do
-        local match = info.line:match("(%d+)%%")
-        if match then
-            update_todo_md(info.to, info.from, match);
+    file:close();
+    for path, _ in pairs(state.opened) do
+        if not closed[path] and not opened[path] then
+            to_remove[path] = true;
         end
     end
+    for path, _ in pairs(state.closed) do
+        if not closed[path] and not opened[path] then
+            to_remove[path] = true;
+        end
+    end
+    for path, title in pairs(to_update) do
+        update(path, title.type, true, get_location_from_type(title.type) .. "/" .. vim.fn.fnamemodify(path, ":t"));
+    end
+    for path, _ in pairs(to_remove) do
+        update(path, "notes", true, get_location_from_type("notes") .. "/" .. vim.fn.fnamemodify(path, ":t"));
+    end
+    update_todos_md();
 end
 
-local function is_note_folder()
-    if not state.path then
-        return
+local function open(path)
+    open_floating_window();
+    vim.cmd("edit " .. path);
+    vim.cmd("normal! G$");
+end
+
+local function get_next_id(path, prefix)
+    local notes = vim.fn.glob(path .. "/" .. prefix .. "*.md", false, true)
+    local max = 0
+    for _, note in ipairs(notes) do
+        local id = tonumber(note:match(prefix .. "(%d+).md"))
+        if not id then
+            goto continue
+        end
+        if id > max then
+            max = id
+        end
+        ::continue::
     end
-    return is_in_path_dir(state.path)
+    return max + 1
+end
+
+local function open_new_todo()
+    local id = get_next_id(state.path .. "/todos", "todo");
+    local path = state.path .. "/todos/todo" .. id .. ".md";
+    local file = io.open(path, "w");
+    if file then
+        file:write("!TODO\n\n# ");
+        file:close();
+    end
+    pre[path] = true;
+    open(path);
 end
 
 function M.setup()
     vim.api.nvim_create_user_command("NotesSetup", create_notes_directory, { nargs = 0 })
-    vim.api.nvim_create_user_command("Notes", open_notes, { nargs = 0 })
-    vim.api.nvim_create_user_command("Todos", open_todos, { nargs = 0 })
-    vim.api.nvim_create_user_command("Note", open_new_note, { nargs = 0 })
+    vim.api.nvim_create_user_command("Notes", function()
+        open(state.path .. "/notes");
+    end, { nargs = 0 })
+    vim.api.nvim_create_user_command("Todos", function()
+        open(state.path .. "/todos");
+    end, { nargs = 0 })
+    vim.api.nvim_create_user_command("Note", function()
+        local id = get_next_id(state.path .. "/notes", "note");
+        local path = state.path .. "/notes/note" .. id .. ".md";
+        open(path);
+    end, { nargs = 0 })
     vim.api.nvim_create_user_command("Todo", open_new_todo, { nargs = 0 })
-    vim.api.nvim_create_user_command("MakeTodo", make_todo, { nargs = 0 })
-    vim.api.nvim_create_user_command("MakeNote", make_note, { nargs = 0 })
 
     if not is_note_folder() then
         return
     end
 
-    local old_path = nil
-    local pre = {}
     vim.api.nvim_create_autocmd('BufWritePre', {
         pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
         callback = function()
             local current_path = vim.fn.expand('%:p');
+            if pre[current_path] then
+                return
+            end
             pre[current_path] = vim.fn.filereadable(current_path) == 0
         end,
     });
@@ -664,37 +510,47 @@ function M.setup()
         pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
         callback = function()
             local current_path = vim.fn.expand('%:p');
-            if old_path and old_path ~= current_path then
-                on_file_moved(old_path, current_path);
+            if pre[current_path] then
+                new_file(current_path);
             else
-                on_file_save_check(pre[current_path]);
+                update();
             end
-            old_path = current_path;
             pre[current_path] = false;
-        end,
-    });
-
-    vim.api.nvim_create_autocmd('BufUnload', {
-        pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
-        callback = function()
-            old_path = vim.fn.expand('%:p')
         end,
     });
 
     vim.api.nvim_create_autocmd('BufWritePost', {
         pattern = { state.path .. '/todos.md' },
         callback = function()
-            on_todo_md_save()
+            on_todos_md_updated()
         end,
     });
 
     vim.api.nvim_create_autocmd('BufDelete', {
         pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
         callback = function(event)
+            vim.print("BufDelete");
             local filepath = vim.api.nvim_buf_get_name(event.buf)
             on_file_delete(filepath)
         end,
-    })
+    });
+
+    require("awman.myPlugins.oilAutoCmd").setup(
+        function(path)
+            on_file_delete(path)
+        end,
+        function(src, dest)
+            update(src, type_of_file_location(dest), true, dest)
+            update_todos_md()
+        end,
+        { state.path .. "/notes/**", state.path .. "/todos/**" }
+    );
 end
 
+-- For testing
+state.opened = {}
+state.closed = {}
+save(state)
 M.setup()
+
+return M;

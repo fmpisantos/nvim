@@ -28,11 +28,11 @@ local function load_buf_content(bufnr, content_file)
 end
 
 function M.setup(type)
-    local state_file = vim.fn.stdpath("data") .. "/shared_" .. type .. "_state.json"
-    local state = load_state(state_file)
+    local state_file = vim.fn.stdpath("data") .. "/shared_" .. type .. "_state.json";
+    local state = load_state(state_file);
     return state,
         function(_state)
-            save_state(_state, state_file)
+            save_state(_state, state_file);
         end
 end
 
