@@ -334,11 +334,11 @@ local function update_todos_md()
     if todo_file then
         todo_file:write("# TODOS:\n\n## Open:\n")
         for path, title in pairs(state.opened) do
-            todo_file:write("- [ ] [" .. title .. "](" .. path .. ")\n")
+            todo_file:write("- [ ] [" .. title .. "](" .. parse_path(path) .. ")\n")
         end
         todo_file:write("\n## Closed:\n")
         for path, title in pairs(state.closed) do
-            todo_file:write("- [x] [" .. title .. "](" .. path .. ")\n")
+            todo_file:write("- [x] [" .. title .. "](" .. parse_path(path) .. ")\n")
         end
         todo_file:close()
     end
@@ -531,6 +531,12 @@ function M.setup()
     vim.api.nvim_create_user_command("TodosRefresh", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("NotesRefresh", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("NotesSetPath", set_Path, { nargs = 0 })
+    vim.api.nvim_create_user_command("GotoNotes", function()
+        vim.cmd("e " .. state.path .. "/notes");
+    end, { nargs = 0 })
+    vim.api.nvim_create_user_command("GotoTodos", function()
+        vim.cmd("e " .. state.path .. "/todos.md");
+    end, { nargs = 0 })
 
     if not is_note_folder() then
         return
