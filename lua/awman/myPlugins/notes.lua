@@ -21,6 +21,19 @@ if state == nil then
     return
 end
 
+local function parse_path(path)
+    if path == nil then
+        return path;
+    end
+    path = oilAutoCMD.get_actual_path(path);
+    path = string.gsub(path, "\\", "/");
+    path = string.gsub(path, "//", "/");
+    if state.path then
+        path = string.gsub(path, state.path, "./");
+    end
+    return path;
+end
+
 local function get_file_extension(filename)
     return filename:match("^.+(%..+)$")
 end
@@ -58,13 +71,13 @@ end
 
 local function get_location_from_type(type)
     if type == "todo" then
-        return state.path .. "/todos"
+        return parse_path(state.path .. "/todos")
     else
         if type == "done" then
-            return state.path .. "/todos/done"
+            return parse_path(state.path .. "/todos/done")
         end
     end
-    return state.path .. "/notes"
+    return parse_path(state.path .. "/notes")
 end
 
 local function move_file(source, destination)
@@ -78,16 +91,6 @@ local function move_file(source, destination)
     end
 
     open_buffer(destination);
-end
-
-local function parse_path(path)
-    if path == nil then
-        return path;
-    end
-    path = oilAutoCMD.get_actual_path(path);
-    path = string.gsub(path, "\\", "/");
-    path = string.gsub(path, "//", "/");
-    return path;
 end
 
 local function contains(str1, str2)
@@ -211,9 +214,10 @@ local function create_notes_directory()
     end
 
     local path = oil.get_current_dir()
-    local notes_path = path .. "/" .. projectName
+    local notes_path = parse_path(path .. "/" .. projectName)
 
     local function create_dir(dir_path)
+        dir_path = parse_path(dir_path)
         if vim.loop.fs_stat(dir_path) == nil then
             vim.loop.fs_mkdir(dir_path, 511)
         end
@@ -225,11 +229,11 @@ local function create_notes_directory()
     create_dir(notes_path .. "/todos")
     create_dir(notes_path .. "/todos/done")
 
-    io.open(notes_path .. "/notes/.gitkeep", "w"):close()
-    io.open(notes_path .. "/todos/.gitkeep", "w"):close()
-    io.open(notes_path .. "/todos/done/.gitkeep", "w"):close()
+    io.open(parse_path(notes_path .. "/notes/.gitkeep"), "w"):close()
+    io.open(parse_path(notes_path .. "/todos/.gitkeep"), "w"):close()
+    io.open(parse_path(notes_path .. "/todos/done/.gitkeep"), "w"):close()
 
-    local todo_file = io.open(notes_path .. "/todos.md", "w")
+    local todo_file = io.open(parse_path(notes_path .. "/todos.md"), "w")
     if todo_file then
         todo_file:write("# TODOS:\n\n## Open:\n\n## Closed:")
         todo_file:close()
@@ -242,6 +246,7 @@ local function create_notes_directory()
 end
 
 local function type_of_file_location(path)
+    path = parse_path(path)
     local current_file = vim.fn.expand(path .. ":p")
     current_file = parse_path(current_file)
     local base_path = parse_path(state.path)
@@ -301,6 +306,7 @@ local function get_title(path)
 end
 
 local function get_files(directory, filetype)
+    directory = parse_path(directory);
     local uv = vim.loop
     local handle = uv.fs_opendir(directory)
     if not handle then
@@ -330,7 +336,7 @@ local function get_files(directory, filetype)
 end
 
 local function update_todos_md()
-    local todo_file = io.open(state.path .. "/todos.md", "w")
+    local todo_file = io.open(parse_path(state.path .. "/todos.md"), "w")
     if todo_file then
         todo_file:write("# TODOS:\n\n## Open:\n")
         for path, title in pairs(state.opened) do
@@ -345,8 +351,8 @@ local function update_todos_md()
 end
 
 local function refresh()
-    state.opened = get_files(state.path .. "/todos", "todo");
-    state.closed = get_files(state.path .. "/todos/done", "done");
+    state.opened = get_files(parse_path(state.path .. "/todos"), "todo") or {};
+    state.closed = get_files(parse_path(state.path .. "/todos/done"), "done") or {};
     update_todos_md();
     vim.cmd("e!");
 end
@@ -508,6 +514,10 @@ local function open_new_todo()
 end
 
 local function set_Path()
+    state.closed = {}
+    state.opened = {}
+    state.path = nil
+    save(state)
     update_path();
     refresh();
 end
