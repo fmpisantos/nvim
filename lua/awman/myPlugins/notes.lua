@@ -21,13 +21,21 @@ if state == nil then
     return
 end
 
-local function parse_path(path)
+local function parse_path_helper(path)
     if path == nil then
         return path;
     end
     path = oilAutoCMD.get_actual_path(path);
     path = string.gsub(path, "\\", "/");
     path = string.gsub(path, "//", "/");
+    return path;
+end
+
+local function parse_path(path)
+    if path == nil then
+        return path;
+    end
+    path = parse_path_helper(path);
     if state.path then
         path = string.gsub(path, state.path, "./");
     end
@@ -71,19 +79,21 @@ end
 
 local function get_location_from_type(type)
     if type == "todo" then
-        return parse_path(state.path .. "/todos")
+        return M.todosPath;
     else
         if type == "done" then
-            return parse_path(state.path .. "/todos/done")
+            return M.todosDonePath;
         end
     end
-    return parse_path(state.path .. "/notes")
+    return M.notesPath
 end
 
 local function move_file(source, destination)
+    source = parse_path_helper(source)
     if is_directory(destination) then
         destination = destination .. "/" .. vim.fn.fnamemodify(source, ":t")
     end
+    destination = parse_path_helper(destination)
     local success, err = os.rename(source, destination)
     if not success then
         vim.print("Error moving file:", err)
@@ -214,7 +224,7 @@ local function create_notes_directory()
     end
 
     local path = oil.get_current_dir()
-    local notes_path = parse_path(path .. "/" .. projectName)
+    local notes_path = parse_path_helper(path .. "/" .. projectName)
 
     local function create_dir(dir_path)
         dir_path = parse_path(dir_path)
@@ -336,7 +346,7 @@ local function get_files(directory, filetype)
 end
 
 local function update_todos_md()
-    local todo_file = io.open(parse_path(state.path .. "/todos.md"), "w")
+    local todo_file = io.open(M.todosFilePath, "w")
     if todo_file then
         todo_file:write("# TODOS:\n\n## Open:\n")
         for path, title in pairs(state.opened) do
@@ -351,8 +361,8 @@ local function update_todos_md()
 end
 
 local function refresh()
-    state.opened = get_files(parse_path(state.path .. "/todos"), "todo") or {};
-    state.closed = get_files(parse_path(state.path .. "/todos/done"), "done") or {};
+    state.opened = get_files(M.todosPath, "todo") or {};
+    state.closed = get_files(M.todosDonePath, "done") or {};
     update_todos_md();
     vim.cmd("e!");
 end
@@ -417,8 +427,15 @@ local function on_file_delete(filepath)
     update_todos_md();
 end
 
+local function deserialize_todos_md_line(line)
+    local checkbox = line:match("%- %[(%S)%]") == "x";
+    local title = line:match("%[(.-)%]");
+    local path = line:match("%((.-)%)");
+    return checkbox, title, path;
+end
+
 local function on_todos_md_updated()
-    local file = io.open(state.path .. "/todos.md", "r");
+    local file = io.open(M.todosFilePath, "r");
     if not file then
         return;
     end
@@ -441,9 +458,7 @@ local function on_todos_md_updated()
             goto continue
         end
         if line and line ~= "" then
-            local checkbox = line:match("%- %[(%S)%]") == "x";
-            local title = line:match("%[(.-)%]");
-            local path = line:match("%((.-)%)");
+            local checkbox, title, path = deserialize_todos_md_line(line);
 
             if checkbox then
                 closed[path] = title;
@@ -502,8 +517,8 @@ local function get_next_id(path, prefix)
 end
 
 local function open_new_todo()
-    local id = get_next_id(state.path .. "/todos", "todo");
-    local path = state.path .. "/todos/todo" .. id .. ".md";
+    local id = get_next_id(M.todosPath, "todo");
+    local path = parse_path_helper(M.todosPath "/todo" .. id .. ".md");
     local file = io.open(path, "w");
     if file then
         file:write("!TODO\n\n# ");
@@ -523,37 +538,45 @@ local function set_Path()
 end
 
 function M.setup()
+    M.notesPath = parse_path_helper(state.path .. "/notes");
+    M.notes_inc = M.notesPath .. "/**";
+    M.todosPath = parse_path_helper(state.path .. "/todos");
+    M.todos_inc = M.todosPath .. "/**";
+    M.todosDonePath = parse_path_helper(state.path .. "/todos/done");
+    -- M.todosDone_inc = parse_path_helper .. "/**";
+    M.todosFilePath = parse_path_helper(state.path .. "/todos.md");
+
     vim.api.nvim_create_user_command("NotesSetup", create_notes_directory, { nargs = 0 })
     vim.api.nvim_create_user_command("Notes", function()
-        open(state.path .. "/notes");
+        open(M.notesPath);
     end, { nargs = 0 })
     vim.api.nvim_create_user_command("Todos", function()
-        open(state.path .. "/todos");
+        open(M.todosPath);
     end, { nargs = 0 })
     vim.api.nvim_create_user_command("Note", function()
-        local id = get_next_id(state.path .. "/notes", "note");
-        local path = state.path .. "/notes/note" .. id .. ".md";
+        local id = get_next_id(M.notesPath, "note");
+        local path = M.notesPath .. "/note" .. id .. ".md";
         open(path);
     end, { nargs = 0 })
     vim.api.nvim_create_user_command("Todo", open_new_todo, { nargs = 0 })
+    vim.api.nvim_create_user_command("GotoNotes", function()
+        vim.cmd("e " .. M.notesPath);
+    end, { nargs = 0 })
+    vim.api.nvim_create_user_command("GotoTodos", function()
+        vim.cmd("e " .. M.todosFilePath);
+    end, { nargs = 0 })
     vim.api.nvim_create_user_command("NotesRestart", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("TodosRestart", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("TodosRefresh", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("NotesRefresh", refresh, { nargs = 0 })
     vim.api.nvim_create_user_command("NotesSetPath", set_Path, { nargs = 0 })
-    vim.api.nvim_create_user_command("GotoNotes", function()
-        vim.cmd("e " .. state.path .. "/notes");
-    end, { nargs = 0 })
-    vim.api.nvim_create_user_command("GotoTodos", function()
-        vim.cmd("e " .. state.path .. "/todos.md");
-    end, { nargs = 0 })
 
     if not is_note_folder() then
         return
     end
 
     vim.api.nvim_create_autocmd('BufWritePre', {
-        pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
+        pattern = { M.notes_inc, M.todos_inc },
         callback = function()
             local current_path = vim.fn.expand('%:p');
             if pre[current_path] then
@@ -564,7 +587,7 @@ function M.setup()
     });
 
     vim.api.nvim_create_autocmd('BufWritePost', {
-        pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
+        pattern = { M.notes_inc, M.todos_inc },
         callback = function()
             local current_path = vim.fn.expand('%:p');
             if pre[current_path] then
@@ -577,15 +600,15 @@ function M.setup()
     });
 
     vim.api.nvim_create_autocmd('BufWritePost', {
-        pattern = { state.path .. '/todos.md' },
+        pattern = { M.todosFilePath },
         callback = function()
             on_todos_md_updated()
-            vim.cmd("e " .. state.path .. "/todos.md");
+            vim.cmd("e " .. M.todosFilePath);
         end,
     });
 
     vim.api.nvim_create_autocmd('BufDelete', {
-        pattern = { state.path .. '/notes/**', state.path .. '/todos/**' },
+        pattern = { M.notes_inc, M.todos_inc },
         callback = function(event)
             local filepath = vim.api.nvim_buf_get_name(event.buf)
             on_file_delete(filepath)
@@ -600,10 +623,72 @@ function M.setup()
             update(src, type_of_file_location(dest), true, dest)
             update_todos_md()
         end,
-        { state.path .. "/notes/**", state.path .. "/todos/**" }
+        { M.notes_inc, M.todos_inc }
     );
 end
 
 M.setup()
+
+local function get_current_line_path()
+    local line = vim.fn.getline('.');
+    local _, _, path = deserialize_todos_md_line(line);
+    return path;
+end
+
+local function goto_file_in_todos_md()
+    local path = get_current_line_path();
+    if path then
+        open(path);
+    end
+end
+
+local function nmap(key, cmd, opts)
+    opts.buffer = vim.api.nvim_get_current_buf()
+    vim.keymap.set('n', key, cmd, opts);
+end
+
+local split_window = nil;
+
+local function split_current_file()
+    local current_win = vim.api.nvim_get_current_win();
+    local path = get_current_line_path();
+    if path then
+        if split_window and vim.api.nvim_win_is_valid(split_window) then
+            vim.api.nvim_set_current_win(split_window);
+            vim.cmd('e ' .. path);
+        else
+            vim.cmd('vsplit ' .. path);
+        end
+        split_window = vim.api.nvim_get_current_win();
+        vim.api.nvim_set_current_win(current_win);
+    end
+end
+
+local function update_split_content()
+    local current_win = vim.api.nvim_get_current_win();
+    local filepath = get_current_line_path();
+    if filepath and split_window then
+        if vim.api.nvim_win_is_valid(split_window) then
+            vim.api.nvim_set_current_win(split_window);
+            vim.cmd('e ' .. filepath);
+            vim.api.nvim_set_current_win(current_win);
+        else
+            split_window = nil;
+        end
+    end
+end
+
+vim.api.nvim_create_autocmd('CursorMoved', {
+    pattern = { M.todosFilePath },
+    callback = update_split_content,
+})
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    pattern = { M.todosFilePath },
+    callback = function()
+        nmap('gf', goto_file_in_todos_md, { noremap = true, silent = true });
+        nmap('gd', goto_file_in_todos_md, { noremap = true, silent = true });
+        nmap('<Tab>', split_current_file, { noremap = true, silent = true });
+    end,
+});
 
 return M;

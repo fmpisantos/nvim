@@ -27,11 +27,11 @@ _G.CreateFloatingWindow = function(opts)
     if opts and opts.buf and vim.api.nvim_buf_is_valid(opts.buf) then
         buf = opts.buf
     else
-        local scratch = true;
+        local scratch = true
         if opts and opts.keep then
-            scratch = false;
+            scratch = false
         end
-        buf = vim.api.nvim_create_buf(false, scratch);
+        buf = vim.api.nvim_create_buf(false, scratch)
     end
 
     local win_opts = {
