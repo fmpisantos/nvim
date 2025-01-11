@@ -9,7 +9,7 @@ local shared_buffs = require("awman.myPlugins.shared_buffer");
 
 function get_bufNr(idx)
     if not vim.api.nvim_buf_is_valid(state.floating.bufs[idx]) then
-        state.floating.bufs[idx] = shared_buffs.setup(shared_buffs.buffers.floatingDiff[idx])
+        state.floating.bufs[idx] = shared_buffs.setupWBuff(shared_buffs.buffers.floatingDiff[idx])
     end
     return state.floating.bufs[idx]
 end

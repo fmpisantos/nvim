@@ -21,7 +21,6 @@ local function save_buf_content(bufnr, content_file)
 end
 
 local function load_buf_content(bufnr, content_file)
-    print(content_file)
     if vim.fn.filereadable(content_file) == 1 then
         local lines = vim.fn.readfile(content_file)
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
@@ -29,6 +28,15 @@ local function load_buf_content(bufnr, content_file)
 end
 
 function M.setup(type)
+    local state_file = vim.fn.stdpath("data") .. "/shared_" .. type .. "_state.json";
+    local state = load_state(state_file);
+    return state,
+        function(_state)
+            save_state(_state, state_file);
+        end
+end
+
+function M.setupWBuff(type)
     -- File paths
     local content_file = vim.fn.stdpath("data") .. "/shared_" .. type .. "_buf_content.txt"
     local state_file = vim.fn.stdpath("data") .. "/shared_" .. type .. "_state.json"
