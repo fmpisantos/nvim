@@ -4,7 +4,7 @@ return {
         dependencies = {
             'williamboman/mason.nvim',
             'williamboman/mason-lspconfig.nvim',
-            { 'j-hui/fidget.nvim', opts = {} },
+            -- { 'j-hui/fidget.nvim',    opts = {} },
             'folke/neodev.nvim',
             {
                 'hrsh7th/nvim-cmp',
@@ -21,6 +21,7 @@ return {
                         dependencies = {
                         },
                     },
+                    'saadparwaiz1/cmp_luasnip',
                     'hrsh7th/cmp-nvim-lsp',
                     'hrsh7th/cmp-path',
                 }
@@ -78,7 +79,7 @@ return {
                 nmap('<leader>ps', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[P]roject [S]ymbols')
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
                 nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
-                imap('<C-h>', vim.lsp.buf.signature_help, 'Signature help');
+                imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
                 local function format()
                     vim.cmd('setlocal expandtab')
                     vim.cmd('setlocal shiftwidth=4')

@@ -5,7 +5,7 @@ local state = {
     }
 }
 
-local shared_buffs = require("awman.myPlugins.shared_buffer");
+local shared_buffs = require("shared_buffer.init");
 
 function get_bufNr(idx)
     if not vim.api.nvim_buf_is_valid(state.floating.bufs[idx]) then

@@ -14,7 +14,6 @@ return {
         --     },
         -- }
 
-
         local function compile_mvn()
             local handle = io.popen('mvn clean install -DskipTests 2>&1')
             if handle then
