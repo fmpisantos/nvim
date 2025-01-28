@@ -15,9 +15,12 @@ vim.api.nvim_set_hl(0, 'LineNrBelow', { fg = 'white' })
 -- vim.cmd.colorscheme("tokyonight-night")
 
 -- vim.cmd.colorscheme("rose-pine-main")
-vim.cmd.colorscheme("rose-pine-moon")
+-- vim.cmd.colorscheme("rose-pine-moon")
+
 -- vim.cmd.colorscheme("night-owl")
 
 -- vim.cmd.colorscheme("monochrome")
 
 -- vim.cmd.colorscheme("nordern")
+
+vim.cmd.colorscheme("onedark")
