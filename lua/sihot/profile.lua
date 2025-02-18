@@ -75,7 +75,15 @@ local function addDeprecatedInfo(deprecated_info)
     vim.api.nvim_command("w!")
 
     local current_dir = vim.fn.expand("%:p:h") -- Get current file's directory
-    local deprecated_folder = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
+
+    local deprecated_folder, count = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
+    if count == 0 then
+        deprecated_folder, count = current_dir:gsub("(.+[\\/]notification_definition[\\/]).*", "%1DEPRECATED\\")
+    end
+
+    if count == 0 then
+        error("Neither 'service_definition' nor 'notification_definition' found in the path.")
+    end
     local move_command = "move \"" .. vim.api.nvim_buf_get_name(0) .. "\" \"" .. deprecated_folder .. "\""
     os.execute(move_command)
 
@@ -85,7 +93,12 @@ local function addDeprecatedInfo(deprecated_info)
 end
 
 local function deprecate(deprecated_info)
-    deprecated_info = deprecated_info or ""
+    local createNew = true
+    if deprecated_info then
+        createNew = false
+    else
+        deprecated_info = ""
+    end
     local current_buffer_name = vim.api.nvim_buf_get_name(0)
 
     local version = current_buffer_name:match("_v(%d+)%.xml$")
@@ -134,12 +147,13 @@ local function deprecate(deprecated_info)
         return
     end
 
-    lines[id_line] = "\t<ID>" .. service_name_uppercase .. "_V" .. versionString .. "</ID>"
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
-    vim.api.nvim_command("w!")
-
-    local copy_command = "copy /Y \"" .. current_buffer_name .. "\" \"" .. new_file_name .. "\""
-    os.execute(copy_command)
+    if createNew then
+        lines[id_line] = "\t<ID>" .. service_name_uppercase .. "_V" .. versionString .. "</ID>"
+        vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+        vim.api.nvim_command("w!")
+        local copy_command = "copy /Y \"" .. current_buffer_name .. "\" \"" .. new_file_name .. "\""
+        os.execute(copy_command)
+    end
 
     lines[id_line] = "\t<ID>" .. service_name_uppercase .. "_V" .. old_version .. "</ID>"
     vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
@@ -314,64 +328,55 @@ local function get_xml_differences(file1_path, file2_path)
         return content:match(string.format(pattern, tag, tag))
     end
 
-    local function get_lines_and_fields(content)
+    local function get_lines_and_fields(content, category)
         local lines = {}
         for line in content:gmatch("[^\r\n]+") do
             local fieldname = line:match('FieldName="([^"]+)"')
+            local alias = line:match('Alias="([^"]+)"') or "" -- Pode estar ausente
             if fieldname then
-                lines[#lines + 1] = {
-                    content = line,
-                    fieldname = fieldname
-                }
+                -- Criar um identificador único ignorando espaços
+                local identifier = category .. "|" .. alias .. "|" .. fieldname
+                identifier = identifier:gsub("%s+", "")
+                lines[identifier] = line:gsub("%s+", "") -- Remover espaços do conteúdo antes de comparar
             end
         end
         return lines
     end
 
-    local content1 = read_file(file1_path)
-    local content2 = read_file(file2_path)
-
-    if not content1 or not content2 then
+    local _content1 = read_file(file1_path)
+    local _content2 = read_file(file2_path)
+    if not _content1 or not _content2 then
         return nil, "Error reading files"
     end
 
-    local input1 = extract_tag_content(content1, "Input")
-    local output1 = extract_tag_content(content1, "Output")
-    local input2 = extract_tag_content(content2, "Input")
-    local output2 = extract_tag_content(content2, "Output")
+    local input1 = extract_tag_content(_content1, "Input") or ""
+    local output1 = extract_tag_content(_content1, "Output") or ""
+    local input2 = extract_tag_content(_content2, "Input") or ""
+    local output2 = extract_tag_content(_content2, "Output") or ""
 
-    local input1_lines = get_lines_and_fields(input1)
-    local output1_lines = get_lines_and_fields(output1)
-    local input2_lines = get_lines_and_fields(input2)
-    local output2_lines = get_lines_and_fields(output2)
+    local input1_lines = get_lines_and_fields(input1, "Input")
+    local output1_lines = get_lines_and_fields(output1, "Output")
+    local input2_lines = get_lines_and_fields(input2, "Input")
+    local output2_lines = get_lines_and_fields(output2, "Output")
 
     local function compare_line_sets(lines1, lines2)
         local different_fields = {}
-        local checked_fields = {}
+        local seen = {}
 
-        local function lines_different(line1, line2)
-            return line1.content ~= line2.content
-        end
-
-        for _, line1 in ipairs(lines1) do
-            for _, line2 in ipairs(lines2) do
-                if line1.fieldname == line2.fieldname then
-                    checked_fields[line1.fieldname] = true
-                    if lines_different(line1, line2) then
-                        table.insert(different_fields, line1.fieldname)
-                    end
+        for identifier, content1 in pairs(lines1) do
+            if lines2[identifier] then
+                if content1 ~= lines2[identifier] then
+                    table.insert(different_fields, identifier:match("|([^|]+)$")) -- Extrai apenas o FieldName
                 end
+            else
+                table.insert(different_fields, identifier:match("|([^|]+)$"))
             end
+            seen[identifier] = true
         end
 
-        for _, line in ipairs(lines1) do
-            if not checked_fields[line.fieldname] then
-                table.insert(different_fields, line.fieldname)
-            end
-        end
-        for _, line in ipairs(lines2) do
-            if not checked_fields[line.fieldname] then
-                table.insert(different_fields, line.fieldname)
+        for identifier, _ in pairs(lines2) do
+            if not seen[identifier] then
+                table.insert(different_fields, identifier:match("|([^|]+)$"))
             end
         end
 
@@ -382,19 +387,18 @@ local function get_xml_differences(file1_path, file2_path)
     local output_differences = compare_line_sets(output1_lines, output2_lines)
 
     local all_differences = {}
-    local seen = {}
+    local seen_fields = {}
 
     for _, fieldname in ipairs(input_differences) do
-        if not seen[fieldname] then
+        if not seen_fields[fieldname] then
             table.insert(all_differences, fieldname)
-            seen[fieldname] = true
+            seen_fields[fieldname] = true
         end
     end
-
     for _, fieldname in ipairs(output_differences) do
-        if not seen[fieldname] then
+        if not seen_fields[fieldname] then
             table.insert(all_differences, fieldname)
-            seen[fieldname] = true
+            seen_fields[fieldname] = true
         end
     end
 
@@ -404,14 +408,11 @@ end
 function CompareXMLFiles()
     local current_file = vim.fn.expand('%:p')
     local alternate_file = vim.fn.expand('#:p')
-
     if current_file == '' or alternate_file == '' then
         print("Error: Need two files to compare")
         return
     end
-
     local differences = get_xml_differences(current_file, alternate_file)
-
     if differences then
         if #differences == 0 then
             print("No differences found in field names")
