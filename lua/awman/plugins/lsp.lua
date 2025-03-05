@@ -78,6 +78,7 @@ return {
                 nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
                 nmap('<leader>ps', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[P]roject [S]ymbols')
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+                nmap('H', vim.lsp.buf.signature_help, 'Signature help')
                 nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
                 imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
                 local function format()

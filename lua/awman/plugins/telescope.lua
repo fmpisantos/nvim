@@ -69,6 +69,8 @@ return {
             builtin.live_grep({ search_dirs = { vim.fn.expand("%:h") }, default_text = text })
         end, { desc = "[F]older [G]rep" });
 
+        vim.keymap.set('n', 'L', ':Telescope lsp_definitions<CR>', { desc = "Peek [L]SP definition" });
+
         -- search over the tags of the current buffer attached lsp server
         vim.keymap.set('n', '<leader>pt', builtin.lsp_workspace_symbols, { desc = "[P]roject [T]ags" });
 
