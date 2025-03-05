@@ -116,6 +116,6 @@ Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim c
   export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
   ```
   ## Note: 
-   - In windows is probably located at %APPDATA%/Local/nvim-data/...
-   - Path to mason can be fount with :LspInfo in a java file
-    
+    - In windows is probably located at %APPDATA%/Local/nvim-data/...
+    - Path to mason can be fount with :LspInfo in a java file
+    - Note that for java the Mason jdtls version needs to be the version running on the shell 
