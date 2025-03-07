@@ -81,6 +81,68 @@ return {
                 nmap('H', vim.lsp.buf.signature_help, 'Signature help')
                 nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
                 imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
+
+                local function organize_imports()
+                    local line_count = vim.api.nvim_buf_line_count(bufnr)
+                    local range = {
+                        start = { line = 0, character = 0 },
+                        ["end"] = { line = line_count - 1, character = 0 }
+                    }
+
+                    local params = {
+                        textDocument = vim.lsp.util.make_text_document_params(),
+                        range = range,
+                        context = { only = { "source.organizeImports" }, diagnostics = {} }
+                    }
+
+                    local old_apply_edit = vim.lsp.util.apply_workspace_edit
+                    local restore_apply_edit = false
+
+                    local function silent_handler(err, result, ctx, config)
+                        return true
+                    end
+
+                    vim.lsp.buf_request(bufnr, "textDocument/codeAction", params, function(err, actions, ctx)
+                        if err or not actions or #actions == 0 then return end
+
+                        for _, action in ipairs(actions) do
+                            if action.kind == "source.organizeImports" or
+                                (action.title and action.title:match("Organize Imports")) then
+                                vim.lsp.handlers["workspace/executeCommand"] = silent_handler
+
+                                if action.edit then
+                                    vim.lsp.util.apply_workspace_edit(action.edit, "utf-16")
+                                elseif action.command then
+                                    vim.lsp.buf.execute_command(action.command)
+                                else
+                                    local client = vim.lsp.get_client_by_id(ctx.client_id)
+                                    if client then
+                                        client.request("codeAction/resolve", action, function(err, resolved_action)
+                                            if err or not resolved_action then return end
+
+                                            if resolved_action.edit then
+                                                vim.lsp.util.apply_workspace_edit(resolved_action.edit, "utf-16")
+                                            end
+                                            if resolved_action.command then
+                                                vim.lsp.buf.execute_command(resolved_action.command)
+                                            end
+
+                                            vim.lsp.handlers["workspace/executeCommand"] = nil
+                                        end, bufnr)
+                                        return
+                                    end
+                                end
+
+                                vim.defer_fn(function()
+                                    vim.lsp.handlers["workspace/executeCommand"] = nil
+                                end, 1000)
+
+                                return
+                            end
+                        end
+                    end)
+                end
+
                 local function format()
                     vim.cmd('setlocal expandtab')
                     vim.cmd('setlocal shiftwidth=4')
@@ -88,6 +150,8 @@ return {
                     vim.lsp.buf.format()
                     if vim.bo.filetype == 'java' then
                         require('jdtls').organize_imports()
+                    else
+                        organize_imports()
                     end
                     local after = vim.fn.getline(1, '$')
                     if before ~= after then
