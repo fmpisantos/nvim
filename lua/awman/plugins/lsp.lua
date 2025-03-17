@@ -79,6 +79,9 @@ return {
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
                 nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
                 imap('<C-h>', vim.lsp.buf.signature_help, 'Signature help');
+
+                nmap("<leader>hh", "<cmd>ClangdSwitchSourceHeader<CR>", "switch_source_header")
+
                 local function format()
                     vim.cmd('setlocal expandtab')
                     vim.cmd('setlocal shiftwidth=4')
@@ -178,6 +181,12 @@ return {
                 ensure_installed = vim.tbl_keys(servers),
             }
 
+            vim.filetype.add({
+                extension = {
+                    razor = "cs",
+                },
+            })
+
             mason_lspconfig.setup_handlers {
                 function(server_name)
                     if (server_name == "jdtls") then
@@ -196,6 +205,27 @@ return {
                             init_options = {
                                 bundles = path.bundles,
                             },
+                        }
+                    elseif (server_name == "lemminx") then
+                        require('lspconfig')[server_name].setup {
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = {
+                                xml = {
+                                    format = {
+                                        lineWidth = 0 -- Prevent line wrapping
+                                    }
+                                }
+                            },
+                            filetypes = (servers[server_name] or {}).filetypes,
+                        }
+                    elseif (server_name == "omnisharp") then
+                        require('lspconfig')[server_name].setup {
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = servers[server_name],
+                            filetypes = { "cs", "razor" },
+                            root_dir = require('lspconfig').util.root_pattern("*.sln", "*.csproj"),
                         }
                     else
                         require('lspconfig')[server_name].setup {

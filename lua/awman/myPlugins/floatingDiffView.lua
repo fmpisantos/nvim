@@ -69,6 +69,14 @@ end
 vim.api.nvim_create_user_command("DiffView", showDiffView, {});
 vim.keymap.set({ 'n' }, "<leader>df", hideDiffView, { noremap = true, silent = true, desc = "Open floating diff" })
 
+vim.keymap.set('n', '<leader>d1', function()
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    if not vim.api.nvim_buf_is_valid(state.floating.bufs[1]) then
+        state.floating.bufs[1] = get_bufNr(1)
+    end
+    vim.api.nvim_buf_set_lines(state.floating.bufs[1], 0, -1, false, lines)
+end)
+
 vim.keymap.set({ 'v' }, "<leader>d1", function()
     local lines = _G.GetSelectedText(true);
     if not vim.api.nvim_buf_is_valid(state.floating.bufs[1]) then
@@ -76,6 +84,14 @@ vim.keymap.set({ 'v' }, "<leader>d1", function()
     end
     vim.api.nvim_buf_set_lines(state.floating.bufs[1], 0, -1, false, lines)
 end, { noremap = true, silent = true, desc = "Diff fill window 1" })
+
+vim.keymap.set('n', '<leader>d2', function()
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    if not vim.api.nvim_buf_is_valid(state.floating.bufs[2]) then
+        state.floating.bufs[2] = get_bufNr(2)
+    end
+    vim.api.nvim_buf_set_lines(state.floating.bufs[2], 0, -1, false, lines)
+end)
 
 vim.keymap.set({ 'v' }, "<leader>d2", function()
     local lines = _G.GetSelectedText(true);

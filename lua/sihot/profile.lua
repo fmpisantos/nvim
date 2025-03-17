@@ -463,3 +463,99 @@ local function DeprecateNew()
 end
 
 vim.api.nvim_create_user_command('DeprecateNew', DeprecateNew, {})
+
+local function AddToInventory()
+    local current_buffer_name = vim.api.nvim_buf_get_name(0)
+
+    -- Determine if we're dealing with a service or notification
+    local is_service = current_buffer_name:match("service_definition") ~= nil
+    local is_notification = current_buffer_name:match("notification_definition") ~= nil
+
+    if not (is_service or is_notification) then
+        print("Error: Current file is neither a service nor a notification definition")
+        return
+    end
+
+    -- Extract the name based on file type
+    local item_name
+    if is_service then
+        item_name = current_buffer_name:match("s_(.-).xml")
+    else
+        item_name = current_buffer_name:match("s_(.-).xml")
+    end
+
+    if not item_name then
+        print("Error: Could not extract name from the current file")
+        return
+    end
+
+    -- Determine the inventory file path and tag based on file type
+    local inventory_file_path
+    local tag_type
+    local id_prefix
+
+    if is_service then
+        tag_type = "ServiceID"
+        id_prefix = "S_"
+        inventory_file_path = vim.fn.fnamemodify(current_buffer_name, ":p:h:h:h") ..
+            "\\service_inventory\\SihotServices01.xml"
+    else
+        tag_type = "NotificationID"
+        id_prefix = "S_"
+        inventory_file_path = vim.fn.fnamemodify(current_buffer_name, ":p:h:h:h") ..
+            "\\notification_inventory\\s_push_notifications_global.xml"
+    end
+
+    -- Create the tag content
+    local id_tag = "<" .. tag_type .. ">" .. id_prefix .. item_name:upper() .. "</" .. tag_type .. ">"
+
+    -- Read the inventory file
+    local file = io.open(inventory_file_path, "r")
+    if not file then
+        print("Error: Unable to open inventory file at " .. inventory_file_path)
+        return
+    end
+
+    -- Store all lines from the file
+    local lines = {}
+    local id_found = false
+    local insert_index = nil
+    local closing_tag = is_service and "</ServiceInventoryDefinition>" or "</NotificationInventoryDefinition>"
+
+    for line in file:lines() do
+        -- Check if a matching ID already exists
+        local pattern = "    <" .. tag_type .. ">" .. id_prefix .. item_name:upper() .. "_V%d+</" .. tag_type .. ">"
+        if line:match(pattern) then
+            id_found = true
+        end
+
+        -- Find where the closing tag is to insert before it
+        if line:match(closing_tag) then
+            insert_index = #lines + 1
+        end
+
+        table.insert(lines, line)
+    end
+    file:close()
+
+    -- If the ID doesn't exist, insert it before the closing tag
+    if not id_found and insert_index then
+        table.insert(lines, insert_index, "    " .. id_tag)
+    end
+
+    -- Write back the updated content
+    file = io.open(inventory_file_path, "w")
+    if not file then
+        print("Error: Unable to write to inventory file")
+        return
+    end
+
+    for _, line in ipairs(lines) do
+        file:write(line .. "\n")
+    end
+    file:close()
+
+    print("Updated inventory file with " .. tag_type .. ":", id_tag)
+end
+
+vim.api.nvim_create_user_command('AddInv', AddToInventory, {})
