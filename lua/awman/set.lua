@@ -75,11 +75,14 @@ if vim.loop.os_uname().sysname == 'Darwin' then
     vim.cmd('set shellcmdflag=-c')
     vim.cmd('set shellquote=')
     vim.cmd('set shellxquote=')
+else
+    -- vim.opt.shell = "powershell"
+    -- vim.opt.shellcmdflag = "-Command"
+    vim.cmd('set shell=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe')
+    vim.opt.shellcmdflag = "-NoProfile -ExecutionPolicy Bypass -Command"
+    vim.cmd('set shellquote=\\')
+    vim.cmd('set shellxquote=')
 end
-
--- vim.cmd('set shell=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe')
--- vim.cmd('set shellquote=\\')
--- vim.cmd('set shellxquote=')
 
 -- Set up the autocmd for redrawing
 vim.api.nvim_create_autocmd('VimResume', {

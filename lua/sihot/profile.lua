@@ -47,7 +47,25 @@ local function addDeprecatedInfo(deprecated_info)
     local versionInt;
     local id_line = 0;
     local description_end_line = 0;
+
+    local isService = true;
+
+    local current_dir = vim.fn.expand("%:p:h") -- Get current file's directory
+
+    local deprecated_folder, count = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
+    if count == 0 then
+        isService = false;
+        deprecated_folder, count = current_dir:gsub("(.+[\\/]notification_definition[\\/]).*",
+            "%1DEPRECATED\\AutoTasks\\")
+    end
+
+    if count == 0 then
+        error("Neither 'service_definition' nor 'notification_definition' found in the path.")
+    end
     for i, line in ipairs(lines) do
+        if not isService then
+            lines[i] = line:gsub("%.%.%/SIHOT%.xsd", "../../SIHOT.xsd")
+        end
         if line:find("<ID>") and line:find("</ID>") then
             id_line = i
             service_name, versionInt = string.match(line, "<ID>(.-)_V(%d%d%d)</ID>");
@@ -57,12 +75,20 @@ local function addDeprecatedInfo(deprecated_info)
             break;
         end
     end
+
     if id_line == 0 or description_end_line == 0 then
         print("Error: Unable to locate <ID>...</ID>  or </Description> in current buffer.");
         return
     end
+
     local version_string = getVersionString(tonumber(versionInt) + 1);
-    local deprecated_section = "\t<Deprecated>\n\t\t<Reference Service=\"" ..
+    local deprecated_section = "\t<Deprecated>\n\t\t<Reference ";
+    if isService then
+        deprecated_section = deprecated_section .. "Service"
+    else
+        deprecated_section = deprecated_section .. "Notification"
+    end
+    deprecated_section = deprecated_section .. "=\"" ..
         service_name .. "_V" .. version_string .. "\" Text=\"" .. deprecated_info .. "\"/>\n\t</Deprecated>"
 
     local replacement_lines = { "" }
@@ -71,34 +97,24 @@ local function addDeprecatedInfo(deprecated_info)
     end
 
     vim.api.nvim_buf_set_option(0, "modifiable", true)
+    if not isService then
+        vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+    end
     vim.api.nvim_buf_set_lines(0, description_end_line, description_end_line, false, replacement_lines)
     vim.api.nvim_command("w!")
-
-    local current_dir = vim.fn.expand("%:p:h") -- Get current file's directory
-
-    local deprecated_folder, count = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
-    if count == 0 then
-        deprecated_folder, count = current_dir:gsub("(.+[\\/]notification_definition[\\/]).*", "%1DEPRECATED\\")
-    end
-
-    if count == 0 then
-        error("Neither 'service_definition' nor 'notification_definition' found in the path.")
-    end
     local move_command = "move \"" .. vim.api.nvim_buf_get_name(0) .. "\" \"" .. deprecated_folder .. "\""
     os.execute(move_command)
 
     local deprecated_file = deprecated_folder .. string.lower(service_name) .. "_v" .. versionInt .. ".xml"
     vim.cmd("silent! edit " .. deprecated_file)
-    vim.api.nvim_win_set_cursor(0, { description_end_line + 3, 35 + #service_name })
+    local offset = 35;
+    if not isService then
+        offset = offset + 5
+    end
+    vim.api.nvim_win_set_cursor(0, { description_end_line + 3, offset + #service_name })
 end
 
-local function deprecate(deprecated_info)
-    local createNew = true
-    if deprecated_info then
-        createNew = false
-    else
-        deprecated_info = ""
-    end
+local function _deprecate(deprecated_info, createNew)
     local current_buffer_name = vim.api.nvim_buf_get_name(0)
 
     local version = current_buffer_name:match("_v(%d+)%.xml$")
@@ -160,6 +176,17 @@ local function deprecate(deprecated_info)
     vim.api.nvim_command("w!")
 
     addDeprecatedInfo(deprecated_info);
+end
+
+
+local function deprecate(deprecated_info)
+    local createNew = true
+    if deprecated_info then
+        createNew = false
+    else
+        deprecated_info = ""
+    end
+    _deprecate(deprecated_info, createNew)
 end
 
 vim.api.nvim_create_user_command("Deprecate", function(_)
@@ -438,8 +465,59 @@ local function concat_list(items)
     end
 end
 
-local function DeprecateNew()
+local function search_file_by_name(filename)
+    local current_path = vim.fn.expand('%:p:h')
+
+    local service_pos = string.find(current_path, "service_definition")
+    local notification_pos = string.find(current_path, "notification_definition")
+
+    if not (service_pos or notification_pos) then
+        print("Error: This function can only search in service_definition or notification_definition directories")
+        return
+    end
+
+    local base_path
+    if service_pos then
+        base_path = string.sub(current_path, 1, service_pos + #"service_definition" - 1)
+    elseif notification_pos then
+        base_path = string.sub(current_path, 1, notification_pos + #"notification_definition" - 1)
+    end
+
+    local direct_pattern = base_path .. '/' .. filename
+    local file_path = vim.fn.glob(direct_pattern)
+
+    if file_path == "" then
+        local recursive_pattern = base_path .. '/**/' .. filename
+        vim.print("Searching recursively: " .. recursive_pattern)
+        file_path = vim.fn.glob(recursive_pattern)
+    else
+        vim.print("Found at direct path: " .. direct_pattern)
+    end
+
+    if file_path == "" then
+        print("File not found!")
+    else
+        print("Found file at: " .. file_path)
+        return file_path;
+    end
+end
+
+local function DeprecateNew(service_name)
     local current_buffer_name = vim.api.nvim_buf_get_name(0)
+
+    if not service_name then
+        service_name = current_buffer_name.match(current_buffer_name, "s_(.-)_v%d+")
+        if not service_name then
+            service_name = current_buffer_name.match(current_buffer_name, "s_(.-)_V%d+")
+            if not service_name then
+                print("Error: cannot get service name")
+                if current_buffer_name then
+                    print(" from (" .. current_buffer_name .. ")")
+                end
+                return
+            end
+        end
+    end
 
     local version = current_buffer_name:match("_v(%d+)%.xml$")
     if not version then
@@ -453,7 +531,8 @@ local function DeprecateNew()
     version = tonumber(version) + 1
     local versionString = getVersionString(version)
 
-    local new_file_name = current_buffer_name:gsub("_v%d+%.xml$", "_v" .. versionString .. ".xml")
+    local new_file_name = search_file_by_name("s_" .. service_name .. "_v" .. versionString .. ".xml");
+    vim.print(new_file_name);
     local changedFields = get_xml_differences(current_buffer_name, new_file_name)
     local plural = ""
     if #changedFields > 1 then
@@ -463,6 +542,63 @@ local function DeprecateNew()
 end
 
 vim.api.nvim_create_user_command('DeprecateNew', DeprecateNew, {})
+
+local function GitDeprecation()
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false);
+    local versionInt;
+    local service_name;
+    local current_dir = vim.fn.expand("%:p:h")
+
+    local deprecated_folder, count = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
+    if count == 0 then
+        deprecated_folder, count = current_dir:gsub("(.+[\\/]notification_definition[\\/]).*",
+            "%1DEPRECATED\\AutoTasks\\")
+    end
+
+    if count == 0 then
+        error("Neither 'service_definition' nor 'notification_definition' found in the path.")
+    end
+
+    for i, line in ipairs(lines) do
+        if line:find("<ID>") and line:find("</ID>") then
+            service_name, versionInt = string.match(line, "<ID>(.-)_V(%d%d%d)</ID>");
+            lines[i] = line:gsub(getVersionString(tonumber(versionInt)), getVersionString(tonumber(versionInt) + 1))
+        end
+        if line:find("</Description>") then
+            break;
+        end
+    end
+
+    local original_buf = vim.api.nvim_get_current_buf()
+    local current_name = vim.api.nvim_buf_get_name(0)
+
+    local new_name = current_name:gsub(getVersionString(tonumber(versionInt)),
+        getVersionString(tonumber(versionInt) + 1))
+
+    local buf = vim.api.nvim_create_buf(true, false)
+    vim.api.nvim_buf_set_name(buf, new_name)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+    vim.api.nvim_set_current_buf(buf)
+    vim.cmd("write")
+
+    -- Use `git checkout` to discard changes for the current file
+    vim.api.nvim_set_current_buf(original_buf);
+    vim.fn.system({ 'git', 'checkout', '--', current_name });
+    vim.api.nvim_command('silent! e');
+    vim.api.nvim_command('w!');
+
+    local move_command = "move \"" .. vim.api.nvim_buf_get_name(0) .. "\" \"" .. deprecated_folder .. "\""
+    os.execute(move_command);
+
+    local deprecated_file = deprecated_folder .. string.lower(service_name) .. "_v" .. versionInt .. ".xml"
+    vim.cmd("silent! edit " .. deprecated_file)
+
+    DeprecateNew();
+end
+
+vim.api.nvim_create_user_command('DeprecateGitChanges', GitDeprecation, {})
+
 
 local function AddToInventory()
     local current_buffer_name = vim.api.nvim_buf_get_name(0)
