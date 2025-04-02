@@ -211,13 +211,13 @@ return {
                             capabilities = capabilities,
                             on_attach = on_attach,
                             settings = {
-                                xml = {
-                                    format = {
-                                        lineWidth = 0 -- Prevent line wrapping
-                                    }
-                                }
-                            },
-                            filetypes = (servers[server_name] or {}).filetypes,
+				    xml = {
+					format = {
+					    lineWidth = vim.lsp.get_active_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
+					}
+				    }
+				},
+                            filetypes = servers[server_name] and type(servers[server_name].filetypes) == "table" and servers[server_name].filetypes or { "xml" },
                         }
                     elseif (server_name == "omnisharp") then
                         require('lspconfig')[server_name].setup {
