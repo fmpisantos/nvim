@@ -355,16 +355,20 @@ local function get_xml_differences(file1_path, file2_path)
         return content:match(string.format(pattern, tag, tag))
     end
 
+    local names = {}
+
     local function get_lines_and_fields(content, category)
         local lines = {}
         for line in content:gmatch("[^\r\n]+") do
             local fieldname = line:match('FieldName="([^"]+)"')
             local alias = line:match('Alias="([^"]+)"') or "" -- Pode estar ausente
+            local name = line:match(' Name="([^"]+)"') -- Pode estar ausente
             if fieldname then
                 -- Criar um identificador único ignorando espaços
                 local identifier = category .. "|" .. alias .. "|" .. fieldname
                 identifier = identifier:gsub("%s+", "")
                 lines[identifier] = line:gsub("%s+", "") -- Remover espaços do conteúdo antes de comparar
+                names[identifier] = name
             end
         end
         return lines
@@ -393,17 +397,17 @@ local function get_xml_differences(file1_path, file2_path)
         for identifier, content1 in pairs(lines1) do
             if lines2[identifier] then
                 if content1 ~= lines2[identifier] then
-                    table.insert(different_fields, identifier:match("|([^|]+)$")) -- Extrai apenas o FieldName
+                    table.insert(different_fields, names[identifier])-- Extrai apenas o FieldName
                 end
             else
-                table.insert(different_fields, identifier:match("|([^|]+)$"))
+                table.insert(different_fields, names[identifier])
             end
             seen[identifier] = true
         end
 
         for identifier, _ in pairs(lines2) do
             if not seen[identifier] then
-                table.insert(different_fields, identifier:match("|([^|]+)$"))
+                table.insert(different_fields, names[identifier])
             end
         end
 
@@ -488,10 +492,8 @@ local function search_file_by_name(filename)
 
     if file_path == "" then
         local recursive_pattern = base_path .. '/**/' .. filename
-        vim.print("Searching recursively: " .. recursive_pattern)
         file_path = vim.fn.glob(recursive_pattern)
     else
-        vim.print("Found at direct path: " .. direct_pattern)
     end
 
     if file_path == "" then
@@ -532,7 +534,6 @@ local function DeprecateNew(service_name)
     local versionString = getVersionString(version)
 
     local new_file_name = search_file_by_name("s_" .. service_name .. "_v" .. versionString .. ".xml");
-    vim.print(new_file_name);
     local changedFields = get_xml_differences(current_buffer_name, new_file_name)
     local plural = ""
     if #changedFields > 1 then
@@ -542,63 +543,6 @@ local function DeprecateNew(service_name)
 end
 
 vim.api.nvim_create_user_command('DeprecateNew', DeprecateNew, {})
-
-local function GitDeprecation()
-    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false);
-    local versionInt;
-    local service_name;
-    local current_dir = vim.fn.expand("%:p:h")
-
-    local deprecated_folder, count = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
-    if count == 0 then
-        deprecated_folder, count = current_dir:gsub("(.+[\\/]notification_definition[\\/]).*",
-            "%1DEPRECATED\\AutoTasks\\")
-    end
-
-    if count == 0 then
-        error("Neither 'service_definition' nor 'notification_definition' found in the path.")
-    end
-
-    for i, line in ipairs(lines) do
-        if line:find("<ID>") and line:find("</ID>") then
-            service_name, versionInt = string.match(line, "<ID>(.-)_V(%d%d%d)</ID>");
-            lines[i] = line:gsub(getVersionString(tonumber(versionInt)), getVersionString(tonumber(versionInt) + 1))
-        end
-        if line:find("</Description>") then
-            break;
-        end
-    end
-
-    local original_buf = vim.api.nvim_get_current_buf()
-    local current_name = vim.api.nvim_buf_get_name(0)
-
-    local new_name = current_name:gsub(getVersionString(tonumber(versionInt)),
-        getVersionString(tonumber(versionInt) + 1))
-
-    local buf = vim.api.nvim_create_buf(true, false)
-    vim.api.nvim_buf_set_name(buf, new_name)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-
-    vim.api.nvim_set_current_buf(buf)
-    vim.cmd("write")
-
-    -- Use `git checkout` to discard changes for the current file
-    vim.api.nvim_set_current_buf(original_buf);
-    vim.fn.system({ 'git', 'checkout', '--', current_name });
-    vim.api.nvim_command('silent! e');
-    vim.api.nvim_command('w!');
-
-    local move_command = "move \"" .. vim.api.nvim_buf_get_name(0) .. "\" \"" .. deprecated_folder .. "\""
-    os.execute(move_command);
-
-    local deprecated_file = deprecated_folder .. string.lower(service_name) .. "_v" .. versionInt .. ".xml"
-    vim.cmd("silent! edit " .. deprecated_file)
-
-    DeprecateNew();
-end
-
-vim.api.nvim_create_user_command('DeprecateGitChanges', GitDeprecation, {})
-
 
 local function AddToInventory()
     local current_buffer_name = vim.api.nvim_buf_get_name(0)
@@ -695,3 +639,61 @@ local function AddToInventory()
 end
 
 vim.api.nvim_create_user_command('AddInv', AddToInventory, {})
+
+local function GitDeprecation()
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false);
+    local versionInt;
+    local service_name;
+    local current_dir = vim.fn.expand("%:p:h")
+
+    local deprecated_folder, count = current_dir:gsub("(.+[\\/]service_definition[\\/]).*", "%1DEPRECATED\\")
+    if count == 0 then
+        deprecated_folder, count = current_dir:gsub("(.+[\\/]notification_definition[\\/]).*",
+            "%1DEPRECATED\\AutoTasks\\")
+    end
+
+    if count == 0 then
+        error("Neither 'service_definition' nor 'notification_definition' found in the path.")
+    end
+
+    for i, line in ipairs(lines) do
+        if line:find("<ID>") and line:find("</ID>") then
+            service_name, versionInt = string.match(line, "<ID>(.-)_V(%d%d%d)</ID>");
+            lines[i] = line:gsub(getVersionString(tonumber(versionInt)), getVersionString(tonumber(versionInt) + 1))
+        end
+        if line:find("</Description>") then
+            break;
+        end
+    end
+
+    local original_buf = vim.api.nvim_get_current_buf()
+    local current_name = vim.api.nvim_buf_get_name(0)
+
+    local new_name = current_name:gsub(getVersionString(tonumber(versionInt)),
+        getVersionString(tonumber(versionInt) + 1))
+
+    local buf = vim.api.nvim_create_buf(true, false)
+    vim.api.nvim_buf_set_name(buf, new_name)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+    vim.api.nvim_set_current_buf(buf)
+    vim.cmd("write")
+
+    AddToInventory();
+
+    -- Use `git checkout` to discard changes for the current file
+    vim.api.nvim_set_current_buf(original_buf);
+    vim.fn.system({ 'git', 'checkout', '--', current_name });
+    vim.api.nvim_command('silent! e');
+    vim.api.nvim_command('w!');
+
+    local move_command = "move \"" .. vim.api.nvim_buf_get_name(0) .. "\" \"" .. deprecated_folder .. "\""
+    os.execute(move_command);
+
+    local deprecated_file = deprecated_folder .. string.lower(service_name) .. "_v" .. versionInt .. ".xml"
+    vim.cmd("silent! edit " .. deprecated_file)
+
+    DeprecateNew();
+end
+
+vim.api.nvim_create_user_command('DeprecateGitChanges', GitDeprecation, {})
