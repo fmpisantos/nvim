@@ -14,6 +14,7 @@ return {
         --     },
         -- }
 
+
         local function compile_mvn()
             local handle = io.popen('mvn clean install -DskipTests 2>&1')
             if handle then
@@ -30,6 +31,7 @@ return {
         end
 
         local jdtls = require("jdtls");
+
         vim.keymap.set('n', '<leader>Dr', function()
                 compile_mvn(); Dap.run_last()
             end,

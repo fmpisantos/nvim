@@ -234,6 +234,7 @@ return {
                     },
                 },
                 jdtls = {},
+                vtsls = {},
             }
 
             require('neodev').setup()
@@ -264,15 +265,31 @@ return {
                             },
                         }
                     else
-                        require('lspconfig')[server_name].setup {
-                            capabilities = capabilities,
-                            on_attach = on_attach,
-                            settings = servers[server_name],
-                            filetypes = (servers[server_name] or {}).filetypes,
-                        }
+                        if (server_name == "vtsls") then
+                            local vtsls_config = require("awman.plugins.jsts.jsts-dap");
+                            local function _on_attach(client, bufnr)
+                                on_attach(client, bufnr)
+                                vtsls_config.setup()
+                            end
+                            require('lspconfig')[server_name].setup {
+                                capabilities = capabilities,
+                                on_attach = _on_attach,
+                                settings = servers[server_name],
+                                filetypes = (servers[server_name] or {}).filetypes,
+                            }
+                        else
+                            require('lspconfig')[server_name].setup {
+                                capabilities = capabilities,
+                                on_attach = on_attach,
+                                settings = servers[server_name],
+                                filetypes = (servers[server_name] or {}).filetypes,
+                            }
+                        end
                     end
-                end,
+                end
             }
+
+            local lspconfig = require('lspconfig')
 
             local cmp = require 'cmp'
             local luasnip = require 'luasnip'
