@@ -7,7 +7,6 @@ return {
     opts = function()
         local metals_config = require("metals").bare_config()
         metals_config.on_attach = function(_, bufnr)
-            vim.print("Metals on_attach");
             local xmap = function(type, keys, func, desc)
                 if desc then
                     desc = 'LSP: ' .. desc
