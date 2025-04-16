@@ -123,7 +123,7 @@ return {
                     organize_imports()
                 end
                 local after = vim.fn.getline(1, '$')
-                if before ~= after then
+                if before ~= after and vim.bo.buftype == '' and vim.bo.modifiable then
                     vim.cmd('update')
                 end
             end
