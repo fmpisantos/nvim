@@ -172,6 +172,8 @@ return {
                 vim.cmd('bwipeout ' .. current_path)
             end
 
+            require("metals").setup_dap()
+
             vim.api.nvim_buf_create_user_command(bufnr, 'Rename', function(_)
                 rename_file()
             end, { desc = 'Rename current file and update lsp_references' });
@@ -182,7 +184,10 @@ return {
     config = function(self, opts)
         -- use 'opts' if Lazy.nvim is recent enough to support config(self, opts)
         local metals_config = opts or require("metals").bare_config()
-
+        -- metals_config.init_options.statusBarProvider = "on"
+        -- metals_config.on_attach = function(client, bufnr)
+        --     require("metals").setup_dap()
+        -- end
         local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
         vim.api.nvim_create_autocmd("FileType", {
             pattern = self.ft,

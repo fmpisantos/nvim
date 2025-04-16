@@ -12,7 +12,17 @@ return {
         --         hostName = "127.0.0.1",
         --         port = 5005,
         --     },
-        -- }
+
+        Dap.configurations.scala = {
+            {
+                type = "scala",
+                request = "launch",
+                name = "Run or Test Target",
+                metals = {
+                    runType = "runOrTestFile",
+                },
+            },
+        }
 
 
         local function compile_mvn()
