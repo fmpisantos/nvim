@@ -243,50 +243,49 @@ return {
             local mason_lspconfig = require 'mason-lspconfig'
             mason_lspconfig.setup {
                 ensure_installed = vim.tbl_keys(servers),
-            }
-
-            mason_lspconfig.setup_handlers {
-                function(server_name)
-                    if (server_name == "jdtls") then
-                        local jdtls_config = require("awman.plugins.java.config")
-                        local function _on_attach(client, bufnr)
-                            on_attach(client, bufnr)
-                            jdtls_config.jdtls_on_attach(client, bufnr)
-                        end
-                        local cmd, path = jdtls_config.jdtls_setup()
-                        require('lspconfig')[server_name].setup {
-                            cmd = cmd,
-                            capabilities = capabilities,
-                            on_attach = _on_attach,
-                            settings = servers[server_name],
-                            filetypes = (servers[server_name] or {}).filetypes,
-                            init_options = {
-                                bundles = path.bundles,
-                            },
-                        }
-                    else
-                        if (server_name == "vtsls") then
-                            local vtsls_config = require("awman.plugins.jsts.jsts-dap");
+                handlers = {
+                    function(server_name)
+                        if (server_name == "jdtls") then
+                            local jdtls_config = require("awman.plugins.java.config")
                             local function _on_attach(client, bufnr)
                                 on_attach(client, bufnr)
-                                vtsls_config.setup()
+                                jdtls_config.jdtls_on_attach(client, bufnr)
                             end
+                            local cmd, path = jdtls_config.jdtls_setup()
                             require('lspconfig')[server_name].setup {
+                                cmd = cmd,
                                 capabilities = capabilities,
                                 on_attach = _on_attach,
                                 settings = servers[server_name],
                                 filetypes = (servers[server_name] or {}).filetypes,
+                                init_options = {
+                                    bundles = path.bundles,
+                                },
                             }
                         else
-                            require('lspconfig')[server_name].setup {
-                                capabilities = capabilities,
-                                on_attach = on_attach,
-                                settings = servers[server_name],
-                                filetypes = (servers[server_name] or {}).filetypes,
-                            }
+                            if (server_name == "vtsls") then
+                                local vtsls_config = require("awman.plugins.jsts.jsts-dap");
+                                local function _on_attach(client, bufnr)
+                                    on_attach(client, bufnr)
+                                    vtsls_config.setup()
+                                end
+                                require('lspconfig')[server_name].setup {
+                                    capabilities = capabilities,
+                                    on_attach = _on_attach,
+                                    settings = servers[server_name],
+                                    filetypes = (servers[server_name] or {}).filetypes,
+                                }
+                            else
+                                require('lspconfig')[server_name].setup {
+                                    capabilities = capabilities,
+                                    on_attach = on_attach,
+                                    settings = servers[server_name],
+                                    filetypes = (servers[server_name] or {}).filetypes,
+                                }
+                            end
                         end
                     end
-                end
+                }
             }
 
             local cmp = require 'cmp'

@@ -38,6 +38,7 @@ vim.opt.foldlevelstart = 99
 
 -- Set the clipboard to "unnamedplus"
 vim.cmd('set clipboard+=unnamedplus')
+
 vim.o.ignorecase = true
 -- set clipboard+=unnamedplus
 
