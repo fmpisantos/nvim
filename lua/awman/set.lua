@@ -98,17 +98,32 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
             vim.fn.jobstart('tmux neww ~/.local/bin/tmux-sessionizer')
         end
         if vim.env.TERM_PROGRAM == "WezTerm" then
+            vim.print(vim.loop.os_uname().sysname)
             if vim.loop.os_uname().sysname == 'Darwin' then
                 vim.fn.jobstart({ "osascript", "-e", 'tell application "System Events" to key code 105' }) -- 105 is F13
-            elseif vim.loop.os_uname().sysname == 'Windwos_NT' then
-                vim.fn.jobstart({
-                    "powershell",
-                    "-Command",
-                    [[
-    Add-Type -AssemblyName System.Windows.Forms;
-    [System.Windows.Forms.SendKeys]::SendWait("^{F13}")
-  ]]
-                })
+            elseif vim.loop.os_uname().sysname == 'Windows_NT' then
+vim.fn.jobstart({
+    "powershell",
+    "-Command",
+    [[
+Add-Type -TypeDefinition @"
+    using System;
+    using System.Runtime.InteropServices;
+    public class Keyboard {
+        [DllImport("user32.dll")]
+        public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+        public const int VK_F13 = 0x7C;
+        public const int KEYEVENTF_KEYDOWN = 0x0000;
+        public const int KEYEVENTF_KEYUP = 0x0002;
+        public static void PressF13() {
+            keybd_event(VK_F13, 0, KEYEVENTF_KEYDOWN, UIntPtr.Zero);
+            keybd_event(VK_F13, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+    }
+"@
+[Keyboard]::PressF13()
+    ]]
+})
             else
                 vim.fn.jobstart({ "wtype", "F13" })
             end
