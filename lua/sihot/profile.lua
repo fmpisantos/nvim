@@ -95,6 +95,7 @@ local function addDeprecatedInfo(deprecated_info)
     for line in deprecated_section:gmatch("[^\r\n]+") do
         table.insert(replacement_lines, line)
     end
+    table.insert(replacement_lines, "")
 
     vim.api.nvim_buf_set_option(0, "modifiable", true)
     if not isService then
@@ -362,13 +363,17 @@ local function get_xml_differences(file1_path, file2_path)
         for line in content:gmatch("[^\r\n]+") do
             local fieldname = line:match('FieldName="([^"]+)"')
             local alias = line:match('Alias="([^"]+)"') or "" -- Pode estar ausente
-            local name = line:match(' Name="([^"]+)"') -- Pode estar ausente
+            local name = line:match(' Name="([^"]+)"')        -- Pode estar ausente
             if fieldname then
                 -- Criar um identificador único ignorando espaços
                 local identifier = category .. "|" .. alias .. "|" .. fieldname
                 identifier = identifier:gsub("%s+", "")
                 lines[identifier] = line:gsub("%s+", "") -- Remover espaços do conteúdo antes de comparar
-                names[identifier] = name
+                if name ~= nil and name ~= '' then
+                    names[identifier] = name
+                else
+                    names[identifier] = fieldname
+                end
             end
         end
         return lines
@@ -397,7 +402,7 @@ local function get_xml_differences(file1_path, file2_path)
         for identifier, content1 in pairs(lines1) do
             if lines2[identifier] then
                 if content1 ~= lines2[identifier] then
-                    table.insert(different_fields, names[identifier])-- Extrai apenas o FieldName
+                    table.insert(different_fields, names[identifier]) -- Extrai apenas o FieldName
                 end
             else
                 table.insert(different_fields, names[identifier])
@@ -499,7 +504,7 @@ local function search_file_by_name(filename)
     if file_path == "" then
         print("File not found!")
     else
-        print("Found file at: " .. file_path)
+        -- print("Found file at: " .. file_path)
         return file_path;
     end
 end
@@ -635,7 +640,7 @@ local function AddToInventory()
     end
     file:close()
 
-    print("Updated inventory file with " .. tag_type .. ":", id_tag)
+    -- print("Updated inventory file with " .. tag_type .. ":", id_tag)
 end
 
 vim.api.nvim_create_user_command('AddInv', AddToInventory, {})
