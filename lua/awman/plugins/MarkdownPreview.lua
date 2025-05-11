@@ -3,5 +3,5 @@ return {
     event = { "BufReadPost", "BufWritePost", "BufNewFile", "VeryLazy" },
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
     ft = { "markdown" },
-    build = function() vim.fn["mkdp#util#install"]() end,
+    build = "cd app && yarn install && git restore ."
 }

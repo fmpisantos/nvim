@@ -89,13 +89,31 @@ vim.api.nvim_create_autocmd('VimResume', {
     callback = function() vim.cmd('redraw!') end
 })
 
--- Tmux sessionizer if not in command mode
+-- Run Sessionizer
 vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
     if vim.fn.mode() == 'c' then
         return '<C-f>'
     else
-        vim.fn.jobstart('tmux neww ~/.local/bin/tmux-sessionizer')
-        return ''
+        if vim.env.TMUX then
+            vim.fn.jobstart('tmux neww ~/.local/bin/tmux-sessionizer')
+        end
+        if vim.env.TERM_PROGRAM == "WezTerm" then
+            if vim.loop.os_uname().sysname == 'Darwin' then
+                vim.fn.jobstart({ "osascript", "-e", 'tell application "System Events" to key code 105' }) -- 105 is F13
+            elseif vim.loop.os_uname().sysname == 'Windwos_NT' then
+                vim.fn.jobstart({
+                    "powershell",
+                    "-Command",
+                    [[
+    Add-Type -AssemblyName System.Windows.Forms;
+    [System.Windows.Forms.SendKeys]::SendWait("^{F13}")
+  ]]
+                })
+            else
+                vim.fn.jobstart({ "wtype", "F13" })
+            end
+        end
+        return '';
     end
 end, { expr = true })
 
