@@ -92,11 +92,18 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
         end
         if vim.env.TERM_PROGRAM == "WezTerm" then
             if vim.loop.os_uname().sysname == 'Darwin' then
-                vim.fn.jobstart({ "osascript", "-e", 'tell application "System Events" to key code 111' }) -- 111 is F12
+                vim.fn.jobstart({ "osascript", "-e", 'tell application "System Events" to key code 105' }) -- 105 is F13
             elseif vim.loop.os_uname().sysname == 'Windwos_NT' then
-                vim.fn.jobstart({ "powershell", "-Command", '[System.Windows.Forms.SendKeys]::SendWait("{F12}")' })
+                vim.fn.jobstart({
+                    "powershell",
+                    "-Command",
+                    [[
+    Add-Type -AssemblyName System.Windows.Forms;
+    [System.Windows.Forms.SendKeys]::SendWait("^{F13}")
+  ]]
+                })
             else
-                vim.fn.jobstart({ "wtype", "F12" })
+                vim.fn.jobstart({ "wtype", "F13" })
             end
         end
         return '';
