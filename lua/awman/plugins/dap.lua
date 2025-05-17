@@ -13,6 +13,56 @@ return {
         --         port = 5005,
         --     },
 
+        Dap.adapters.coreclr = {
+            type = 'executable',
+            command = 'F:\\netcorebg\\netcoredbg.exe',
+            args = { '--interpreter=vscode' }
+        }
+
+        local function find_highest_net_version()
+            local debug_path = vim.fn.getcwd() .. '\\bin\\Debug\\'
+            local dirs = vim.fn.glob(debug_path .. 'net*', 0, 1)
+
+            if #dirs == 0 then
+                vim.notify("No net* folders found in bin\\Debug\\", vim.log.levels.ERROR)
+                return ''
+            end
+
+            table.sort(dirs, function(a, b)
+                local major_a, minor_a = a:match("net(%d+)%.(%d+)")
+                local major_b, minor_b = b:match("net(%d+)%.(%d+)")
+
+                if major_a and major_b then
+                    major_a, minor_a = tonumber(major_a), tonumber(minor_a)
+                    major_b, minor_b = tonumber(major_b), tonumber(minor_b)
+
+                    if major_a == major_b then
+                        return minor_a < minor_b
+                    else
+                        return major_a < major_b
+                    end
+                end
+
+                return a < b
+            end)
+
+            return dirs[#dirs] .. '\\'
+        end
+
+        Dap.configurations.cs = {
+            {
+                type = 'coreclr',
+                name = 'Launch - netcoredbg',
+                request = 'launch',
+                program = function()
+                    local dir = find_highest_net_version()
+                    local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+                    local dll = dir .. project_name .. ".dll"
+                    return dll
+                end,
+            },
+        }
+
         Dap.configurations.scala = {
             {
                 type = "scala",

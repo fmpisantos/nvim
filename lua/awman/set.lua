@@ -76,11 +76,11 @@ if vim.loop.os_uname().sysname == 'Darwin' then
     vim.cmd('set shellquote=')
     vim.cmd('set shellxquote=')
 else
-    -- vim.opt.shell = "powershell"
-    -- vim.opt.shellcmdflag = "-Command"
-    vim.cmd('set shell=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe')
-    vim.opt.shellcmdflag = "-NoProfile -ExecutionPolicy Bypass -Command"
-    vim.cmd('set shellquote=\\')
+    vim.opt.shell = "powershell"
+    -- vim.cmd('set shell=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe')
+    vim.opt.shellcmdflag = "-Command"
+    -- vim.opt.shellcmdflag = "-NoProfile -ExecutionPolicy Bypass -Command"
+    -- vim.cmd('set shellquote=\\')
     vim.cmd('set shellxquote=')
 end
 
@@ -101,10 +101,10 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
             if vim.loop.os_uname().sysname == 'Darwin' then
                 vim.fn.jobstart({ "osascript", "-e", 'tell application "System Events" to key code 105' }) -- 105 is F13
             elseif vim.loop.os_uname().sysname == 'Windows_NT' then
-vim.fn.jobstart({
-    "powershell",
-    "-Command",
-    [[
+                vim.fn.jobstart({
+                    "powershell",
+                    "-Command",
+                    [[
 Add-Type -TypeDefinition @"
     using System;
     using System.Runtime.InteropServices;
@@ -122,7 +122,7 @@ Add-Type -TypeDefinition @"
 "@
 [Keyboard]::PressF13()
     ]]
-})
+                })
             else
                 vim.fn.jobstart({ "wtype", "F13" })
             end

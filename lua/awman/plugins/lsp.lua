@@ -161,7 +161,13 @@ return {
                 { '<leader>h', desc = 'Git [H]unk' }
             }, { mode = 'v' })
 
-            require('mason').setup()
+            require("mason").setup({
+                registries = {
+                    "github:mason-org/mason-registry",
+                    "github:Crashdummyy/mason-registry",
+                },
+            })
+            -- require('mason').setup()
             require('mason-lspconfig').setup()
             local servers = {
                 lua_ls = {
@@ -211,21 +217,25 @@ return {
                             capabilities = capabilities,
                             on_attach = on_attach,
                             settings = {
-				    xml = {
-					format = {
-					    lineWidth = vim.lsp.get_active_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
-					}
-				    }
-				},
+                                xml = {
+                                    format = {
+                                        lineWidth = vim.lsp.get_active_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
+                                    }
+                                }
+                            },
                             filetypes = servers[server_name] and type(servers[server_name].filetypes) == "table" and servers[server_name].filetypes or { "xml" },
                         }
                     elseif (server_name == "omnisharp") then
                         require('lspconfig')[server_name].setup {
+                            cmd = { "omnisharp", "--languageserver" },
                             capabilities = capabilities,
                             on_attach = on_attach,
                             settings = servers[server_name],
-                            filetypes = { "cs", "razor" },
+                            filetypes = { "cs", "vb", "razor", "cshtml" },
                             root_dir = require('lspconfig').util.root_pattern("*.sln", "*.csproj"),
+                            init_options = {
+                                RazorSupport = true
+                            },
                         }
                     else
                         require('lspconfig')[server_name].setup {
