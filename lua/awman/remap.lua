@@ -81,3 +81,18 @@ vim.keymap.set("n", "<leader>l", ":lua show_current_line_popup()<cr>",
 
 vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
     { noremap = true, silent = true, desc = "[Q]uickFixList [F]ilter" })
+
+function GetCurrentLocation()
+    local location = vim.fn.expand("%") .. ":" .. vim.fn.line(".")
+    print(location)
+    vim.fn.setreg("+", location)
+end
+
+function GetCurrentLocationFull()
+    local location = vim.fn.expand("%:p") .. ":" .. vim.fn.line(".")
+    print(location)
+    vim.fn.setreg("+", location)
+end
+
+vim.api.nvim_create_user_command('Location', GetCurrentLocation, {})
+vim.api.nvim_create_user_command('FullLocation', GetCurrentLocationFull, {})
