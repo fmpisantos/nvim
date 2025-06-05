@@ -1,0 +1,35 @@
+-- ~/.config/nvim/colors/phantom.lua
+
+vim.cmd('highlight clear')
+
+if vim.fn.exists('syntax_on') then
+  vim.cmd('syntax reset')
+end
+
+vim.o.background = 'dark'
+vim.g.colors_name = 'phantom' -- This is crucial
+
+-- Define colors
+local colors = {
+  bg        = '#0f0f11',
+  fg        = '#e3e3e3',
+  accent    = '#9061f9',
+  accent2   = '#a07afe',
+  comment   = '#7c7c8a',
+  cursor    = '#e3e3e3',
+  selection = '#1a1a1f',
+}
+
+-- Highlight groups
+vim.api.nvim_set_hl(0, 'Normal',        { fg = colors.fg, bg = colors.bg })
+vim.api.nvim_set_hl(0, 'Comment',       { fg = colors.comment, italic = true })
+vim.api.nvim_set_hl(0, 'CursorLine',    { bg = '#1a1a1f' })
+vim.api.nvim_set_hl(0, 'CursorColumn',  { bg = '#1a1a1f' })
+vim.api.nvim_set_hl(0, 'Visual',        { bg = colors.selection })
+vim.api.nvim_set_hl(0, 'LineNr',        { fg = '#3c3c3c' })
+vim.api.nvim_set_hl(0, 'CursorLineNr',  { fg = colors.accent })
+vim.api.nvim_set_hl(0, 'Keyword',       { fg = colors.accent, bold = true })
+vim.api.nvim_set_hl(0, 'Function',      { fg = colors.accent2 })
+vim.api.nvim_set_hl(0, 'String',        { fg = '#a0e3a0' })
+vim.api.nvim_set_hl(0, 'Type',          { fg = '#5fcfff' })
+vim.api.nvim_set_hl(0, 'Constant',      { fg = '#ff9ac1' })
