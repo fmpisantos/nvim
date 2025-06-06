@@ -4,7 +4,7 @@
 
 vim.cmd("hi clear")
 if vim.fn.exists("syntax_on") then
-  vim.cmd("syntax reset")
+    vim.cmd("syntax reset")
 end
 
 vim.o.background = "dark"
@@ -12,46 +12,51 @@ vim.g.colors_name = "phantom"
 
 -- Color palette
 local colors = {
-  -- Background colors
-  bg = "#0d1117",           -- Deep dark background
-  bg_alt = "#161b22",       -- Slightly lighter background
-  bg_highlight = "#21262d", -- Highlighted background
-  bg_popup = "#1c2128",     -- Popup background
-  bg_sidebar = "#0d1117",   -- Sidebar background
-  
-  -- Foreground colors
-  fg = "#c9d1d9",           -- Main foreground
-  fg_alt = "#8b949e",       -- Dimmed foreground
-  fg_gutter = "#484f58",    -- Gutter foreground
-  
-  -- Blue accent colors (phantom theme)
-  blue = "#58a6ff",         -- Bright blue (main accent)
-  blue_light = "#79c0ff",   -- Light blue (glowing effect)
-  blue_dark = "#1f6feb",    -- Dark blue
-  blue_dim = "#388bfd",     -- Dimmed blue
-  
-  -- Additional colors
-  cyan = "#39d0d8",         -- Cyan
-  green = "#56d364",        -- Green
-  yellow = "#e3b341",       -- Yellow
-  orange = "#ffa657",       -- Orange
-  red = "#f85149",          -- Red
-  purple = "#a5a2ff",       -- Purple
-  pink = "#ffa5d3",         -- Pink
-  
-  -- UI colors
-  border = "#30363d",       -- Border color
-  selection = "#264f78",    -- Selection background
-  search = "#3d3d1a",       -- Search highlight (darker yellow)
-  match = "#ffd33d",        -- Match highlight
-  
-  -- Special
-  none = "NONE",
+    -- Background colors
+    -- bg = "#0d1117", -- Deep dark background
+    bg = "#26192b", -- Deep dark purple
+    -- bg = "#333159",          -- Light purple background
+    -- bg = "#360f2a",          -- Deep dark red
+    -- bg = "#01243a",          -- Deep dark teal
+    -- bg = "#2e0f38",             -- Purple
+    bg_alt = "#161b22",       -- Slightly lighter background
+    bg_highlight = "#21262d", -- Highlighted background
+    bg_popup = "#1c2128",     -- Popup background
+    bg_sidebar = "#0d1117",   -- Sidebar background
+
+    -- Foreground colors
+    fg = "#c9d1d9",        -- Main foreground
+    fg_alt = "#8b949e",    -- Dimmed foreground
+    fg_gutter = "#484f58", -- Gutter foreground
+
+    -- Blue accent colors (phantom theme)
+    blue = "#58a6ff",       -- Bright blue (main accent)
+    blue_light = "#79c0ff", -- Light blue (glowing effect)
+    blue_dark = "#1f6feb",  -- Dark blue
+    blue_dim = "#388bfd",   -- Dimmed blue
+
+    -- Additional colors
+    cyan = "#39d0d8",   -- Cyan
+    green = "#56d364",  -- Green
+    yellow = "#e3b341", -- Yellow
+    orange = "#ffa657", -- Orange
+    red = "#f85149",    -- Red
+    purple = "#a5a2ff", -- Purple
+    pink = "#ffa5d3",   -- Pink
+
+    -- UI colors
+    border = "#30363d",    -- Border color
+    selection = "#264f78", -- Selection background
+    search = "#3d3d1a",    -- Search highlight (darker yellow)
+    match = "#ffd33d",     -- Match highlight
+
+    -- Special
+    none = "NONE",
 }
 
 -- Helper function to set highlights
 local function hl(group, opts)
-  vim.api.nvim_set_hl(0, group, opts)
+    vim.api.nvim_set_hl(0, group, opts)
 end
 
 -- Editor highlights
@@ -312,5 +317,3 @@ hl("NoiceCmdlineIcon", { fg = colors.blue })
 hl("LeapMatch", { fg = colors.match, bold = true, underline = true })
 hl("LeapLabelPrimary", { fg = colors.blue_light, bold = true })
 hl("LeapLabelSecondary", { fg = colors.purple, bold = true })
-
-print("Phantom theme loaded successfully!")
