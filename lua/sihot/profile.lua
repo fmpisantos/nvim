@@ -91,11 +91,20 @@ local function addDeprecatedInfo(deprecated_info)
     deprecated_section = deprecated_section .. "=\"" ..
         service_name .. "_V" .. version_string .. "\" Text=\"" .. deprecated_info .. "\"/>\n\t</Deprecated>"
 
+    local function trim(s)
+        return s:match("^%s*(.-)%s*$")
+    end
+
     local replacement_lines = { "" }
+    local lastLine = ""
     for line in deprecated_section:gmatch("[^\r\n]+") do
+        lastLine = line
         table.insert(replacement_lines, line)
     end
-    table.insert(replacement_lines, "")
+
+    if trim(lastLine) ~= "" then
+        table.insert(replacement_lines, "")
+    end
 
     vim.api.nvim_buf_set_option(0, "modifiable", true)
     if not isService then
