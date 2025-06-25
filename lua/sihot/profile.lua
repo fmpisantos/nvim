@@ -62,7 +62,13 @@ local function addDeprecatedInfo(deprecated_info)
     if count == 0 then
         error("Neither 'service_definition' nor 'notification_definition' found in the path.")
     end
+    local finished = false
+    local nextLineIsEmpty = false
     for i, line in ipairs(lines) do
+        if finished then
+            nextLineIsEmpty = trim(line) ~= ""
+            break
+        end
         if not isService then
             lines[i] = line:gsub("%.%.%/SIHOT%.xsd", "../../SIHOT.xsd")
         end
@@ -72,7 +78,7 @@ local function addDeprecatedInfo(deprecated_info)
         end
         if line:find("</Description>") then
             description_end_line = i;
-            break;
+            finished = true
         end
     end
 
@@ -91,18 +97,13 @@ local function addDeprecatedInfo(deprecated_info)
     deprecated_section = deprecated_section .. "=\"" ..
         service_name .. "_V" .. version_string .. "\" Text=\"" .. deprecated_info .. "\"/>\n\t</Deprecated>"
 
-    local function trim(s)
-        return s:match("^%s*(.-)%s*$")
-    end
-
     local replacement_lines = { "" }
-    local lastLine = ""
+
     for line in deprecated_section:gmatch("[^\r\n]+") do
-        lastLine = line
         table.insert(replacement_lines, line)
     end
 
-    if trim(lastLine) ~= "" then
+    if nextLineIsEmpty then
         table.insert(replacement_lines, "")
     end
 
@@ -110,6 +111,7 @@ local function addDeprecatedInfo(deprecated_info)
     if not isService then
         vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
     end
+
     vim.api.nvim_buf_set_lines(0, description_end_line, description_end_line, false, replacement_lines)
     vim.api.nvim_command("w!")
     local move_command = "move \"" .. vim.api.nvim_buf_get_name(0) .. "\" \"" .. deprecated_folder .. "\""
