@@ -9,6 +9,10 @@ return {
                 good = "Normal",
                 bad = "Error",
                 remaining = "Comment"
+            },
+            window_config = {
+                height = 16,
+                width = 192
             }
         })
     end,

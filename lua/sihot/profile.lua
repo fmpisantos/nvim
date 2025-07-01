@@ -713,3 +713,59 @@ local function GitDeprecation()
 end
 
 vim.api.nvim_create_user_command('DeprecateGitChanges', GitDeprecation, {})
+
+local function NewService()
+    local api = vim.api
+
+    local filename = vim.fn.expand("%:t:r"):upper()
+
+    local content = {
+        '<?xml version="1.0" encoding="ISO-8859-1"?>',
+        '<ServiceDefinition  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../SIHOT.xsd">',
+        '    <ID>'..filename..'</ID>',
+        '',
+        '    <Description>',
+        '        <Language LanguageCode="EN" Text=""/>	',
+        '    </Description>',
+        '',
+        '    <WSDLDocumentation>',
+        '        <![CDATA[',
+        '        ### General',
+        '        ',
+        '        This service ',
+        '',
+        '        ### Input',
+        '',
+        '        ### Output',
+        '',
+        '        ]]>',
+        '    </WSDLDocumentation>',
+        '',
+        '    <BO Class="BO_PERSON"		Alias="Person"/>',
+        '',
+        '    <Input >',
+        '        <Tree>',
+        '            <Node Alias="" 		Mode="loadFromDB">',
+        '                <Column Alias=""	FieldName="" Compulsory="true"	Name=""/>',
+        '            </Node>',
+        '        </Tree>',
+        '    </Input>',
+        '',
+        '    <Output>',
+        '        <Tree>',
+        '            <Node Alias="" Name="">',
+        '                <Column Alias="" FieldName="" />',
+        '            </Node>',
+        '        </Tree>',
+        '    </Output>',
+        '</ServiceDefinition>'
+    }
+
+    api.nvim_buf_set_lines(0, 0, -1, false, content)
+
+    vim.cmd("write")
+
+    AddToInventory();
+end
+
+vim.api.nvim_create_user_command('NewService', NewService, {})
