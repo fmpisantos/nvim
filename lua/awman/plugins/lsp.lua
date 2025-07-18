@@ -123,7 +123,7 @@ return {
                     end
                 end
 
-                nmap("<leader>hh", find_corresponding_file, { desc = "Find source/header file" })
+                nmap("<leader>hh", find_corresponding_file, "Find source/header file")
 
                 local function format()
                     vim.cmd('setlocal expandtab')
