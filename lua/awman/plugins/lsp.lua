@@ -82,7 +82,26 @@ return {
 
                 -- nmap("<leader>hh", "<cmd>ClangdSwitchSourceHeader<CR>", "switch_source_header")
 
-                local builtin = require("telescope.builtin")
+                local cached_files = nil
+                local cached_headers = nil
+
+                local function get_project_headers()
+                    if not cached_headers then
+                        cached_headers = vim.fn.systemlist(
+                            'fd --type f --extension h --extension hpp'
+                        )
+                    end
+                    return cached_headers
+                end
+
+                local function get_project_files()
+                    if not cached_files then
+                        cached_files = vim.fn.systemlist(
+                            'fd --type f --extension cpp --extension cc --extension c'
+                        )
+                    end
+                    return cached_files
+                end
 
                 local function find_corresponding_file()
                     local filename = vim.fn.expand("%:t:r")
@@ -90,9 +109,11 @@ return {
 
                     local header_exts = { "h", "hpp" }
                     local source_exts = { "cpp", "cc", "c" }
+                    local is_header = false
 
                     local targets = {}
                     if vim.tbl_contains(header_exts, ext) then
+                        is_header = true
                         for _, e in ipairs(source_exts) do
                             table.insert(targets, filename .. "." .. e)
                         end
@@ -106,9 +127,19 @@ return {
                     end
 
                     local results = {}
-                    for _, target in ipairs(targets) do
-                        local found = vim.fn.globpath(".", "**/" .. target, true, true)
-                        vim.list_extend(results, found)
+                    local all_files
+                    if is_header then
+                        all_files = get_project_files()
+                    else
+                        all_files = get_project_headers()
+                    end
+
+                    for _, file in ipairs(all_files) do
+                        for _, target in ipairs(targets) do
+                            if file:match(target .. "$") then
+                                table.insert(results, file)
+                            end
+                        end
                     end
 
                     if #results == 0 then
@@ -116,9 +147,14 @@ return {
                     elseif #results == 1 then
                         vim.cmd("edit " .. results[1])
                     else
-                        builtin.find_files({
-                            prompt_title = "Select corresponding file",
-                            default_text = filename,
+                        local fzf = require("fzf-lua")
+                        fzf.fzf_exec(results, {
+                            prompt = "Select corresponding file> ",
+                            actions = {
+                                ["default"] = function(selected)
+                                    vim.cmd("edit " .. selected[1])
+                                end
+                            }
                         })
                     end
                 end
