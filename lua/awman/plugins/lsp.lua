@@ -80,7 +80,50 @@ return {
                 nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
                 imap('<C-h>', vim.lsp.buf.signature_help, 'Signature help');
 
-                nmap("<leader>hh", "<cmd>ClangdSwitchSourceHeader<CR>", "switch_source_header")
+                -- nmap("<leader>hh", "<cmd>ClangdSwitchSourceHeader<CR>", "switch_source_header")
+
+                local builtin = require("telescope.builtin")
+
+                local function find_corresponding_file()
+                    local filename = vim.fn.expand("%:t:r")
+                    local ext = vim.fn.expand("%:e")
+
+                    local header_exts = { "h", "hpp" }
+                    local source_exts = { "cpp", "cc", "c" }
+
+                    local targets = {}
+                    if vim.tbl_contains(header_exts, ext) then
+                        for _, e in ipairs(source_exts) do
+                            table.insert(targets, filename .. "." .. e)
+                        end
+                    elseif vim.tbl_contains(source_exts, ext) then
+                        for _, e in ipairs(header_exts) do
+                            table.insert(targets, filename .. "." .. e)
+                        end
+                    else
+                        vim.cmd("ClangdSwitchSourceHeader")
+                        return
+                    end
+
+                    local results = {}
+                    for _, target in ipairs(targets) do
+                        local found = vim.fn.globpath(".", "**/" .. target, true, true)
+                        vim.list_extend(results, found)
+                    end
+
+                    if #results == 0 then
+                        print("No matching file found")
+                    elseif #results == 1 then
+                        vim.cmd("edit " .. results[1])
+                    else
+                        builtin.find_files({
+                            prompt_title = "Select corresponding file",
+                            default_text = filename,
+                        })
+                    end
+                end
+
+                nmap("<leader>hh", find_corresponding_file, { desc = "Find source/header file" })
 
                 local function format()
                     vim.cmd('setlocal expandtab')
