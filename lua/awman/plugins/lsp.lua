@@ -298,7 +298,7 @@ return {
                             settings = {
                                 xml = {
                                     format = {
-                                        lineWidth = vim.lsp.get_active_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
+                                        lineWidth = vim.lsp.get_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
                                     }
                                 }
                             },
