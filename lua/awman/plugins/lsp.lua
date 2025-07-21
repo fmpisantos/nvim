@@ -265,6 +265,31 @@ return {
                                 bundles = path.bundles,
                             },
                         }
+                    elseif (server_name == "lemminx") then
+                        require('lspconfig')[server_name].setup {
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = {
+                                xml = {
+                                    format = {
+                                        lineWidth = vim.lsp.get_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
+                                    }
+                                }
+                            },
+                            filetypes = servers[server_name] and type(servers[server_name].filetypes) == "table" and servers[server_name].filetypes or { "xml" },
+                        }
+                    elseif (server_name == "omnisharp") then
+                        require('lspconfig')[server_name].setup {
+                            cmd = { "omnisharp", "--languageserver" },
+                            capabilities = capabilities,
+                            on_attach = on_attach,
+                            settings = servers[server_name],
+                            filetypes = { "cs", "vb", "razor", "cshtml" },
+                            root_dir = require('lspconfig').util.root_pattern("*.sln", "*.csproj"),
+                            init_options = {
+                                RazorSupport = true
+                            },
+                        }
                     else
                         if (server_name == "vtsls") then
                             local vtsls_config = require("awman.plugins.jsts.jsts-dap");
