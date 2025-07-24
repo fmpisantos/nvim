@@ -162,17 +162,21 @@ return {
                 local function format_all_files()
                     local current_buffer = vim.fn.bufname('%')
                     local current_win_view = vim.fn.winsaveview()
-                    local project_files = vim.fn.glob('**', true, true)
-                    for _, filename in ipairs(project_files) do
+
+                    -- Get all non-gitignored files
+                    local git_files = vim.fn.systemlist('git ls-files --cached --others --exclude-standard')
+
+                    for _, filename in ipairs(git_files) do
                         if vim.fn.filereadable(filename) == 1 then
-                            vim.cmd('keepalt edit ' .. filename)
+                            vim.cmd('keepalt edit ' .. vim.fn.fnameescape(filename))
                             format()
                         else
                             print("File doesn't exist: " .. filename)
                         end
                     end
+
                     if current_buffer ~= '' then
-                        vim.cmd('buffer ' .. current_buffer)
+                        vim.cmd('buffer ' .. vim.fn.fnameescape(current_buffer))
                         vim.fn.winrestview(current_win_view)
                     end
                 end
@@ -242,78 +246,85 @@ return {
             local capabilities = vim.lsp.protocol.make_client_capabilities()
             capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
             local mason_lspconfig = require 'mason-lspconfig'
-            mason_lspconfig.setup {
-                ensure_installed = vim.tbl_keys(servers),
-            }
 
-            mason_lspconfig.setup_handlers {
-                function(server_name)
-                    if (server_name == "jdtls") then
-                        local jdtls_config = require("awman.plugins.java.config")
+            -- Register filetypes
+            vim.filetype.add({
+                extension = {
+                    razor = "cs",
+                },
+            })
+
+            -- Define per-server configs using the new API
+            for server_name, server_config in pairs(servers) do
+                if server_name == "jdtls" then
+                    local jdtls_config = require("awman.plugins.java.config")
+                    local function _on_attach(client, bufnr)
+                        on_attach(client, bufnr)
+                        jdtls_config.jdtls_on_attach(client, bufnr)
+                    end
+                    local cmd, path = jdtls_config.jdtls_setup()
+                    require('lspconfig')[server_name].setup {
+                        cmd = cmd,
+                        capabilities = capabilities,
+                        on_attach = _on_attach,
+                        settings = servers[server_name],
+                        filetypes = (servers[server_name] or {}).filetypes,
+                        init_options = {
+                            bundles = path.bundles,
+                        },
+                    }
+                elseif (server_name == "lemminx") then
+                    require('lspconfig')[server_name].setup {
+                        capabilities = capabilities,
+                        on_attach = on_attach,
+                        settings = {
+                            xml = {
+                                format = {
+                                    lineWidth = vim.lsp.get_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
+                                }
+                            }
+                        },
+                        filetypes = servers[server_name] and type(servers[server_name].filetypes) == "table" and servers[server_name].filetypes or { "xml" },
+                    }
+                elseif (server_name == "omnisharp") then
+                    require('lspconfig')[server_name].setup {
+                        cmd = { "omnisharp", "--languageserver" },
+                        capabilities = capabilities,
+                        on_attach = on_attach,
+                        settings = servers[server_name],
+                        filetypes = { "cs", "vb", "razor", "cshtml" },
+                        root_dir = require('lspconfig').util.root_pattern("*.sln", "*.csproj"),
+                        init_options = {
+                            RazorSupport = true
+                        },
+                    }
+                else
+                    if (server_name == "vtsls") then
+                        local vtsls_config = require("awman.plugins.jsts.jsts-dap");
                         local function _on_attach(client, bufnr)
                             on_attach(client, bufnr)
-                            jdtls_config.jdtls_on_attach(client, bufnr)
+                            vtsls_config.setup()
                         end
-                        local cmd, path = jdtls_config.jdtls_setup()
                         require('lspconfig')[server_name].setup {
-                            cmd = cmd,
                             capabilities = capabilities,
                             on_attach = _on_attach,
                             settings = servers[server_name],
                             filetypes = (servers[server_name] or {}).filetypes,
-                            init_options = {
-                                bundles = path.bundles,
-                            },
                         }
-                    elseif (server_name == "lemminx") then
+                    else
                         require('lspconfig')[server_name].setup {
-                            capabilities = capabilities,
-                            on_attach = on_attach,
-                            settings = {
-                                xml = {
-                                    format = {
-                                        lineWidth = vim.lsp.get_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
-                                    }
-                                }
-                            },
-                            filetypes = servers[server_name] and type(servers[server_name].filetypes) == "table" and servers[server_name].filetypes or { "xml" },
-                        }
-                    elseif (server_name == "omnisharp") then
-                        require('lspconfig')[server_name].setup {
-                            cmd = { "omnisharp", "--languageserver" },
                             capabilities = capabilities,
                             on_attach = on_attach,
                             settings = servers[server_name],
-                            filetypes = { "cs", "vb", "razor", "cshtml" },
-                            root_dir = require('lspconfig').util.root_pattern("*.sln", "*.csproj"),
-                            init_options = {
-                                RazorSupport = true
-                            },
+                            filetypes = (servers[server_name] or {}).filetypes,
                         }
-                    else
-                        if (server_name == "vtsls") then
-                            local vtsls_config = require("awman.plugins.jsts.jsts-dap");
-                            local function _on_attach(client, bufnr)
-                                on_attach(client, bufnr)
-                                vtsls_config.setup()
-                            end
-                            require('lspconfig')[server_name].setup {
-                                capabilities = capabilities,
-                                on_attach = _on_attach,
-                                settings = servers[server_name],
-                                filetypes = (servers[server_name] or {}).filetypes,
-                            }
-                        else
-                            require('lspconfig')[server_name].setup {
-                                capabilities = capabilities,
-                                on_attach = on_attach,
-                                settings = servers[server_name],
-                                filetypes = (servers[server_name] or {}).filetypes,
-                            }
-                        end
                     end
                 end
-            }
+            end
+            mason_lspconfig.setup({
+                ensure_installed = vim.tbl_keys(servers),
+                automatic_enable = true, -- will hook into vim.lsp.config definitions
+            })
 
             local cmp = require 'cmp'
             local luasnip = require 'luasnip'

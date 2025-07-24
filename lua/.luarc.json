@@ -9,6 +9,7 @@
         "CreateFloatingTerminal",
         "showDiffView",
         "get_bufNr",
-        "hideDiffView"
+        "hideDiffView",
+        "vim"
     ]
 }
