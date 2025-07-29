@@ -67,7 +67,7 @@ end
 vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end,
     { desc = "Open Current Directory in explorer" })
 vim.cmd([[command! Open :lua OpenBufferDirectory()]])
-vim.cmd([[command! Open :lua LauchBudder()]])
+vim.cmd([[command! Open :lua LaunchBuffer()]])
 
 
 vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
