@@ -98,7 +98,7 @@ local function get_jdtls_paths()
 end
 
 local function enable_debugger(_)
-    local dap_config = require("awman.plugins.java.dap_java_config");
+    local dap_config = require("plugins.java.dap_java_config");
     dap_config.setup_dap({ hotcodereplace = 'auto' })
     dap_config.setup_dap_main_class_configs()
 

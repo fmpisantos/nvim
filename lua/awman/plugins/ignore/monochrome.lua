@@ -1,1 +1,0 @@
-return { "kdheepak/monochrome.nvim" }

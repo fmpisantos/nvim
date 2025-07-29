@@ -34,11 +34,31 @@ function ToggleFoldUnderCursor()
     end
 end
 
+function LaunchBuffer()
+    local buffer_dir = vim.fn.expand('%:p')
+    local open_command
+
+    local os_name = vim.loop.os_uname().sysname
+    if os_name == 'Windows_NT' then
+        open_command = 'explorer "' .. buffer_dir .. '"'
+    elseif os_name == 'Darwin' then
+        open_command = 'open "' .. buffer_dir .. '"'
+    else
+        open_command = 'xdg-open "' .. buffer_dir .. '" &'
+    end
+
+    vim.fn.system(open_command)
+end
+
 function OpenBufferDirectory()
     local buffer_dir = vim.fn.expand('%:p:h')
     local open_command
-    if vim.fn.has('win32') == 1 then
+
+    local os_name = vim.loop.os_uname().sysname
+    if os_name == 'Windows_NT' then
         open_command = 'explorer "' .. buffer_dir .. '"'
+    elseif os_name == 'Darwin' then
+        open_command = 'open "' .. buffer_dir .. '"'
     else
         open_command = 'xdg-open "' .. buffer_dir .. '" &'
     end
@@ -49,6 +69,7 @@ end
 vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end,
     { desc = "Open Current Directory in explorer" })
 vim.cmd([[command! Open :lua OpenBufferDirectory()]])
+vim.cmd([[command! Open :lua LauchBudder()]])
 
 
 vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
