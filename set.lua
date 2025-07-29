@@ -31,13 +31,18 @@ vim.opt.termguicolors = true
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
+-- vim.cmd("hi statusline guidb=NONE");
 
 vim.opt.updatetime = 50
 vim.opt.foldmethod = "indent"
 vim.opt.foldlevelstart = 99
 
+-- Remove statusline
+vim.cmd("hi statusline guibg=NONE")
+
 -- Set the clipboard to "unnamedplus"
-vim.cmd('set clipboard+=unnamedplus')
+-- vim.cmd('set clipboard+=unnamedplus')
+
 vim.o.ignorecase = true
 -- set clipboard+=unnamedplus
 
@@ -52,6 +57,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 vim.opt.scrolloff = 10
 vim.opt.hlsearch = true
+
 vim.api.nvim_create_autocmd('TextYankPost', {
     desc = 'Highlight when yanking (copying) text',
     group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
