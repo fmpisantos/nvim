@@ -1,8 +1,8 @@
 vim.keymap.set("n", "n", "nzzzv", { desc = "Goto [N]ext occurence of search and centers it to the old cursor positon" });
 vim.keymap.set("n", "N", "Nzzzv", { desc = "Goto previous occurence of search and centers it to the old cursor positon" });
-vim.keymap.set({ "n", "v", "x" }, "<leader>y", "\"+y<CR>", { desc = "[Y]ank to clipboard" });
-vim.keymap.set({ "n", "v", "x" }, "<leader>p", "\"+p<CR>", { desc = "[Y]ank to clipboard" });
-vim.keymap.set({ "n", "v", "x" }, "<leader>d", "\"+d<CR>", { desc = "[Y]ank to clipboard" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>y", "\"+y", { desc = "[Y]ank to clipboard" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>p", "\"+p", { desc = "[Y]ank to clipboard" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>d", "\"+d", { desc = "[Y]ank to clipboard" });
 vim.keymap.set("n", "Q", "<nop>", { desc = "No operation" });
 vim.keymap.set("n", "<leader>k", "<cmd>cnext<CR>zz", { desc = "Goto prev error" })
 vim.keymap.set("n", "<F3>", "<cmd>cnext<CR>zz", { desc = "Goto prev error" })
