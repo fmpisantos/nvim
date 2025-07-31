@@ -80,14 +80,14 @@ local on_attach = function(_, bufnr)
                     else
                         local client = vim.lsp.get_client_by_id(ctx.client_id)
                         if client then
-                            client.request("codeAction/resolve", action, function(err, resolved_action)
+                            client:request("codeAction/resolve", action, function(err, resolved_action)
                                 if err or not resolved_action then return end
 
                                 if resolved_action.edit then
                                     vim.lsp.util.apply_workspace_edit(resolved_action.edit, "utf-16")
                                 end
                                 if resolved_action.command then
-                                    vim.lsp.buf.execute_command(resolved_action.command)
+                                    client:exec_cmd(resolved_action.command)
                                 end
 
                                 vim.lsp.handlers["workspace/executeCommand"] = nil
