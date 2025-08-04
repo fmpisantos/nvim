@@ -79,6 +79,8 @@ return {
                 nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
                 nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
                 imap('<C-h>', vim.lsp.buf.signature_help, 'Signature help');
+                vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, { noremap = true, silent = true })
+                -- imap('<C-h>', vim.lsp.buf.signature_help, 'Signature help');
 
                 -- nmap("<leader>hh", "<cmd>ClangdSwitchSourceHeader<CR>", "switch_source_header")
 
