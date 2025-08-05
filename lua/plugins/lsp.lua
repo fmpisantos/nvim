@@ -1,28 +1,4 @@
-vim.pack.add({
-    { src = "https://github.com/hrsh7th/nvim-cmp" },
-    { src = "https://github.com/neovim/nvim-lspconfig" },
-    { src = "https://github.com/williamboman/mason.nvim" },
-    { src = "https://github.com/williamboman/mason-lspconfig.nvim" },
-});
-
 require("mason").setup();
-
-local servers = {
-    lua_ls = {
-        Lua = {
-            workspace = { checkThirdParty = false },
-            telemetry = { enable = false },
-        },
-    },
-    jdtls = {},
-    vtsls = {},
-}
-
-vim.filetype.add({
-    extension = {
-        razor = "cs",
-    },
-})
 
 local on_attach = function(_, bufnr)
     local xmap = function(type, keys, func, desc)
@@ -148,7 +124,7 @@ local on_attach = function(_, bufnr)
     nmap('<leader>dF', ':Format<CR>', '[D]ocument [F]ormat')
     vim.api.nvim_buf_create_user_command(bufnr, 'FormatAll', function(_)
         format_all_files()
-    end, { desc = 'Format all project files with LSP' })
+    end, { desc = 'Format all project files with LSP' });
     nmap('<leader>pF', ':FormatAll<CR>', '[P]roject [F]ormat')
 
     local function rename_file()
@@ -175,106 +151,73 @@ local on_attach = function(_, bufnr)
     end, { desc = 'Rename current file and update lsp_references' });
 end
 
-for server_name, server_config in pairs(servers) do
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
-    if server_name == "jdtls" then
-        local jdtls_config = require("plugins.java.config")
-        local function _on_attach(client, bufnr)
-            on_attach(client, bufnr)
-            jdtls_config.jdtls_on_attach(client, bufnr)
-        end
-        local cmd, path = jdtls_config.jdtls_setup()
-        require('lspconfig')[server_name].setup {
-            cmd = cmd,
-            capabilities = capabilities,
-            on_attach = _on_attach,
-            settings = servers[server_name],
-            filetypes = (servers[server_name] or {}).filetypes,
-            init_options = {
-                bundles = path.bundles,
-            },
-        }
-    elseif (server_name == "lemminx") then
-        require('lspconfig')[server_name].setup {
-            capabilities = capabilities,
-            on_attach = on_attach,
-            settings = {
-                xml = {
-                    format = {
-                        lineWidth = vim.lsp.get_clients()[1] and 0 or nil -- Ensure it's only set if LSP is active
-                    }
-                }
-            },
-            filetypes = servers[server_name] and type(servers[server_name].filetypes) == "table" and servers[server_name].filetypes or { "xml" },
-        }
-    elseif (server_name == "omnisharp") then
-        require('lspconfig')[server_name].setup {
-            cmd = { "omnisharp", "--languageserver" },
-            capabilities = capabilities,
-            on_attach = on_attach,
-            settings = servers[server_name],
-            filetypes = { "cs", "vb", "razor", "cshtml" },
-            root_dir = require('lspconfig').util.root_pattern("*.sln", "*.csproj"),
-            init_options = {
-                RazorSupport = true
-            },
-        }
-    else
-        if (server_name == "vtsls") then
-            local vtsls_config = require("plugins.jsts.jsts-dap");
-            local function _on_attach(client, bufnr)
-                on_attach(client, bufnr)
-                vtsls_config.setup()
-            end
-            require('lspconfig')[server_name].setup {
-                capabilities = capabilities,
-                on_attach = _on_attach,
-                settings = servers[server_name],
-                filetypes = (servers[server_name] or {}).filetypes,
-            }
-        else
-            require('lspconfig')[server_name].setup {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = servers[server_name],
-                filetypes = (servers[server_name] or {}).filetypes,
-            }
-        end
-    end
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+vim.lsp.config('*', {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    root_markers = { '.git' }
+})
+
+vim.lsp.config('lua_ls', {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    settings = {
+        Lua = {
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+        },
+    },
+})
+
+local jdtls_config = require("plugins.java.config")
+local function on_attach_jdtls(client, _bufnr)
+    on_attach(client, _bufnr)
+    jdtls_config.jdtls_on_attach(client, _bufnr)
 end
+local cmd, path = jdtls_config.jdtls_setup()
 
-require("mason-lspconfig").setup({
-    ensure_installed = vim.tbl_keys(servers),
-    automatic_enable = true, -- will hook into vim.lsp.config definitions
-})
-
-local cmp = require 'cmp'
-
-cmp.setup {
-    completion = {
-        completeopt = 'menu,menuone,noinsert',
+vim.lsp.config('jdtls', {
+    cmd = cmd,
+    capabilities = capabilities,
+    on_attach = on_attach_jdtls,
+    init_options = {
+        bundles = path.bundles,
     },
-    mapping = cmp.mapping.preset.insert {
-        ['<C-n>'] = cmp.mapping.select_next_item(),
-        ['<C-p>'] = cmp.mapping.select_prev_item(),
-        ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-        ['<C-Space>'] = nil,
-        ['<Tab>'] = nil,
-        ['<S-Tab>'] = cmp.mapping.complete {},
-    },
-    sources = {
-        { name = 'nvim_lsp' },
-        { name = 'luasnip' },
-        { name = 'path' },
-    },
-}
+});
 
-cmp.setup.filetype({ "sql" }, {
-    sources = {
-        { name = "vim-dadbod-completion" },
-        { name = "buffer" },
-    }
-})
+vim.lsp.config('lemminx', {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    settings = {
+        xml = {
+            format = {
+                lineWidth = vim.lsp.get_clients()[1] and 0 or nil
+            }
+        }
+    },
+});
+
+vim.lsp.config("omnisharp", {
+    cmd = { "omnisharp", "--languageserver" },
+    on_attach = on_attach,
+    capabilities = capabilities,
+    filetypes = { "cs", "vb", "razor", "cshtml" },
+    root_markers = { "*.sln", "*.csproj" },
+    init_options = {
+        RazorSupport = true
+    },
+});
+
+local vtsls_config = require("plugins.jsts.jsts-dap")
+local function on_attach_vtsls(client, _bufnr)
+    on_attach(client, _bufnr)
+    vtsls_config.setup()
+end
+vim.lsp.config("vtsls", {
+    capabilities = capabilities,
+    on_attach = on_attach_vtsls,
+});
 
 vim.diagnostic.config({
     float = {
@@ -286,3 +229,12 @@ vim.diagnostic.config({
         prefix = "",
     },
 })
+
+vim.lsp.enable({
+    "omnisharp",
+    -- "jdtls",
+    "lua_ls",
+    "lemminx",
+    "vtsls"
+});
+
