@@ -16,7 +16,8 @@ vim.pack.add({
     { src = 'https://github.com/nvim-treesitter/nvim-treesitter-context' },
     { src = "https://github.com/neovim/nvim-lspconfig" },
     { src = "https://github.com/williamboman/mason.nvim" },
-    { src = "https://github.com/theprimeagen/harpoon", version = "harpoon2" },
+    { src = "https://github.com/williamboman/mason-lspconfig.nvim" },
+    { src = "https://github.com/theprimeagen/harpoon",                    version = "harpoon2" },
     {
         src = "https://github.com/iamcco/markdown-preview.nvim",
         event = { "BufReadPost", "BufWritePost", "BufNewFile", "VeryLazy" },
@@ -41,4 +42,3 @@ require("plugins.sihot")
 
 -- Colorscheme
 require("plugins.colorscheme")
-
