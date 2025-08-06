@@ -26,6 +26,7 @@ vim.pack.add({
         build = "cd app && yarn install && git restore ."
     },
     { src = "https://github.com/tpope/vim-fugitive" },
+    { src = "https://github.com/chentoast/marks.nvim"}
 })
 
 require("plugins.oil")
@@ -35,6 +36,7 @@ require("plugins.treesitter")
 require("plugins.lsp")
 require("plugins.harpoon")
 require("plugins.fugitive")
+require("plugins.marks")
 -- My plugins
 require("plugins.notes")
 require("plugins.extensions")
