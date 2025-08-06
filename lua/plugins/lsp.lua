@@ -1,18 +1,5 @@
 local on_attach = require("plugins.lsp-keymaps").on_attach
-
 require("mason").setup();
-require("mason-lspconfig").setup({
-    ensure_installed = {
-        "omnisharp",
-        "jdtls",
-        "lua_ls",
-        "lemminx",
-        "vtsls"
-    },
-    automatic_installation = true,
-    automatic_enable = true
-});
-
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 
 vim.lsp.config('*', {
@@ -90,6 +77,18 @@ vim.diagnostic.config({
         prefix = "",
     },
 })
+
+require("mason-lspconfig").setup({
+    ensure_installed = {
+        "omnisharp",
+        "jdtls",
+        "lua_ls",
+        "lemminx",
+        "vtsls"
+    },
+    automatic_installation = true,
+    automatic_enable = true
+});
 
 -- vim.lsp.enable({
 --     "omnisharp",

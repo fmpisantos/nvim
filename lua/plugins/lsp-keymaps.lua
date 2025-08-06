@@ -21,7 +21,11 @@ function M.on_attach(_, bufnr)
     nmap('H', vim.lsp.buf.signature_help, 'Signature help')
     nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
     imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
-    imap('<C-Tab>', vim.lsp.buf.signature_help, 'Signature help');
+    imap('<C-k>', function()
+        print("here!");
+        vim.lsp.buf.signature_help()
+        print("here2");
+    end, 'Signature help');
 
     local function organize_imports()
         local line_count = vim.api.nvim_buf_line_count(bufnr)
