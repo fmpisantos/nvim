@@ -26,7 +26,12 @@ vim.pack.add({
         build = "cd app && yarn install && git restore ."
     },
     { src = "https://github.com/tpope/vim-fugitive" },
-    { src = "https://github.com/chentoast/marks.nvim"}
+    { src = "https://github.com/chentoast/marks.nvim" },
+    { src = "https://github.com/folke/tokyonight.nvim" },
+    { src = "https://github.com/vague2k/vague.nvim" },
+    { src = "https://github.com/fmpisantos/notes.nvim" },
+    { src = "https://github.com/fmpisantos/shared_buffer.nvim" },
+    { src = "https://github.com/fmpisantos/oilAutoCmd.nvim" },
 })
 
 require("plugins.oil")
