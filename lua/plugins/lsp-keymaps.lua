@@ -152,6 +152,85 @@ function M.on_attach(_, bufnr)
     vim.api.nvim_buf_create_user_command(bufnr, 'Rename', function(_)
         rename_file()
     end, { desc = 'Rename current file and update lsp_references' });
+
+    local cached_files = nil
+    local cached_headers = nil
+
+    local function get_project_headers()
+        if not cached_headers then
+            cached_headers = vim.fn.systemlist(
+                'fd --type f --extension h --extension hpp'
+            )
+        end
+        return cached_headers
+    end
+
+    local function get_project_files()
+        if not cached_files then
+            cached_files = vim.fn.systemlist(
+                'fd --type f --extension cpp --extension cc --extension c'
+            )
+        end
+        return cached_files
+    end
+
+    local function find_corresponding_file()
+        local filename = vim.fn.expand("%:t:r")
+        local ext = vim.fn.expand("%:e")
+
+        local header_exts = { "h", "hpp" }
+        local source_exts = { "cpp", "cc", "c" }
+        local is_header = false
+
+        local targets = {}
+        if vim.tbl_contains(header_exts, ext) then
+            is_header = true
+            for _, e in ipairs(source_exts) do
+                table.insert(targets, filename .. "." .. e)
+            end
+        elseif vim.tbl_contains(source_exts, ext) then
+            for _, e in ipairs(header_exts) do
+                table.insert(targets, filename .. "." .. e)
+            end
+        else
+            vim.cmd("ClangdSwitchSourceHeader")
+            return
+        end
+
+        local results = {}
+        local all_files
+        if is_header then
+            all_files = get_project_files()
+        else
+            all_files = get_project_headers()
+        end
+
+        for _, file in ipairs(all_files) do
+            for _, target in ipairs(targets) do
+                if file:match(target .. "$") then
+                    table.insert(results, file)
+                end
+            end
+        end
+
+        if #results == 0 then
+            print("No matching file found")
+        elseif #results == 1 then
+            vim.cmd("edit " .. results[1])
+        else
+            local fzf = require("fzf-lua")
+            fzf.fzf_exec(results, {
+                prompt = "Select corresponding file> ",
+                actions = {
+                    ["default"] = function(selected)
+                        vim.cmd("edit " .. selected[1])
+                    end
+                }
+            })
+        end
+    end
+
+    nmap("<leader>hh", find_corresponding_file, "Find source/header file");
 end
 
 return M
