@@ -1,1 +1,6 @@
-require("marks").setup {}
+return {
+    src = "chentoast/marks.nvim",
+    setup = function()
+        require("marks").setup {}
+    end
+}

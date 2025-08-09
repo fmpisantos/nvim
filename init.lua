@@ -5,55 +5,99 @@ vim.g.maplocalleader = " "
 require("set")
 require("remap")
 
-vim.pack.add({
-    { src = "https://github.com/stevearc/oil.nvim" },
-    { src = "https://github.com/mbbill/undotree" },
-    { src = "https://github.com/nvim-telescope/telescope.nvim" },
-    { src = "https://github.com/nvim-telescope/telescope-ui-select.nvim" },
-    { src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim" },
-    { src = "https://github.com/nvim-lua/plenary.nvim" },
-    { src = "https://github.com/nvim-treesitter/nvim-treesitter" },
-    { src = "https://github.com/nvim-treesitter/nvim-treesitter-context" },
-    { src = "https://github.com/neovim/nvim-lspconfig" },
-    { src = "https://github.com/williamboman/mason.nvim" },
-    { src = "https://github.com/williamboman/mason-lspconfig.nvim" },
-    { src = "https://github.com/theprimeagen/harpoon",                    version = "harpoon2" },
-    {
-        src = "https://github.com/iamcco/markdown-preview.nvim",
-        event = { "BufReadPost", "BufWritePost", "BufNewFile", "VeryLazy" },
-        cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-        ft = { "markdown" },
-        build = "cd app && yarn install && git restore ."
-    },
-    { src = "https://github.com/tpope/vim-fugitive" },
-    { src = "https://github.com/chentoast/marks.nvim" },
-    { src = "https://github.com/folke/tokyonight.nvim" },
-    { src = "https://github.com/vague2k/vague.nvim" },
-    { src = "https://github.com/kristijanhusak/vim-dadbod-ui" },
-    { src = "https://github.com/tpope/vim-dadbod" },
-    { src = "https://github.com/kristijanhusak/vim-dadbod-completion" },
-    { src = "https://github.com/rcarriga/nvim-dap-ui" },
-    { src = "https://github.com/mfussenegger/nvim-dap" },
-    { src = "https://github.com/nvim-neotest/nvim-nio" },
-    { src = "https://github.com/mfussenegger/nvim-jdtls" },
-    { src = "https://github.com/fmpisantos/notes.nvim" },
-    { src = "https://github.com/fmpisantos/shared_buffer.nvim" },
-    { src = "https://github.com/fmpisantos/oilAutoCmd.nvim" },
-})
+local toInstall = {}
 
-require("plugins.oil")
-require("plugins.undotree")
-require("plugins.telescope")
-require("plugins.treesitter")
-require("plugins.lsp")
-require("plugins.harpoon")
-require("plugins.fugitive")
-require("plugins.marks")
-
+toInstall[#toInstall + 1] = require("plugins.oil");
+toInstall[#toInstall + 1] = require("plugins.undotree");
+toInstall[#toInstall + 1] = require("plugins.telescope");
+toInstall[#toInstall + 1] = require("plugins.treesitter");
+toInstall[#toInstall + 1] = require("plugins.lsp");
+toInstall[#toInstall + 1] = require("plugins.harpoon");
+toInstall[#toInstall + 1] = require("plugins.fugitive");
+toInstall[#toInstall + 1] = require("plugins.marks");
 -- My plugins
-require("plugins.notes")
-require("plugins.extensions")
-require("plugins.myplugins")
-
+toInstall[#toInstall + 1] = require("plugins.notes");
+require("plugins.extensions");
+toInstall[#toInstall + 1] = require("plugins.myplugins");
 -- Colorscheme
-require("plugins.colorscheme")
+toInstall[#toInstall + 1] = require("plugins.colorscheme");
+
+local function starts_with(str, prefix)
+    return str:sub(1, #prefix) == prefix
+end
+
+local function normalize_url(src)
+    if type(src) == "string" then
+        if starts_with(src, "https://") then
+            return src
+        else
+            return "https://github.com/" .. src
+        end
+    end
+    return src
+end
+
+local function extract_plugins(src)
+    local plugins = {}
+
+    if type(src) == "string" then
+        plugins[#plugins + 1] = normalize_url(src)
+    elseif type(src) == "table" then
+        if src.src then
+            local plugin_spec = {
+                src = normalize_url(src.src)
+            }
+            for key, value in pairs(src) do
+                if key ~= "src" then
+                    plugin_spec[key] = value
+                end
+            end
+            plugins[#plugins + 1] = plugin_spec
+        else
+            for _, item in ipairs(src) do
+                if type(item) == "string" then
+                    plugins[#plugins + 1] = normalize_url(item)
+                elseif type(item) == "table" and item.src then
+                    local plugin_spec = {
+                        src = normalize_url(item.src)
+                    }
+                    for key, value in pairs(item) do
+                        if key ~= "src" then
+                            plugin_spec[key] = value
+                        end
+                    end
+                    plugins[#plugins + 1] = plugin_spec
+                elseif type(item) == "table" then
+                    local nested_plugins = extract_plugins(item)
+                    for _, nested_plugin in ipairs(nested_plugins) do
+                        plugins[#plugins + 1] = nested_plugin
+                    end
+                end
+            end
+        end
+    end
+
+    return plugins
+end
+
+local allPlugins = {}
+local setupFunctions = {}
+
+for _, plugin in ipairs(toInstall) do
+    if plugin.setup then
+        setupFunctions[#setupFunctions + 1] = plugin.setup
+    end
+
+    local extracted = extract_plugins(plugin.src)
+    for _, extracted_plugin in ipairs(extracted) do
+        allPlugins[#allPlugins + 1] = extracted_plugin
+    end
+end
+
+vim.pack.add(allPlugins)
+
+for _, setup in ipairs(setupFunctions) do
+    if type(setup) == "function" then
+        setup()
+    end
+end
