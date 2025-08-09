@@ -1,26 +1,8 @@
-vim.pack.add({
-		{src = "https://github.com/stevearc/oil.nvim"}
-})
 require('oil').setup {
-	columns = { "icon" },
-	buf_options = {
-		buflisted = false,
-		bufhidden = "hide",
-	},
 	keymaps = {
 		["<C-h>"] = false,
 		["<Tab>"] = "actions.preview",
 		["<C-v>"] = "actions.select_vsplit",
-	},
-	preview = {
-		width = 0.8,
-		height = 1,
-		border = "rounded",
-		win_options = {
-			winblend = 0,
-		},
-		-- Whether the preview window is automatically updated when the cursor is moved
-		update_on_cursor_moved = true,
 	},
 	view_options = {
 		-- Show files and directories that start with "."

@@ -1,28 +1,3 @@
-vim.keymap.set("n", "n", "nzzzv", { desc = "Goto [N]ext occurence of search and centers it to the old cursor positon" });
-vim.keymap.set("n", "N", "Nzzzv", { desc = "Goto previous occurence of search and centers it to the old cursor positon" });
-vim.keymap.set({ "n", "v", "x" }, "<leader>y", '"+y', { desc = "[Y]ank to clipboard" });
-vim.keymap.set({ "n", "v", "x" }, "<leader>p", '"+p', { desc = "[P]aste from clipboard" });
-vim.keymap.set({ "n", "v", "x" }, "<leader>d", '"+d', { desc = "[D]elete to clipboard" });
-vim.keymap.set("n", "Q", "<nop>", { desc = "No operation" });
-vim.keymap.set("n", "<leader>k", "<cmd>cnext<CR>zz", { desc = "Goto prev error" })
-vim.keymap.set("n", "<F3>", "<cmd>cnext<CR>zz", { desc = "Goto prev error" })
-vim.keymap.set("n", "<leader>j", "<cmd>cprev<CR>zz", { desc = "Goto next error" })
-vim.keymap.set("n", "<S-F3>", "<cmd>cprev<CR>zz", { desc = "Goto next error" })
-vim.keymap.set("n", "<S-Tab>", "<<hhhh", { desc = "Remove tab" });
-vim.keymap.set("n", "<leader><Tab>", ">>llll", { desc = "Add tab" });
-vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Remove tab for selected lines" });
-vim.keymap.set("v", "<Tab>", ">gv", { desc = "Add tab to selected lines" });
-vim.keymap.set("n", "<M-j>", ":m+<CR>==", { desc = "Switch present line with line above" });
-vim.keymap.set("n", "<M-k>", ":m-2<CR>==", { desc = "Switch present line with line bellow" });
-vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
-vim.keymap.set("n", "<M-.>", "<C-W>5<", { desc = "Decrease window width" });
-vim.keymap.set("n", "<M-,>", "<C-W>5>", { desc = "Increase window width" });
-vim.keymap.set("n", "<M-Up>", "<C-W>5-", { desc = "Decrease window width" });
-vim.keymap.set("n", "<M-Down>", "<C-W>5+", { desc = "Increase window width" });
-vim.keymap.set("n", "<C-->", "<C-o>", { noremap = true, silent = true, desc = "Go back" });
-vim.keymap.set("n", "<C-_>", "<C-i>", { noremap = true, silent = true, desc = "Go forward" });
-vim.api.nvim_set_keymap('n', '<leader>zi', ':lua ToggleFoldUnderCursor()<CR>', { noremap = true, silent = true })
-
 function ToggleFoldUnderCursor()
     local cursor_line = vim.fn.line('.')
     if vim.fn.foldclosed(cursor_line) ~= -1 then
@@ -64,11 +39,43 @@ function OpenBufferDirectory()
     vim.fn.system(open_command)
 end
 
+
+function GetCurrentLocation()
+    local location = vim.fn.expand("%") .. ":" .. vim.fn.line(".")
+    print(location)
+    vim.fn.setreg("+", location)
+end
+
+function GetCurrentLocationFull()
+    local location = vim.fn.expand("%:p") .. ":" .. vim.fn.line(".")
+    print(location)
+    vim.fn.setreg("+", location)
+end
+
+vim.keymap.set("n", "n", "nzzzv", { desc = "Goto [N]ext occurence of search and centers it to the old cursor positon" });
+vim.keymap.set("n", "N", "Nzzzv", { desc = "Goto previous occurence of search and centers it to the old cursor positon" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>y", '"+y', { desc = "[Y]ank to clipboard" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>p", '"+p', { desc = "[P]aste from clipboard" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>d", '"+d', { desc = "[D]elete to clipboard" });
+vim.keymap.set("n", "Q", "<nop>", { desc = "No operation" });
+vim.keymap.set("n", "<S-Tab>", "<<hhhh", { desc = "Remove tab" });
+vim.keymap.set("n", "<leader><Tab>", ">>llll", { desc = "Add tab" });
+vim.keymap.set("v", "<S-Tab>", "<gv", { desc = "Remove tab for selected lines" });
+vim.keymap.set("v", "<Tab>", ">gv", { desc = "Add tab to selected lines" });
+vim.keymap.set("n", "<M-j>", ":m+<CR>==", { desc = "Switch present line with line above" });
+vim.keymap.set("n", "<M-k>", ":m-2<CR>==", { desc = "Switch present line with line bellow" });
+vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
+vim.keymap.set("n", "<M-.>", "<C-W>5<", { desc = "Decrease window width" });
+vim.keymap.set("n", "<M-,>", "<C-W>5>", { desc = "Increase window width" });
+vim.keymap.set("n", "<M-Up>", "<C-W>5-", { desc = "Decrease window width" });
+vim.keymap.set("n", "<M-Down>", "<C-W>5+", { desc = "Increase window width" });
+vim.api.nvim_set_keymap('n', '<leader>zi', ':lua ToggleFoldUnderCursor()<CR>', { noremap = true, silent = true })
+
 vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end,
     { desc = "Open Current Directory in explorer" })
+
 vim.cmd([[command! Open :lua OpenBufferDirectory()]])
 vim.cmd([[command! Open :lua LaunchBuffer()]])
-
 
 vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
 
@@ -101,17 +108,6 @@ vim.keymap.set("n", "<leader>l", ":lua show_current_line_popup()<cr>",
 vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
     { noremap = true, silent = true, desc = "[Q]uickFixList [F]ilter" })
 
-function GetCurrentLocation()
-    local location = vim.fn.expand("%") .. ":" .. vim.fn.line(".")
-    print(location)
-    vim.fn.setreg("+", location)
-end
-
-function GetCurrentLocationFull()
-    local location = vim.fn.expand("%:p") .. ":" .. vim.fn.line(".")
-    print(location)
-    vim.fn.setreg("+", location)
-end
-
 vim.api.nvim_create_user_command('Location', GetCurrentLocation, {})
 vim.api.nvim_create_user_command('FullLocation', GetCurrentLocationFull, {})
+

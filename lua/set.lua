@@ -1,3 +1,4 @@
+vim.opt.winborder = "rounded"
 vim.opt.guicursor = ""
 
 vim.opt.nu = true
@@ -31,7 +32,6 @@ vim.opt.termguicolors = true
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
--- vim.cmd("hi statusline guidb=NONE");
 
 vim.opt.updatetime = 50
 vim.opt.foldmethod = "indent"
@@ -40,11 +40,7 @@ vim.opt.foldlevelstart = 99
 -- Remove statusline
 vim.cmd("hi statusline guibg=NONE")
 
--- Set the clipboard to "unnamedplus"
--- vim.cmd('set clipboard+=unnamedplus')
-
 vim.o.ignorecase = true
--- set clipboard+=unnamedplus
 
 -- Kickstart include
 vim.g.have_nerd_font = true
@@ -137,9 +133,3 @@ Add-Type -TypeDefinition @"
         return '';
     end
 end, { expr = true })
-
-vim.filetype.add({
-    extension = {
-        sln = "cpp"
-    }
-});

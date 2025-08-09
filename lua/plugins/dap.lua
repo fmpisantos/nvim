@@ -1,9 +1,3 @@
-vim.pack.add({
-	{ src = "https://github.com/mfussenegger/nvim-dap" },
-	{ src = "https://github.com/mfussenegger/nvim-dap" },
-	{ src = "https://github.com/mfussenegger/nvim-jdtls" }
-});
-
 _G.Dap = require('dap')
 
 -- Dap.configurations.java = {

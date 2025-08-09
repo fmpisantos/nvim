@@ -1,7 +1,3 @@
-vim.pack.add({
-    { src = "https://github.com/tpope/vim-fugitive" }
-});
-
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "git*",
     callback = function()

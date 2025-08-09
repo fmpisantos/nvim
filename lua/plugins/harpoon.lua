@@ -1,8 +1,3 @@
-vim.pack.add({
-    { src = "https://github.com/theprimeagen/harpoon", version = "harpoon2" },
-    { src = "https://github.com/nvim-lua/plenary.nvim" }
-});
-
 local harpoon = require("harpoon")
 harpoon:setup({
     -- only include serializable options (no functions)
