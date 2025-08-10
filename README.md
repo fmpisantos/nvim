@@ -1,121 +1,223 @@
-# Config
-## Windows: 
-```powershell
-install neovim "choco install neovim"
-cd $config/.config && git clone git@github.com:fmpisantos/nvim.git && cd nvim
-"$Env:XDG_CONFIG_HOME = '$HOME/.config'" >> $PROFILE
-git clone https://github.com/wbthomason/packer.nvim "$env:LOCALAPPDATA\nvim-data\site\pack\packer\start\packer.nvim"
-```
-## Mac:
-```shell
-curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
-tar xzf nvim-macos.tar.gz
-./nvim-macos/bin/nvim
-```
-Mac can use "brew install neovim"
+# pack.nvim (nvim-version: > 0.12.0)
 
-## Linux:
-Check this link for the most recent installation method: https://github.com/neovim/neovim/wiki/Installing-Neovim#linux
-```shell
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-chmod u+x nvim.appimage
-./nvim.appimage
+A lightweight Neovim plugin manager that simplifies plugin organization and batch installation with interactive prompts.
+
+## Installation
+
+Add pack.nvim to your Neovim configuration:
+
+```lua
+vim.pack.add({"https://github.com/fmpisantos/pack.nvim"})
 ```
 
-```shell
-./nvim.appimage --appimage-extract
-./squashfs-root/AppRun --version
+## Quick Start
 
-# Optional: exposing nvim globally.
-sudo mv squashfs-root /
-sudo ln -s /squashfs-root/AppRun /usr/bin/nvim
-nvim
+```lua
+local pack = require("pack")
+
+-- Add plugins from a directory
+pack.require("plugins")
+
+-- Add a specific plugin file
+pack.require("plugins.example.init")
+
+-- Install all queued plugins with a single prompt
+pack.install()
 ```
 
-## Mac/Linux:
-```shell
-cd ~/.config && git clone git@github.com:fmpisantos/nvim.git
+## API Reference
+
+### `pack.require(path)`
+
+Adds plugin sources to the installation queue.
+
+**Parameters:**
+- `path` (string): The module path to require
+  - Use folder paths to include all files in a directory
+  - Use dot notation for file paths (e.g., `"plugins.example.init"`)
+  - Dots (`.`) represent directory separators (`/`)
+
+**Examples:**
+```lua
+-- Add all plugins from the plugins/ directory
+pack.require("plugins")
+
+-- Add a specific plugin configuration file
+pack.require("plugins.lsp.init")
+pack.require("plugins.ui.statusline")
 ```
 
-# Installing the Vim/Neovim extension on macOS
+### `pack.install()`
 
-- To configure GitHub Copilot, open Vim/Neovim and enter the following command.
+Executes the installation process for all queued plugin sources.
 
-```vim
-:Copilot setup
+**Behavior:**
+- Runs `vim.pack.add()` for each queued source
+- Calls `.setup()` on each installed plugin
+- Groups all queued sources into a single installation prompt
+- Clears the queue after installation
+
+**Example:**
+```lua
+-- Queue multiple plugins
+pack.require("plugins.editor")
+pack.require("plugins.git")
+pack.require("plugins.lsp")
+
+-- Install all queued plugins with one prompt
+pack.install()
 ```
 
-- Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim command.
+## Usage Patterns
 
-```vim
-:Copilot enable
+### Basic Plugin Organization
+
+Organize your plugins in separate files and directories:
+
+```
+lua/
+├── plugins/
+│   ├── init.lua          -- Core plugins
+│   ├── editor.lua        -- Editor enhancements
+│   ├── lsp/
+│   │   ├── init.lua      -- LSP configuration
+│   │   └── servers.lua   -- Server configs
+│   └── ui/
+│       ├── colorscheme.lua
+│       └── statusline.lua
 ```
 
-# Installing the Vim/Neovim extension on Windows
+```lua
+local pack = require("pack")
 
-- To configure GitHub Copilot, open Vim/Neovim and enter the following command.
+-- Load core plugins
+pack.require("plugins")
 
-```vim
-:Copilot setup
+-- Load LSP configuration
+pack.require("plugins.lsp")
+
+-- Install everything in one go
+pack.install()
 ```
 
-- Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim command.
+### Grouped Installation
 
-```vim
-:Copilot enable
+You can create separate installation groups for different types of plugins:
+
+```lua
+local pack = require("pack")
+
+-- Group 1: Essential plugins
+pack.require("plugins.core")
+pack.require("plugins.editor")
+pack.install() -- First installation prompt
+
+-- Group 2: Optional enhancements
+pack.require("plugins.ui")
+pack.require("plugins.extras")
+pack.install() -- Second installation prompt
 ```
 
-# Installing the Vim/Neovim extension on Linux
+### Conditional Plugin Loading
 
-- To configure GitHub Copilot, open Vim/Neovim and enter the following command.
+```lua
+local pack = require("pack")
 
-```vim
-:Copilot setup
+-- Always load core plugins
+pack.require("plugins.core")
+
+-- Conditionally load development plugins
+if vim.fn.isdirectory(".git") == 1 then
+  pack.require("plugins.git")
+  pack.require("plugins.dev")
+end
+
+pack.install()
 ```
 
-Enable GitHub Copilot in your Vim/Neovim configuration, or with the Vim/Neovim command.
+## File Structure Examples
 
-```vim
-:Copilot enable
+### Plugin Configuration Files
+
+Each plugin file should return a configuration table. The `src` field follows the same specification as `vim.pack.add()`, supporting all the same options and formats.
+
+#### Simple Plugin Configuration
+```lua
+-- plugins/editor.lua
+return {
+    src = "nvim-treesitter/nvim-treesitter",
+    deps = {
+        "windwp/nvim-autopairs",
+        {src = "numToStr/Comment.nvim"} 
+    }
+}
 ```
 
-# Extra requirements:
- - A C compiler in your path and libstdc++ installed (https://github.com/nvim-treesitter/nvim-treesitter#quickstart)
-  - ```shell
-    sudo apt update
-    sudo apt install build-essential
-    sudo apt install libstdc++-10-dev
-    ```  
- - ripgrep
-  - ```shell
-    sudo apt install ripgrep
-    ```
-# JAVA
-  ## Install LSP
-    ```shell
-      :LspInstall jdtls
-    ```
-    or
-    ```shell
-      :Mason
-      2->Lsp
-      /jdtls
-      i->install
-    ```
-  ## Configure lombok
-  Setup enviroment variable for javaagent:
-  ```shell
-  export JDTLS_JVM_ARGS="-javaagent:$HOME/.local/share/java/lombok.jar"
-  ```
-  or
-  ```shell
-  export JDTLS_JVM_ARGS="-javaagent:/home/awman/.local/share/nvim/mason/packages/jdtls/lombok.jar"
-  ```
-  ## Configure DAP
-  ```shell
-  export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
-  ```
-  ## Note: 
-    - In windows is probably located at %APPDATA%/Local/nvim-data/...
-    - Path to mason can be fount with :LspInfo in a java file
-    - Note that for java the Mason jdtls version needs to be the version running on the shell 
+#### Plugin with Setup Function
+```lua
+-- plugins/lsp/init.lua
+return {
+  "neovim/nvim-lspconfig",
+  "hrsh7th/nvim-cmp",
+  setup = function()
+    -- LSP setup code here
+  end
+}
+```
+
+#### Advanced Plugin Configuration
+The `src` field supports all `vim.pack.add()` specifications, including lazy loading, build commands, and event triggers:
+
+```lua
+-- plugins/markdown.lua
+return {
+    src = {
+        {
+            src = "iamcco/markdown-preview.nvim",
+            event = { "BufReadPost", "BufWritePost", "BufNewFile", "VeryLazy" },
+            cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+            ft = { "markdown" },
+            build = "cd app && yarn install && git restore ."
+        },
+    }
+}
+```
+
+#### Supported `src` Formats
+
+Since pack.nvim uses `vim.pack.add()` internally, your `src` field can use any format supported by `vim.pack.add()`:
+
+- **String format**: `src = "owner/repo"`
+- **Table format**: `src = { src = "owner/repo", event = "VeryLazy" }`
+- **Array of plugins**: `src = { "plugin1", "plugin2", { src = "plugin3" } }`
+- **Full specification**: Including `event`, `cmd`, `ft`, `build`, `dependencies`, etc.
+
+All standard `vim.pack.add()` options are supported:
+- `event` - Lazy load on events
+- `cmd` - Lazy load on commands  
+- `ft` - Lazy load on filetypes
+- `build` - Post-install build commands
+- `dependencies` - Plugin dependencies
+- `config` - Configuration function
+
+## Benefits
+
+- **Organized Configuration**: Keep related plugins grouped in logical files and directories
+- **Batch Installation**: Install multiple plugins with a single confirmation prompt
+- **Flexible Loading**: Load plugins conditionally or in separate groups
+- **Simple API**: Just two main functions to learn and use
+- **Path Flexibility**: Use directory paths or specific file paths as needed
+
+## Tips
+
+1. **Group Related Plugins**: Keep similar functionality together (LSP, UI, editor tools)
+2. **Use Descriptive Paths**: Make your plugin organization self-documenting
+3. **Separate Optional Plugins**: Use multiple `install()` calls to separate essential from optional plugins
+4. **Leverage Conditionals**: Only load plugins when needed based on project type or environment
+
+## Troubleshooting
+
+- Ensure all required paths exist and contain valid Lua modules
+- Check that plugin files return proper configuration tables
+- Verify paths use dot notation correctly (dots instead of slashes)
+- Make sure `pack.install()` is called after all `pack.require()` calls for each group

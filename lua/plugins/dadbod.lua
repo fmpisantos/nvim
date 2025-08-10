@@ -1,6 +1,8 @@
 return {
     src = {
         "kristijanhusak/vim-dadbod-ui",
+    },
+    deps = {
         "tpope/vim-dadbod",
         "kristijanhusak/vim-dadbod-completion",
     },

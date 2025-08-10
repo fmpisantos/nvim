@@ -5,7 +5,7 @@ return {
             event = { "BufReadPost", "BufWritePost", "BufNewFile", "VeryLazy" },
             cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
             ft = { "markdown" },
-            build = "cd app && yarn install && git restore ."
+            build = "cd app && npm install && git restore ."
         },
     }
 }

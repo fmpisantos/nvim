@@ -5,7 +5,7 @@ vim.g.maplocalleader = " "
 require("set")
 require("remap")
 
-vim.pack.add({"https://github.com/fmpisantos/pack.nvim"})
+vim.pack.add({ "https://github.com/fmpisantos/pack.nvim" })
 local pack = require("pack")
 
 require("plugins.extensions");
