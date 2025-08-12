@@ -51,7 +51,6 @@ return {
             init_options = {
                 bundles = path.bundles,
             },
-            root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' })
         });
 
         vim.lsp.config('lemminx', {
