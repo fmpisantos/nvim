@@ -97,7 +97,6 @@ local function get_jdtls_paths()
         }
 
         cache_vars.paths = path
-
     else
         vim.notify("jdtls is not installed in Mason", vim.log.levels.ERROR)
     end
