@@ -5,6 +5,7 @@ return {
         "nvim-telescope/telescope-fzf-native.nvim",
         "nvim-lua/plenary.nvim"
     },
+    event = "VimEnter",
     setup = function()
         function vim.getVisualSelection()
             vim.cmd('noau normal! "vy"')
@@ -73,6 +74,7 @@ return {
         vim.keymap.set('n', '<leader>?', "<cmd>:Telescope help_tags<CR>", { desc = "Search helper tags" });
 
         vim.keymap.set('n', 'gd', require('telescope.builtin').lsp_definitions, { desc = '[G]oto [D]efinition' });
-        vim.keymap.set('n', '<M-\\>', require('telescope.builtin').lsp_document_symbols, { desc = '[D]ocument [S]ymbols' })
+        vim.keymap.set('n', '<M-\\>', require('telescope.builtin').lsp_document_symbols,
+            { desc = '[D]ocument [S]ymbols' })
     end
 }

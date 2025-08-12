@@ -5,6 +5,7 @@ return {
         "williamboman/mason-lspconfig.nvim",
         "mfussenegger/nvim-jdtls",
     },
+    event = { "BufReadPost", "BufWritePost", "BufNewFile" },
     setup = function()
         local on_attach = require("plugins.lsp-keymaps").on_attach
         require("mason").setup();
