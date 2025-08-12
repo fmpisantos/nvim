@@ -7,7 +7,11 @@ return {
     },
     setup = function()
         local on_attach = require("plugins.lsp-keymaps").on_attach
-        require("mason").setup();
+        require("mason").setup({
+            github = {
+                download = "curl"
+            }
+        });
         local capabilities = vim.lsp.protocol.make_client_capabilities()
 
         vim.lsp.config('*', {

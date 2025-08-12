@@ -2,6 +2,10 @@ return {
     src = {
         { src = "theprimeagen/harpoon", version = "harpoon2" }
     },
+    deps = {
+        "nvim-telescope/telescope.nvim",
+        "nvim-lua/plenary.nvim"
+    },
     setup = function()
         local harpoon = require("harpoon")
         harpoon:setup({
