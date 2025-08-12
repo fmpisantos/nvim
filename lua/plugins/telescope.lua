@@ -29,8 +29,14 @@ return {
             },
         }
 
+
+        -- vim.api.nvim_create_autocmd("BufRead", {
+        --     once = true,
+        --     callback = function()
         pcall(require('telescope').load_extension, 'fzf')
         pcall(require('telescope').load_extension, 'ui-select')
+        --     end
+        -- })
 
         local builtin = require('telescope.builtin')
         -- Search Files
