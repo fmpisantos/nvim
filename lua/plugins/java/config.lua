@@ -68,15 +68,23 @@ local function get_jdtls_paths()
             vim.list_extend(path.bundles, java_debug_bundle)
         end
 
-        ---
-        -- Useful if you're starting jdtls with a Java version that's
-        -- different from the one the project uses.
-        ---
         path.runtimes = {
             -- Note: the field `name` must be a valid `ExecutionEnvironment`,
             -- you can find the list here:
             -- https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
             --
+            -- {
+            --     name = 'JavaSE-11',
+            --     path = vim.fn.expand('F:\\Java\\11'),
+            -- },
+            -- {
+            --     name = 'JavaSE-17',
+            --     path = vim.fn.expand('F:\\Java\\17'),
+            -- },
+            -- {
+            --     name = 'JavaSE-21',
+            --     path = vim.fn.expand("$JAVA_HOME"),
+            -- },
             -- This example assume you are using sdkman: https://sdkman.io
             -- {
             --   name = 'JavaSE-17',
