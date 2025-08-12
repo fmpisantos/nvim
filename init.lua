@@ -4,6 +4,9 @@ vim.g.maplocalleader = " "
 
 require("set")
 require("remap")
+if vim.env.FROM_WEZTERM == "1" then
+    return
+end
 
 vim.pack.add({ "https://github.com/fmpisantos/pack.nvim" })
 local pack = require("pack")

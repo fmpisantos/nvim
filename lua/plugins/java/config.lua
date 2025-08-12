@@ -77,6 +77,18 @@ local function get_jdtls_paths()
             -- you can find the list here:
             -- https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
             --
+            {
+                name = 'JavaSE-11',
+                path = vim.fn.expand('$JAVA_HOME\\11'),
+            },
+            {
+                name = 'JavaSE-17',
+                path = vim.fn.expand('$JAVA_HOME\\17'),
+            },
+            {
+                name = 'JavaSE-21',
+                path = vim.fn.expand('$JAVA_HOME\\21'),
+            },
             -- This example assume you are using sdkman: https://sdkman.io
             -- {
             --   name = 'JavaSE-17',
@@ -89,7 +101,6 @@ local function get_jdtls_paths()
         }
 
         cache_vars.paths = path
-
     else
         vim.notify("jdtls is not installed in Mason", vim.log.levels.ERROR)
     end
