@@ -1,8 +1,9 @@
 return {
     src = {
         "nvim-treesitter/nvim-treesitter",
-        "nvim-treesitter/nvim-treesitter-context"
+        "nvim-treesitter/nvim-treesitter-context",
     },
+    event = { "BufReadPost", "BufWritePost", "BufNewFile" },
     setup = function()
         require('nvim-treesitter.install').prefer_git = true
         require('nvim-treesitter.configs').setup({

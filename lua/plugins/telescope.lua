@@ -3,10 +3,9 @@ return {
         "nvim-telescope/telescope.nvim",
         "nvim-telescope/telescope-ui-select.nvim",
         "nvim-telescope/telescope-fzf-native.nvim",
+        "nvim-lua/plenary.nvim"
     },
-    deps = {
-        src = "nvim-lua/plenary.nvim"
-    },
+    event = "VimEnter",
     setup = function()
         function vim.getVisualSelection()
             vim.cmd('noau normal! "vy"')
@@ -29,14 +28,8 @@ return {
             },
         }
 
-
-        -- vim.api.nvim_create_autocmd("BufRead", {
-        --     once = true,
-        --     callback = function()
         pcall(require('telescope').load_extension, 'fzf')
         pcall(require('telescope').load_extension, 'ui-select')
-        --     end
-        -- })
 
         local builtin = require('telescope.builtin')
         -- Search Files
