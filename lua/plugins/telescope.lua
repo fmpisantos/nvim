@@ -5,7 +5,6 @@ return {
         "nvim-telescope/telescope-fzf-native.nvim",
         "nvim-lua/plenary.nvim"
     },
-    event = "VimEnter",
     setup = function()
         function vim.getVisualSelection()
             vim.cmd('noau normal! "vy"')
