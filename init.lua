@@ -16,3 +16,11 @@ require("plugins.extensions");
 pack.require("plugins");
 pack.require("plugins.myPlugins.init");
 pack.install()
+
+-- Force wrap
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    pattern = "*/Notes/PersonalNotes/notes/notesForInterview(story).md",
+    callback = function()
+        vim.opt_local.wrap = true
+    end,
+})

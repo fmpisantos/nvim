@@ -39,7 +39,6 @@ function OpenBufferDirectory()
     vim.fn.system(open_command)
 end
 
-
 function GetCurrentLocation()
     local location = vim.fn.expand("%") .. ":" .. vim.fn.line(".")
     print(location)
@@ -74,7 +73,7 @@ vim.api.nvim_set_keymap('n', '<leader>zi', ':lua ToggleFoldUnderCursor()<CR>', {
 vim.keymap.set("n", "<leader><C-O>", function() OpenBufferDirectory() end,
     { desc = "Open Current Directory in explorer" })
 
-vim.cmd([[command! Open :lua OpenBufferDirectory()]])
+vim.cmd([[command! OpenDirectory :lua OpenBufferDirectory()]])
 vim.cmd([[command! Open :lua LaunchBuffer()]])
 
 vim.keymap.set("n", "zZ", "zszH", { desc = "Center line" });
@@ -110,4 +109,3 @@ vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
 
 vim.api.nvim_create_user_command('Location', GetCurrentLocation, {})
 vim.api.nvim_create_user_command('FullLocation', GetCurrentLocationFull, {})
-
