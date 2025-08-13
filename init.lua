@@ -8,7 +8,7 @@ if vim.env.FROM_WEZTERM == "1" then
     return
 end
 
--- vim.pack.add({ "https://github.com/fmpisantos/pack.nvim" })
+vim.pack.add({ "https://github.com/fmpisantos/pack.nvim" })
 local pack = require("pack")
 
 require("plugins.extensions");
