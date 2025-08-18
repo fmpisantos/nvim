@@ -63,6 +63,12 @@ return {
             },
         });
 
+        vim.lsp.config("clangd", {
+            on_attach = on_attach,
+            capabilities = capabilities,
+            root_markers = { "*.sln", "*.csproj" },
+        });
+
         vim.lsp.config("omnisharp", {
             cmd = { "omnisharp", "--languageserver" },
             on_attach = on_attach,
