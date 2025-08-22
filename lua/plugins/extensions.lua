@@ -77,7 +77,28 @@ function OpenFloatingWindow(content)
 
     local buf = api.nvim_create_buf(false, true)
 
-    api.nvim_buf_set_lines(buf, 0, -1, false, content)
+    local function sanitize_lines(content)
+        local lines = {}
+
+        if type(content) == "string" then
+            for line in content:gmatch("[^\r\n]+") do
+                table.insert(lines, line)
+            end
+        elseif type(content) == "table" then
+            for _, line in ipairs(content) do
+                for subline in line:gmatch("[^\r\n]+") do
+                    table.insert(lines, subline)
+                end
+            end
+        else
+            error("content must be string or table of strings")
+        end
+
+        return lines
+    end
+
+    api.nvim_buf_set_lines(buf, 0, -1, false, sanitize_lines(content))
+
 
     local win = api.nvim_open_win(buf, true, {
         relative = 'editor',
@@ -95,6 +116,30 @@ function OpenFloatingWindow(content)
 
     api.nvim_buf_set_keymap(buf, 'n', 'q', '<cmd>lua vim.api.nvim_win_close(' .. win .. ', true)<cr>',
         { noremap = true, silent = true })
+end
+
+_G.getVisualSelection = function()
+    local start_pos = vim.fn.getpos("'<")
+    local end_pos = vim.fn.getpos("'>")
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    local lines = vim.api.nvim_buf_get_lines(bufnr, start_pos[2] - 1, end_pos[2], false)
+    local selected_text = table.concat(lines, "\n"):sub(start_pos[3], end_pos[3])
+
+    return selected_text:match("^%s*(.-)%s*$")
+end
+
+_G.getLastVisualSelection = function()
+    vim.cmd('noau normal! "vy"')
+    local text = vim.fn.getreg('v')
+    vim.fn.setreg('v', {})
+
+    text = string.gsub(text, "\n", "")
+    if #text > 0 then
+        return text
+    else
+        return ''
+    end
 end
 
 _G.show_current_line_popup = function()
