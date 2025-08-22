@@ -150,3 +150,47 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
         end
     end,
 })
+
+local function translate_to_english()
+    local selected_text = getVisualSelection()
+
+    if selected_text == "" then
+        print("No text selected")
+        return
+    end
+
+    local api_url = "https://api-free.deepl.com/v2/translate"
+    local deepl_key = os.getenv("DEEPL_API_KEY")
+    if not deepl_key then
+        print("Please set the DEEPL_API_KEY environment variable")
+    end
+    local target_lang = "EN"
+
+    local data = {
+        auth_key = deepl_key,
+        text = selected_text,
+        target_lang = target_lang,
+    }
+
+    local response = vim.fn.system({
+        "curl", "-s", "-X", "POST", api_url,
+        "-d", "auth_key=" .. data.auth_key,
+        "-d", "text=" .. vim.fn.shellescape(data.text),
+        "-d", "target_lang=" .. data.target_lang,
+        data.source_lang and "-d" or nil, data.source_lang and "source_lang=" .. data.source_lang or nil,
+    })
+
+    local success, result = pcall(vim.fn.json_decode, response)
+    if not success or not result or result.translations[1].text == "" then
+        print("Translation failed")
+        return
+    end
+
+    OpenFloatingWindow({ result.translations[1].text })
+end
+
+vim.api.nvim_create_user_command(
+    "Translate",
+    translate_to_english,
+    { range = true, desc = "Translate selected lines to English" }
+)
