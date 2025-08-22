@@ -4,6 +4,16 @@ function trim(s)
     return s:match("^%s*(.-)%s*$")
 end
 
+_G.urlencode = function(str)
+    if str then
+        str = str:gsub("\n", "\r\n")
+        str = str:gsub("([^%w%-_%.~])", function(c)
+            return string.format("%%%02X", string.byte(c))
+        end)
+    end
+    return str or ""
+end
+
 _G.CreateFloatingWindow = function(opts)
     local ui = vim.api.nvim_list_uis()[1]
     if not ui then
@@ -121,13 +131,38 @@ end
 _G.getVisualSelection = function()
     local start_pos = vim.fn.getpos("'<")
     local end_pos = vim.fn.getpos("'>")
-    local bufnr = vim.api.nvim_get_current_buf()
 
-    local lines = vim.api.nvim_buf_get_lines(bufnr, start_pos[2] - 1, end_pos[2], false)
-    local selected_text = table.concat(lines, "\n"):sub(start_pos[3], end_pos[3])
+    local start_line = start_pos[2]
+    local start_col = start_pos[3]
+    local end_line = end_pos[2]
+    local end_col = end_pos[3]
 
-    return selected_text:match("^%s*(.-)%s*$")
+    local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+
+    if #lines == 0 then
+        return ""
+    end
+
+    if #lines == 1 then
+        return lines[1]:sub(start_col, end_col)
+    end
+
+    lines[#lines] = lines[#lines]:sub(1, end_col)
+    lines[1] = lines[1]:sub(start_col)
+
+    return table.concat(lines, "\n")
 end
+
+-- _G.getVisualSelection = function()
+--     local start_pos = vim.fn.getpos("'<")
+--     local end_pos = vim.fn.getpos("'>")
+--     local bufnr = vim.api.nvim_get_current_buf()
+--
+--     local lines = vim.api.nvim_buf_get_lines(bufnr, start_pos[2] - 1, end_pos[2], false)
+--     local selected_text = table.concat(lines, "\n"):sub(start_pos[3], end_pos[3])
+--
+--     return selected_text:match("^%s*(.-)%s*$")
+-- end
 
 _G.getLastVisualSelection = function()
     vim.cmd('noau normal! "vy"')
