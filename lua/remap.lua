@@ -109,3 +109,44 @@ vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
 
 vim.api.nvim_create_user_command('Location', GetCurrentLocation, {})
 vim.api.nvim_create_user_command('FullLocation', GetCurrentLocationFull, {})
+
+local function g_to_qf(pattern)
+    local start_pos  = vim.fn.getpos("'<")
+    local end_pos    = vim.fn.getpos("'>")
+    local bufnr      = vim.api.nvim_get_current_buf()
+
+    local start_line = start_pos[2]
+    local end_line   = end_pos[2]
+
+    local qf_entries = {}
+    for lnum = start_line, end_line do
+        local line = vim.fn.getline(lnum)
+        local col = string.find(line, pattern)
+        if col then
+            table.insert(qf_entries, {
+                bufnr = bufnr,
+                lnum = lnum,
+                col = col,
+                text = line,
+            })
+        end
+    end
+
+    if #qf_entries > 0 then
+        vim.fn.setqflist(qf_entries, "r")
+        vim.cmd("copen")
+    else
+        print("No matches")
+    end
+end
+
+vim.api.nvim_create_autocmd("CmdlineLeave", {
+    pattern = ":",
+    callback = function()
+        local cmd = vim.fn.getcmdline()
+        local pat = cmd:match("^'<,'>g/(.+)/?$")
+        if pat then
+            g_to_qf(pat)
+        end
+    end,
+})

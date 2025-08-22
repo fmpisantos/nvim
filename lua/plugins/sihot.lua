@@ -1,21 +1,11 @@
 -- Remaps
 local CompileFile = function()
-    -- Get the current file's full path
     local file_path = vim.fn.expand('%:p')
+    local ps_script = "W:\\env\\etc\\crossbow\\validation\\sihot_style_compiler.ps1"
 
-    -- Build the command
-    local command = 'powershell.exe -File W:\\env\\etc\\crossbow\\validation\\sihot_style_compiler.ps1 -FILE ' ..
-        file_path
-
-    vim.print(command);
-
-    -- Execute the command and capture the output
-    local output = vim.fn.system(command)
-
-    -- Print the output
-    print(output)
+    -- Open a terminal buffer and run the script
+    vim.cmd('terminal pwsh.exe -File "' .. ps_script .. '" -File "' .. file_path .. '"')
 end
-
 -- Create a command to call the function
 vim.api.nvim_create_user_command('CompileFile', CompileFile, {})
 
