@@ -170,7 +170,7 @@ local function translate_to_english()
     local response = vim.fn.system({
         "curl", "-s", "-X", "POST", api_url,
         "-d", "auth_key=" .. deepl_key,
-        "--ssl-no-revoke",  -- Add this flag to fix Windows SSL issue
+        "--ssl-no-revoke", -- Add this flag to fix Windows SSL issue
         "-d", "text=" .. vim.fn.shellescape(selected_text),
         "-d", "target_lang=" .. target_lang,
     })
@@ -191,3 +191,6 @@ vim.api.nvim_create_user_command(
     translate_to_english,
     { range = true, desc = "Translate selected lines to English" }
 )
+
+vim.keymap.set('n', "<C-c>", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });
+vim.keymap.set('n', "<leader>c", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });

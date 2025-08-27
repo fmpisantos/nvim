@@ -84,6 +84,7 @@ function M.on_attach(_, bufnr)
     local function format()
         vim.cmd('setlocal expandtab')
         vim.cmd('setlocal shiftwidth=4')
+
         local before = vim.fn.getline(1, '$')
         vim.lsp.buf.format()
         if vim.bo.filetype == 'java' then

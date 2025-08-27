@@ -57,7 +57,7 @@ return {
             settings = {
                 xml = {
                     format = {
-                        lineWidth = vim.lsp.get_clients()[1] and 0 or nil
+                        lineWidth = 0
                     }
                 }
             },
