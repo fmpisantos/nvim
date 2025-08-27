@@ -109,3 +109,88 @@ vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
 
 vim.api.nvim_create_user_command('Location', GetCurrentLocation, {})
 vim.api.nvim_create_user_command('FullLocation', GetCurrentLocationFull, {})
+
+local function g_to_qf(pattern)
+    local start_pos  = vim.fn.getpos("'<")
+    local end_pos    = vim.fn.getpos("'>")
+    local bufnr      = vim.api.nvim_get_current_buf()
+
+    local start_line = start_pos[2]
+    local end_line   = end_pos[2]
+
+    local qf_entries = {}
+    for lnum = start_line, end_line do
+        local line = vim.fn.getline(lnum)
+        local col = string.find(line, pattern)
+        if col then
+            table.insert(qf_entries, {
+                bufnr = bufnr,
+                lnum = lnum,
+                col = col,
+                text = line,
+            })
+        end
+    end
+
+    if #qf_entries > 0 then
+        vim.fn.setqflist(qf_entries, "r")
+        vim.cmd("copen")
+    else
+        print("No matches")
+    end
+end
+
+vim.api.nvim_create_autocmd("CmdlineLeave", {
+    pattern = ":",
+    callback = function()
+        local cmd = vim.fn.getcmdline()
+        local pat = cmd:match("^'<,'>g/(.+)/?$")
+        if pat then
+            g_to_qf(pat)
+        end
+    end,
+})
+
+local function translate_to_english()
+    local selected_text = getVisualSelection()
+
+    if selected_text == "" then
+        print("No text selected")
+        return
+    end
+
+    local api_url = "https://api-free.deepl.com/v2/translate"
+    local deepl_key = os.getenv("DEEPL_API_KEY")
+    if not deepl_key then
+        print("Please set the DEEPL_API_KEY environment variable")
+        return
+    end
+    local target_lang = "EN"
+
+    local response = vim.fn.system({
+        "curl", "-s", "-X", "POST", api_url,
+        "-d", "auth_key=" .. deepl_key,
+        "--ssl-no-revoke", -- Add this flag to fix Windows SSL issue
+        "-d", "text=" .. vim.fn.shellescape(selected_text),
+        "-d", "target_lang=" .. target_lang,
+    })
+
+    local success, result = pcall(vim.fn.json_decode, response)
+    if not success or not result or not result.translations or result.translations[1].text == "" then
+        vim.print(vim.inspect(result))
+        vim.print(vim.inspect(response))
+        print("Translation failed")
+        return
+    end
+
+    OpenFloatingWindow({ result.translations[1].text })
+end
+
+vim.api.nvim_create_user_command(
+    "Translate",
+    translate_to_english,
+    { range = true, desc = "Translate selected lines to English" }
+)
+
+vim.keymap.set('n', "<C-c>", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });
+vim.keymap.set('n', "<leader>c", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });

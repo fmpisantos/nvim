@@ -57,10 +57,16 @@ return {
             settings = {
                 xml = {
                     format = {
-                        lineWidth = vim.lsp.get_clients()[1] and 0 or nil
+                        lineWidth = 0
                     }
                 }
             },
+        });
+
+        vim.lsp.config("clangd", {
+            on_attach = on_attach,
+            capabilities = capabilities,
+            root_markers = { "*.sln", "*.csproj" },
         });
 
         vim.lsp.config("omnisharp", {
