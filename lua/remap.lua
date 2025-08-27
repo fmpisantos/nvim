@@ -54,7 +54,9 @@ end
 vim.keymap.set("n", "n", "nzzzv", { desc = "Goto [N]ext occurence of search and centers it to the old cursor positon" });
 vim.keymap.set("n", "N", "Nzzzv", { desc = "Goto previous occurence of search and centers it to the old cursor positon" });
 vim.keymap.set({ "n", "v", "x" }, "<leader>y", '"+y', { desc = "[Y]ank to clipboard" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>Y", '"+Y', { desc = "[Y]ank to clipboard" });
 vim.keymap.set({ "n", "v", "x" }, "<leader>p", '"+p', { desc = "[P]aste from clipboard" });
+vim.keymap.set({ "n", "v", "x" }, "<leader>P", '"+P', { desc = "[P]aste from clipboard" });
 vim.keymap.set({ "n", "v", "x" }, "<leader>d", '"+d', { desc = "[D]elete to clipboard" });
 vim.keymap.set("n", "Q", "<nop>", { desc = "No operation" });
 vim.keymap.set("n", "<S-Tab>", "<<hhhh", { desc = "Remove tab" });
@@ -194,3 +196,5 @@ vim.api.nvim_create_user_command(
 
 vim.keymap.set('n', "<C-c>", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });
 vim.keymap.set('n', "<leader>c", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });
+
+vim.keymap.set('n', '-', "<cmd>Ex<CR>", { noremap = true, silent = true, desc = "Open file" });
