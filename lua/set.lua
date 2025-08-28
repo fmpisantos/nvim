@@ -71,19 +71,18 @@ vim.api.nvim_create_autocmd('TermOpen', {
     end,
 })
 
--- MacOS only
 if vim.loop.os_uname().sysname == 'Darwin' then
-    vim.cmd('set shell=/bin/zsh')
-    vim.cmd('set shellcmdflag=-c')
-    vim.cmd('set shellquote=')
-    vim.cmd('set shellxquote=')
+    -- macOS → use zsh
+    vim.opt.shell = "/bin/zsh"
+    vim.opt.shellcmdflag = "-c"
+    vim.opt.shellquote = ""
+    vim.opt.shellxquote = ""
 else
+    -- Windows → use PowerShell Core (pwsh)
     vim.opt.shell = "pwsh"
-    -- vim.opt.shellcmdflag = "-Command"
-    -- vim.cmd('set shell=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe')
     vim.opt.shellcmdflag = "-NoProfile -ExecutionPolicy Bypass -Command"
-    vim.cmd('set shellquote=\\')
-    vim.cmd('set shellxquote=')
+    vim.opt.shellquote = ""
+    vim.opt.shellxquote = ""
 end
 
 -- Set up the autocmd for redrawing
