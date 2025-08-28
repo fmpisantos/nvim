@@ -197,4 +197,4 @@ vim.api.nvim_create_user_command(
 vim.keymap.set('n', "<C-c>", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });
 vim.keymap.set('n', "<leader>c", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });
 
-vim.keymap.set('n', '-', "<cmd>Ex<CR>", { noremap = true, silent = true, desc = "Open file" });
+vim.keymap.set('n', '-', "<cmd>Ex<CR>", { noremap = true, silent = true, desc = "Open file" })
