@@ -9,7 +9,7 @@ vim.opt.wildmenu = true
 -- Define a :Find command that searches only git-tracked/untracked (non-ignored) files
 if vim.fn.executable("rg") == 1 then
     vim.api.nvim_create_user_command("Find", function(opts)
-        local files = vim.fn.systemlist("rg -i --vimgrep --files --hidden --glob '!*.git/*'")
+        local files = vim.fn.systemlist("rg -i --vimgrep --files --hidden --glob '!*.git/*' --glob ")
         local matches = {}
 
         local query = opts.args:lower()
@@ -32,7 +32,7 @@ if vim.fn.executable("rg") == 1 then
     end, {
         nargs = 1,
         complete = function(_, line, _)
-            local files = vim.fn.systemlist("rg -i --vimgrep --files --hidden --glob '!*.git/*'")
+            local files = vim.fn.systemlist("rg -i --vimgrep --files --hidden --glob '!*.git/*' --glob ")
             local prefix = line:match("%S+$") or ""
             local matches = {}
             local lower_prefix = prefix:lower()
