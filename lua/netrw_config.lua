@@ -1,3 +1,4 @@
+vim.keymap.set("n", "-", "<cmd>edit %:p:h<CR><cmd>normal! gv<CR>", { noremap = true, silent = true, desc = "Netrw with current file highlighted" })
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
