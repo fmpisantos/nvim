@@ -41,11 +41,19 @@ return {
             end, { desc = "[P]roject [F]ile" });
         -- Grep
         -- Project
-        vim.keymap.set('n', '<leader>pg', builtin.live_grep, { desc = "[P]roject [G]rep" });
+        vim.keymap.set('n', '<leader>pg', function()
+            require('telescope.builtin').live_grep({
+                additional_args = function() return { "--hidden" } end
+            })
+        end, { desc = "[P]roject [G]rep" })
+
         vim.keymap.set('v', '<leader>pg', function()
-            local text = vim.getVisualSelection()
-            builtin.live_grep({ default_text = text })
-        end, { desc = "[P]roject [G]rep" });
+            local text = vim.fn.getreg('"') -- get visual selection
+            require('telescope.builtin').live_grep({
+                default_text = text,
+                additional_args = function() return { "--hidden" } end
+            })
+        end, { desc = "[P]roject [G]rep" })
         -- Document
         vim.keymap.set('n', '<leader>dg', function() builtin.live_grep({ search_dirs = { vim.fn.expand("%:p") } }) end,
             { desc = "[D]ocument [G]rep" });
