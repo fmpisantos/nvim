@@ -1,4 +1,5 @@
-vim.keymap.set("n", "-", "<cmd>edit %:p:h<CR><cmd>normal! gv<CR>", { noremap = true, silent = true, desc = "Netrw with current file highlighted" })
+vim.keymap.set("n", "-", "<cmd>edit %:p:h<CR><cmd>normal! gv<CR>",
+    { noremap = true, silent = true, desc = "Netrw with current file highlighted" })
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
@@ -6,6 +7,18 @@ vim.g.netrw_winsize = 25
 vim.opt.path:append("**")
 -- Make it so that I can tab on :find
 vim.opt.wildmenu = true
+-- Auto-select current file in netrw
+vim.api.nvim_create_augroup("netrw_select_current", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+    group = "netrw_select_current",
+    pattern = "netrw",
+    callback = function()
+        local current_file = vim.fn.expand('#:t')
+        if current_file ~= '' then
+            vim.fn.search('\\V\\^' .. vim.fn.escape(current_file, '\\') .. '\\$')
+        end
+    end,
+})
 
 -- Helper function to convert glob pattern to Lua pattern
 local function glob_to_pattern(glob)
