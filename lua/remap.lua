@@ -14,7 +14,7 @@ function LaunchBuffer()
     local os_name = vim.loop.os_uname().sysname
     if os_name == 'Windows_NT' then
         open_command = 'explorer "' .. buffer_dir .. '"'
-    elseif os_name == 'Darwin' then
+    elseif os_name == 'Darwin' or os_name == 'Linux' then
         open_command = 'open "' .. buffer_dir .. '"'
     else
         open_command = 'xdg-open "' .. buffer_dir .. '" &'
@@ -30,7 +30,7 @@ function OpenBufferDirectory()
     local os_name = vim.loop.os_uname().sysname
     if os_name == 'Windows_NT' then
         open_command = 'explorer "' .. buffer_dir .. '"'
-    elseif os_name == 'Darwin' then
+    elseif os_name == 'Darwin' or os_name == 'Linux' then
         open_command = 'open "' .. buffer_dir .. '"'
     else
         open_command = 'xdg-open "' .. buffer_dir .. '" &'

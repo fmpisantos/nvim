@@ -71,7 +71,7 @@ vim.api.nvim_create_autocmd('TermOpen', {
     end,
 })
 
-if vim.loop.os_uname().sysname == 'Darwin' then
+if vim.loop.os_uname().sysname == 'Darwin' or vim.loop.os_uname().sysname == 'Linux' then
     -- macOS → use zsh
     vim.opt.shell = "/bin/zsh"
     vim.opt.shellcmdflag = "-c"
@@ -99,7 +99,7 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
             vim.fn.jobstart('tmux neww ~/.local/bin/tmux-sessionizer')
         end
         if vim.env.TERM_PROGRAM == "WezTerm" then
-            if vim.loop.os_uname().sysname == 'Darwin' then
+            if vim.loop.os_uname().sysname == 'Darwin' or vim.loop.os_uname().sysname == 'Linux' then
                 vim.fn.jobstart({ "osascript", "-e", 'tell application "System Events" to key code 105' }) -- 105 is F13
             elseif vim.loop.os_uname().sysname == 'Windows_NT' then
                 vim.fn.jobstart({
