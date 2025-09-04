@@ -27,7 +27,13 @@ vim.opt.undofile = true
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
+-- In your init.lua or wherever you configure nvim
 vim.opt.termguicolors = true
+
+-- Force true color support
+if vim.fn.has('termguicolors') == 1 then
+  vim.opt.termguicolors = true
+end
 
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
