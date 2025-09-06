@@ -3,6 +3,7 @@ vim.keymap.set("n", "-", "<cmd>edit %:p:h<CR><cmd>normal! gv<CR>",
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
+vim.g.netrw_sizestyle = "H" -- Homan-readable
 -- Make find search recursively
 vim.opt.path:append("**")
 -- Make it so that I can tab on :find
