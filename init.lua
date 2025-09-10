@@ -5,6 +5,7 @@ vim.g.maplocalleader = " "
 require("set")
 require("netrw_config")
 require("remap")
+
 if vim.env.FROM_WEZTERM == "1" then
     return
 end
