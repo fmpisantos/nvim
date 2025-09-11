@@ -91,7 +91,7 @@ vim.api.nvim_create_autocmd('VimResume', {
 })
 
 -- Run Sessionizer
-vim.keymap.set({ 'n', 'v', 'i' }, '<C-f>', function()
+vim.keymap.set({ 'n', 'v', 'i', 'c' }, '<C-f>', function()
     if vim.fn.mode() == 'c' then
         return '<C-f>'
     else
