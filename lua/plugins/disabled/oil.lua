@@ -1,7 +1,7 @@
 return {
     src = "stevearc/oil.nvim",
     setup = function()
-        require('oil').setup {
+        require('lua.plugins.disabled.oil').setup {
             keymaps = {
                 ["<C-h>"] = false,
                 ["<Tab>"] = "actions.preview",
@@ -21,8 +21,8 @@ return {
             },
             skip_confirm_for_simple_edits = true,
         }
-        vim.keymap.set("n", "-", require('oil').open, { noremap = true, silent = true, desc = "Open file" });
-        vim.keymap.set("n", "<leader>pv", require('oil').open,
+        vim.keymap.set("n", "-", require('lua.plugins.disabled.oil').open, { noremap = true, silent = true, desc = "Open file" });
+        vim.keymap.set("n", "<leader>pv", require('lua.plugins.disabled.oil').open,
             { noremap = true, silent = true, desc = "Open parent directory" });
     end
 }

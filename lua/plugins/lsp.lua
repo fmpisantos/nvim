@@ -51,17 +51,17 @@ return {
             root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' })
         });
 
-        vim.lsp.config('lemminx', {
-            capabilities = capabilities,
-            on_attach = on_attach,
-            settings = {
-                xml = {
-                    format = {
-                        lineWidth = 0
-                    }
-                }
-            },
-        });
+        -- vim.lsp.config('lemminx', {
+        --     capabilities = capabilities,
+        --     on_attach = on_attach,
+        --     settings = {
+        --         xml = {
+        --             format = {
+        --                 lineWidth = 0
+        --             }
+        --         }
+        --     },
+        -- });
 
         vim.lsp.config("clangd", {
             on_attach = on_attach,
@@ -106,7 +106,7 @@ return {
                 "omnisharp",
                 "jdtls",
                 "lua_ls",
-                "lemminx",
+                -- "lemminx",
                 "vtsls"
             },
             automatic_installation = true,
