@@ -6,7 +6,7 @@ require("set")
 require("netrw_config")
 require("remap")
 
-if vim.env.FROM_WEZTERM == "1" then
+if vim.env.TMUX or vim.env.FROM_WEZTERM == "1" then
     return
 end
 
