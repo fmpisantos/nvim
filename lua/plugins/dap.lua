@@ -27,35 +27,130 @@ return {
             },
         }
 
+        local function read_file(path)
+            local f = io.open(path, "r")
+            if not f then return nil end
+            local content = f:read("*a")
+            f:close()
+            return content
+        end
+
+        local function detect_java_version(path)
+            local content = read_file(path)
+            if not content then return nil end
+
+            -- Gradle style: sourceCompatibility or toolchain
+            local gradle_version = content:match("sourceCompatibility%s*=%s*['\"](%d+)")
+                or content:match("JavaLanguageVersion%.of%((%d+)%)")
+
+            -- Maven style: <source> or <maven.compiler.source>
+            local maven_version = content:match("<source>(%d+)</source>")
+                or content:match("<maven%.compiler%.source>(%d+)</maven%.compiler%.source>")
+
+            return gradle_version or maven_version or 17
+        end
 
         local function compile_mvn()
             local handle = io.popen('mvn clean install -DskipTests 2>&1')
             if handle then
                 local result = handle:read('*a')
                 handle:close()
-                if result then
-                    print('Maven compilation error:\n' .. result)
+                if result:match('BUILD SUCCESS') then
+                    print('✅ Maven build succeeded')
                 else
-                    vim.api.nvim_err_writeln('Failed to read Maven compilation output')
+                    vim.api.nvim_err_writeln('❌ Maven build failed:\n' .. result)
                 end
             else
                 vim.api.nvim_err_writeln('Failed to execute mvn compile')
             end
         end
 
+        local function compile_gradle(java_version)
+            local cmd = './gradlew build -x test 2>&1'
+            if not io.open('./gradlew', 'r') then
+                cmd = 'gradle build -x test 2>&1'
+            end
+
+            local java_home = os.getenv('JAVA_HOME')
+
+            if java_version then
+                local home = os.getenv('HOME')
+                local sdkman_base = home .. '/.sdkman/candidates/java/'
+
+                -- Find matching SDKMAN Java version
+                local handle = io.popen('ls -1 ' .. sdkman_base .. ' 2>/dev/null')
+                if handle then
+                    local found_version = nil
+                    for line in handle:lines() do
+                        -- Match versions that start with the requested version
+                        if line:match('^' .. java_version .. '%.') or line:match('^' .. java_version .. '%-') then
+                            found_version = line
+                            break
+                        end
+                    end
+                    handle:close()
+
+                    if found_version then
+                        local sdkman_path = sdkman_base .. found_version
+                        if io.open(sdkman_path .. '/bin/java', 'r') then
+                            java_home = sdkman_path
+                            print('🔧 Using Java ' .. found_version .. ' from SDKMAN: ' .. java_home)
+                        end
+                    else
+                        vim.api.nvim_err_writeln('⚠️  No Java version matching ' .. java_version .. ' found in SDKMAN')
+                    end
+                end
+            end
+
+            if java_home then
+                cmd = cmd .. ' -Dorg.gradle.java.home=' .. java_home
+            end
+
+            local handle = io.popen(cmd)
+            if handle then
+                local result = handle:read('*a')
+                handle:close()
+                if result:match('BUILD SUCCESSFUL') then
+                    print('✅ Gradle build succeeded')
+                else
+                    vim.api.nvim_err_writeln('❌ Gradle build failed:\n' .. result)
+                end
+            else
+                vim.api.nvim_err_writeln('Failed to execute Gradle build')
+            end
+        end
+
+        local function compile()
+            if vim.fn.filereadable('pom.xml') == 1 then
+                print('📦 Detected Maven project')
+                local version = detect_java_version('pom.xml')
+                if version then print('Detected Java version: ' .. version) end
+                compile_mvn()
+            elseif vim.fn.filereadable('build.gradle') == 1 or vim.fn.filereadable('build.gradle.kts') == 1 then
+                print('📦 Detected Gradle project')
+                local path = vim.fn.filereadable('build.gradle') == 1 and 'build.gradle' or 'build.gradle.kts'
+                local version = detect_java_version(path)
+                print('Java Version: ' .. tostring(version))
+                if version then print('Detected Java version: ' .. version) end
+                compile_gradle(version)
+            else
+                vim.api.nvim_err_writeln('❌ No Maven or Gradle build file found')
+            end
+        end
+
         local jdtls = require("jdtls");
 
         vim.keymap.set('n', '<leader>Dr', function()
-                compile_mvn(); Dap.run_last()
+                compile(); Dap.run_last()
             end,
             { noremap = true, desc = "Debug run_last" })
 
         vim.keymap.set('n', "<leader>Dc", function()
-            compile_mvn(); jdtls.test_class()
+            compile(); jdtls.test_class()
         end, { desc = "[D]ebug [C]lass" })
 
         vim.keymap.set('n', '<leader>Dm', function()
-                compile_mvn(); jdtls.test_nearest_method()
+                compile(); jdtls.test_nearest_method()
             end,
             { desc = '[D]ebug [M]ethod' })
 
@@ -65,7 +160,7 @@ return {
 
         vim.keymap.set('n', '<F5>', function()
             if Dap.session() == nil then
-                compile_mvn();
+                compile();
             end
             Dap.continue()
         end, { noremap = true, desc = "Degub Continue" })
@@ -73,7 +168,7 @@ return {
         vim.keymap.set('n', '<S-F5>', function() Dap.terminate() end, { noremap = true, desc = "Debug Stop" })
 
         vim.keymap.set('n', '<C-S-F5>', function()
-            Dap.terminate(); compile_mvn(); Dap.run_last();
+            Dap.terminate(); compile(); Dap.run_last();
         end, { noremap = true, desc = "Debug Stop" })
 
         vim.keymap.set('n', '<F9>', function() Dap.toggle_breakpoint() end,
@@ -98,7 +193,7 @@ return {
 
         local function mvnnt()
             require("plugins.java.config").clear_data_dir();
-            compile_mvn();
+            compile();
         end
         vim.api.nvim_create_user_command("Mvnnt", mvnnt, { desc = "Maven clean install with no tests" })
         vim.api.nvim_create_user_command("DapCleanInstall", mvnnt, { desc = "Maven clean install with no tests" })
