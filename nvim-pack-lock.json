@@ -1,0 +1,39 @@
+{
+  "plugins": {
+    "LuaSnip": [],
+    "harpoon": {
+      "version": "'harpoon2'"
+    },
+    "markdown-preview.nvim": [],
+    "marks.nvim": [],
+    "mason-lspconfig.nvim": [],
+    "mason.nvim": [],
+    "neodev.nvim": [],
+    "notes.nvim": [],
+    "nvim-dap": [],
+    "nvim-dap-ui": [],
+    "nvim-jdtls": [],
+    "nvim-lspconfig": [],
+    "nvim-nio": [],
+    "nvim-treesitter": [],
+    "nvim-treesitter-context": [],
+    "nvim-web-devicons": {
+      "rev": "8dcb311",
+      "src": "https://github.com/nvim-tree/nvim-web-devicons"
+    },
+    "oil.nvim": [],
+    "pack.nvim": [],
+    "plenary.nvim": [],
+    "shared_buffer.nvim": [],
+    "telescope-fzf-native.nvim": [],
+    "telescope-ui-select.nvim": [],
+    "telescope.nvim": [],
+    "tokyonight.nvim": [],
+    "undotree": [],
+    "vague.nvim": [],
+    "vim-dadbod": [],
+    "vim-dadbod-completion": [],
+    "vim-dadbod-ui": [],
+    "vim-fugitive": []
+  }
+}

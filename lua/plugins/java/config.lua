@@ -25,7 +25,7 @@ local function get_jdtls_paths()
     local mason_registry = require("mason-registry")
 
     if mason_registry.has_package("jdtls") then
-        local jdtls_pkg = mason_registry.get_package("jdtls")
+        local _ = mason_registry.get_package("jdtls")
         local jdtls_install = vim.fn.expand("$MASON/packages/jdtls")
         path.java_agent = jdtls_install .. '/lombok.jar'
         path.launcher_jar = vim.fn.glob(jdtls_install .. '/plugins/org.eclipse.equinox.launcher_*.jar')
@@ -94,6 +94,15 @@ local function get_jdtls_paths()
             --   name = 'JavaSE-18',
             --   path = vim.fn.expand('~/.sdkman/candidates/java/18.0.2-amzn'),
             -- },
+            {
+                name = 'JavaSE-17',
+                path = vim.fn.expand('~/.sdkman/candidates/java/17.0.16-tem'),
+                default = true
+            },
+            {
+                name = 'JavaSE-11',
+                path = vim.fn.expand('~/.sdkman/candidates/java/11.0.28-tem'),
+            }
         }
 
         cache_vars.paths = path
@@ -149,9 +158,8 @@ function M.jdtls_setup(_)
     local data_dir = path.data_dir .. '/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 
     local cmd = {
-        -- 💀
-        'java',
-
+        -- 'java',
+        vim.fn.expand('~/.sdkman/candidates/java/21.0.9-tem/bin/java'),
         '-Declipse.application=org.eclipse.jdt.ls.core.id1',
         '-Dosgi.bundles.defaultStartLevel=4',
         '-Declipse.product=org.eclipse.jdt.ls.core.product',
