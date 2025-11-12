@@ -4,6 +4,13 @@ return {
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
         "mfussenegger/nvim-jdtls",
+        -- Add nvim-cmp and its dependencies
+        "hrsh7th/nvim-cmp",         -- The completion plugin itself
+        "hrsh7th/cmp-nvim-lsp",     -- LSP completion source for nvim-cmp
+        "L3MON4D3/LuaSnip",         -- Snippet engine (recommended for LSP snippets)
+        "saadparwaiz1/cmp_luasnip", -- Snippet source for nvim-cmp
+        "hrsh7th/cmp-buffer",       -- Buffer word completion source
+        "hrsh7th/cmp-path",         -- File path completion source
     },
     event = { "BufReadPost", "BufWritePost", "BufNewFile" },
     setup = function()
@@ -11,6 +18,42 @@ return {
         require("mason").setup();
         local capabilities = vim.lsp.protocol.make_client_capabilities()
 
+        -- Configure nvim-cmp
+        local cmp = require("cmp")
+        local luasnip = require("luasnip")
+
+        cmp.setup {
+            snippet = {
+                expand = function(args)
+                    luasnip.lsp_expand(args.body)
+                end,
+            },
+            completion = {
+                completeopt = 'menu,menuone,noinsert',
+            },
+            mapping = cmp.mapping.preset.insert {
+                ['<C-n>'] = cmp.mapping.select_next_item(),
+                ['<C-p>'] = cmp.mapping.select_prev_item(),
+                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+                ['<C-Space>'] = nil,
+                ['<Tab>'] = nil,
+                ['<S-Tab>'] = cmp.mapping.complete {},
+            },
+            sources = {
+                { name = 'nvim_lsp' },
+                { name = 'luasnip' },
+                { name = 'path' },
+            },
+        }
+
+        cmp.setup.filetype({ "sql" }, {
+            sources = {
+                { name = "vim-dadbod-completion" },
+                { name = "buffer" },
+            }
+        })
+
+        -- Your existing LSP configurations follow
         vim.lsp.config('*', {
             capabilities = capabilities,
             on_attach = on_attach,
@@ -50,18 +93,6 @@ return {
             },
             root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' })
         });
-
-        -- vim.lsp.config('lemminx', {
-        --     capabilities = capabilities,
-        --     on_attach = on_attach,
-        --     settings = {
-        --         xml = {
-        --             format = {
-        --                 lineWidth = 0
-        --             }
-        --         }
-        --     },
-        -- });
 
         vim.lsp.config("clangd", {
             on_attach = on_attach,
@@ -106,19 +137,10 @@ return {
                 "omnisharp",
                 "jdtls",
                 "lua_ls",
-                -- "lemminx",
                 "vtsls"
             },
             automatic_installation = true,
             automatic_enable = true
         });
-
-        -- vim.lsp.enable({
-        --     "omnisharp",
-        --     "jdtls",
-        --     "lua_ls",
-        --     "lemminx",
-        --     "vtsls"
-        -- });
     end
 }
