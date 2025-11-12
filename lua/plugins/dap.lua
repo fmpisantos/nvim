@@ -153,14 +153,14 @@ return {
             local tasks = {}
             if vim.fn.filereadable("build.gradle") == 1 or vim.fn.filereadable("build.gradle.kts") == 1 then
                 tasks = {
-                    { name = "test (unit tests only)", cmd = "./gradlew test", needs_docker = false, source_set = "test" },
-                    { name = "integrationTest", cmd = "./gradlew integrationTest", needs_docker = true, source_set = "integrationTest" },
-                    { name = "allTests (unit + integration)", cmd = "./gradlew allTests", needs_docker = true, source_set = "all" },
+                    { name = "test (unit tests only)",        cmd = "./gradlew test",            needs_docker = false, source_set = "test" },
+                    { name = "integrationTest",               cmd = "./gradlew integrationTest", needs_docker = true,  source_set = "integrationTest" },
+                    { name = "allTests (unit + integration)", cmd = "./gradlew allTests",        needs_docker = true,  source_set = "all" },
                 }
             elseif vim.fn.filereadable("pom.xml") == 1 then
                 tasks = {
-                    { name = "test (unit tests)", cmd = "mvn test", needs_docker = false, source_set = "test" },
-                    { name = "verify (includes integration)", cmd = "mvn verify", needs_docker = true, source_set = "integration" },
+                    { name = "test (unit tests)",             cmd = "mvn test",   needs_docker = false, source_set = "test" },
+                    { name = "verify (includes integration)", cmd = "mvn verify", needs_docker = true,  source_set = "integration" },
                 }
             else
                 vim.api.nvim_err_writeln("No build file found")

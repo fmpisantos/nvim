@@ -4,12 +4,8 @@ local java_cmds = vim.api.nvim_create_augroup('java_cmds', { clear = true })
 local cache_vars = {}
 
 local features = {
-    -- change this to `true` to enable codelens
-    codelens = false,
-
-    -- change this to `true` if you have `nvim-dap`,
-    -- `java-test` and `java-debug-adapter` installed
-    debugger = true,
+    codelens = false, -- enable if you want
+    debugger = true,  -- enable if nvim-dap + java-test installed
 }
 
 local function get_jdtls_paths()
@@ -18,15 +14,12 @@ local function get_jdtls_paths()
     end
 
     local path = {}
-
     path.data_dir = vim.fn.stdpath('cache') .. '/nvim-jdtls'
-
 
     local mason_registry = require("mason-registry")
 
     if mason_registry.has_package("jdtls") then
-        local _ = mason_registry.get_package("jdtls")
-        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls")
+        local jdtls_install = vim.fn.expand("$MASON/share/jdtls")
         path.java_agent = jdtls_install .. '/lombok.jar'
         path.launcher_jar = vim.fn.glob(jdtls_install .. '/plugins/org.eclipse.equinox.launcher_*.jar')
 
@@ -40,69 +33,39 @@ local function get_jdtls_paths()
 
         path.bundles = {}
 
-        ---
-        -- Include java-test bundle if present
-        ---
+        -- Include java-test "fat jar" bundle
         local java_test_path = vim.fn.expand("$MASON/share/java-test")
-
         local java_test_bundle = vim.split(
             vim.fn.glob(java_test_path .. '/com.microsoft.java.test.runner-jar-with-dependencies.jar', 1),
             '\n'
         )
-
+        vim.print(vim.inspect(java_test_bundle))
         if java_test_bundle[1] ~= '' then
             vim.list_extend(path.bundles, java_test_bundle)
         end
 
-        ---
-        -- Include java-debug-adapter bundle if present
-        ---
+        -- Include java-debug-adapter bundle
         local java_debug_path = vim.fn.expand("$MASON/share/java-debug-adapter")
-
         local java_debug_bundle = vim.split(
             vim.fn.glob(java_debug_path .. '/com.microsoft.java.debug.plugin-*.jar', 1),
             '\n'
         )
-
+        vim.print(vim.inspect(java_debug_bundle))
         if java_debug_bundle[1] ~= '' then
             vim.list_extend(path.bundles, java_debug_bundle)
         end
 
+        -- Java runtimes
         path.runtimes = {
-            -- Note: the field `name` must be a valid `ExecutionEnvironment`,
-            -- you can find the list here:
-            -- https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
-            --
-            -- {
-            --     name = 'JavaSE-11',
-            --     path = vim.fn.expand('F:\\Java\\11'),
-            -- },
-            -- {
-            --     name = 'JavaSE-17',
-            --     path = vim.fn.expand('F:\\Java\\17'),
-            -- },
-            -- {
-            --     name = 'JavaSE-21',
-            --     path = vim.fn.expand("$JAVA_HOME"),
-            -- },
-            -- This example assume you are using sdkman: https://sdkman.io
-            -- {
-            --   name = 'JavaSE-17',
-            --   path = vim.fn.expand('~/.sdkman/candidates/java/17.0.6-tem'),
-            -- },
-            -- {
-            --   name = 'JavaSE-18',
-            --   path = vim.fn.expand('~/.sdkman/candidates/java/18.0.2-amzn'),
-            -- },
             {
                 name = 'JavaSE-17',
                 path = vim.fn.expand('~/.sdkman/candidates/java/17.0.16-tem'),
-                default = true
+                default = true,
             },
             {
                 name = 'JavaSE-11',
                 path = vim.fn.expand('~/.sdkman/candidates/java/11.0.28-tem'),
-            }
+            },
         }
 
         cache_vars.paths = path
@@ -114,16 +77,13 @@ local function get_jdtls_paths()
 end
 
 local function enable_debugger(_)
-    local dap_config = require("plugins.java.dap_java_config");
+    local dap_config = require("plugins.java.dap_java_config")
     dap_config.setup_dap({ hotcodereplace = 'auto' })
     dap_config.setup_dap_main_class_configs()
-
-    -- local opts = { buffer = bufnr }
 end
 
 local function enable_codelens(bufnr)
     pcall(vim.lsp.codelens.refresh)
-
     vim.api.nvim_create_autocmd('BufWritePost', {
         buffer = bufnr,
         group = java_cmds,
@@ -158,7 +118,6 @@ function M.jdtls_setup(_)
     local data_dir = path.data_dir .. '/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 
     local cmd = {
-        -- 'java',
         vim.fn.expand('~/.sdkman/candidates/java/21.0.9-tem/bin/java'),
         '-Declipse.application=org.eclipse.jdt.ls.core.id1',
         '-Dosgi.bundles.defaultStartLevel=4',
@@ -169,38 +128,14 @@ function M.jdtls_setup(_)
         '-Xms2g',
         '-Xmx4g',
         '--add-modules=ALL-SYSTEM',
-        '--add-opens',
-        'java.base/java.util=ALL-UNNAMED',
-        '--add-opens',
-        'java.base/java.lang=ALL-UNNAMED',
-
-        -- 💀
-        '-jar',
-        path.launcher_jar,
-
-        -- 💀
-        '-configuration',
-        path.platform_config,
-
-        -- 💀
-        '-data',
-        data_dir,
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '-jar', path.launcher_jar,
+        '-configuration', path.platform_config,
+        '-data', data_dir,
     }
 
     return cmd, path
-
-    -- This starts a new client & server,
-    -- or attaches to an existing client & server depending on the `root_dir`.
-    -- jdtls.start_or_attach({
-    --     cmd = cmd,
-    --     on_attach = jdtls_on_attach,
-    --     flags = {
-    --         allow_incremental_sync = true,
-    --     },
-    --     init_options = {
-    --         bundles = path.bundles,
-    --     },
-    -- })
 end
 
 return M
