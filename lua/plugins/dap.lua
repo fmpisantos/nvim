@@ -7,15 +7,6 @@ return {
     setup = function()
         _G.Dap = require('dap')
 
-        -- Dap.configurations.java = {
-        --     {
-        --         type = 'java',
-        --         request = 'attach',
-        --         name = "Debug (Attach) - Remote",
-        --         hostName = "127.0.0.1",
-        --         port = 5005,
-        --     },
-
         Dap.configurations.scala = {
             {
                 type = "scala",
@@ -138,50 +129,162 @@ return {
             end
         end
 
-        local jdtls = require("jdtls");
+        -- Test task selection function
+        local function select_test_task(callback)
+            local tasks = {}
+
+            -- Detect available test tasks based on build file
+            if vim.fn.filereadable('build.gradle') == 1 or vim.fn.filereadable('build.gradle.kts') == 1 then
+                tasks = {
+                    { name = 'test (unit tests only)', cmd = './gradlew test', needs_docker = false },
+                    { name = 'integrationTest', cmd = './gradlew integrationTest', needs_docker = true },
+                    { name = 'allTests (unit + integration)', cmd = './gradlew allTests', needs_docker = true },
+                }
+            elseif vim.fn.filereadable('pom.xml') == 1 then
+                tasks = {
+                    { name = 'test (unit tests)', cmd = 'mvn test', needs_docker = false },
+                    { name = 'verify (includes integration)', cmd = 'mvn verify', needs_docker = true },
+                }
+            else
+                vim.api.nvim_err_writeln('No build file found')
+                return
+            end
+
+            -- Create menu options
+            local options = {}
+            for i, task in ipairs(tasks) do
+                local docker_indicator = task.needs_docker and " 🐳" or ""
+                table.insert(options, string.format("%d. %s%s", i, task.name, docker_indicator))
+            end
+
+            vim.ui.select(options, {
+                prompt = 'Select test task:',
+            }, function(choice, idx)
+                if idx then
+                    callback(tasks[idx])
+                end
+            end)
+        end
+
+        -- Docker compose management
+        local docker_started = false
+
+        local function start_docker_compose()
+            if docker_started then
+                print('🐳 Docker Compose already running')
+                return
+            end
+
+            print('🐳 Starting Docker Compose...')
+            local result = vim.fn.system('./gradlew composeUp')
+            if vim.v.shell_error == 0 then
+                print('✅ Docker Compose started')
+                docker_started = true
+            else
+                vim.api.nvim_err_writeln('❌ Failed to start Docker Compose:\n' .. result)
+            end
+        end
+
+        local function stop_docker_compose()
+            if not docker_started then
+                return
+            end
+
+            print('🐳 Stopping Docker Compose...')
+            vim.fn.system('./gradlew composeDown')
+            docker_started = false
+            print('✅ Docker Compose stopped')
+        end
+
+        -- Enhanced test runner with task selection
+        local function run_test_with_task(task, test_function)
+            compile()
+
+            -- Start Docker Compose if needed for integration tests
+            if task.needs_docker then
+                start_docker_compose()
+
+                -- Setup cleanup listener
+                Dap.listeners.before.event_terminated['docker-cleanup'] = function()
+                    vim.defer_fn(function()
+                        stop_docker_compose()
+                    end, 1000)
+                end
+            end
+
+            -- Prepare test classpath
+            print('🧪 Preparing tests: ' .. task.name)
+            local prepare_cmd = task.cmd:gsub('gradlew', 'gradlew testClasses')
+            vim.fn.system(prepare_cmd .. ' --dry-run')
+
+            -- Run the test
+            test_function()
+        end
+
+        local jdtls = require("jdtls")
 
         vim.keymap.set('n', '<leader>Dr', function()
-                compile(); Dap.run_last()
-            end,
-            { noremap = true, desc = "Debug run_last" })
+            compile()
+            Dap.run_last()
+        end, { noremap = true, desc = "Debug run_last" })
 
+        -- Updated keymaps with test task selection
         vim.keymap.set('n', "<leader>Dc", function()
-            compile(); jdtls.test_class()
+            select_test_task(function(task)
+                run_test_with_task(task, function()
+                    jdtls.test_class()
+                end)
+            end)
         end, { desc = "[D]ebug [C]lass" })
 
         vim.keymap.set('n', '<leader>Dm', function()
-                compile(); jdtls.test_nearest_method()
-            end,
-            { desc = '[D]ebug [M]ethod' })
+            select_test_task(function(task)
+                run_test_with_task(task, function()
+                    jdtls.test_nearest_method()
+                end)
+            end)
+        end, { desc = '[D]ebug [M]ethod' })
 
-        vim.keymap.set("n", "<leader>Dl", function() jdtls.pick_test() end,
-            { desc = "[D]ebug pick tests" })
-
+        vim.keymap.set("n", "<leader>Dl", function()
+            jdtls.pick_test()
+        end, { desc = "[D]ebug pick tests" })
 
         vim.keymap.set('n', '<F5>', function()
             if Dap.session() == nil then
-                compile();
+                compile()
             end
             Dap.continue()
-        end, { noremap = true, desc = "Degub Continue" })
+        end, { noremap = true, desc = "Debug Continue" })
 
-        vim.keymap.set('n', '<S-F5>', function() Dap.terminate() end, { noremap = true, desc = "Debug Stop" })
-
-        vim.keymap.set('n', '<C-S-F5>', function()
-            Dap.terminate(); compile(); Dap.run_last();
+        vim.keymap.set('n', '<S-F5>', function()
+            Dap.terminate()
+            -- Cleanup docker if it was started
+            if docker_started then
+                stop_docker_compose()
+            end
         end, { noremap = true, desc = "Debug Stop" })
 
-        vim.keymap.set('n', '<F9>', function() Dap.toggle_breakpoint() end,
-            { noremap = true, desc = "Debug Toggle Breakpoint" })
+        vim.keymap.set('n', '<C-S-F5>', function()
+            Dap.terminate()
+            compile()
+            Dap.run_last()
+        end, { noremap = true, desc = "Debug Restart" })
 
-        vim.keymap.set('n', '<F10>', function() Dap.step_over() end,
-            { noremap = true, desc = "Debug Step Over" })
+        vim.keymap.set('n', '<F9>', function()
+            Dap.toggle_breakpoint()
+        end, { noremap = true, desc = "Debug Toggle Breakpoint" })
 
-        vim.keymap.set('n', '<S-F11>', function() Dap.step_out() end,
-            { noremap = true, desc = "Debug Step Out" })
+        vim.keymap.set('n', '<F10>', function()
+            Dap.step_over()
+        end, { noremap = true, desc = "Debug Step Over" })
 
-        vim.keymap.set('n', '<F11>', function() Dap.step_into() end,
-            { noremap = true, desc = "Debug Step Into" })
+        vim.keymap.set('n', '<S-F11>', function()
+            Dap.step_out()
+        end, { noremap = true, desc = "Debug Step Out" })
+
+        vim.keymap.set('n', '<F11>', function()
+            Dap.step_into()
+        end, { noremap = true, desc = "Debug Step Into" })
 
         vim.api.nvim_create_user_command("DapClearBreakpoints", function()
             Dap.clear_breakpoints()
@@ -192,10 +295,17 @@ return {
         end, { desc = "Open REPL" })
 
         local function mvnnt()
-            require("plugins.java.config").clear_data_dir();
-            compile();
+            require("plugins.java.config").clear_data_dir()
+            compile()
         end
+
         vim.api.nvim_create_user_command("Mvnnt", mvnnt, { desc = "Maven clean install with no tests" })
         vim.api.nvim_create_user_command("DapCleanInstall", mvnnt, { desc = "Maven clean install with no tests" })
+
+        -- Docker management commands
+        vim.api.nvim_create_user_command("DockerUp", start_docker_compose,
+            { desc = "Start Docker Compose" })
+        vim.api.nvim_create_user_command("DockerDown", stop_docker_compose,
+            { desc = "Stop Docker Compose" })
     end
 }
