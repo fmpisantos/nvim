@@ -355,6 +355,13 @@ local function make_config(lens, launch_args, config_overrides)
         vmArgs = table.concat(launch_args.vmArguments, ' '),
         noDebug = false,
     }
+    -- Add jdtls bundles (e.g., java-test jars) to classpath for test execution
+    local client = get_clients({ name = 'jdtls' })[1]
+    if client and client.config.init_options and client.config.init_options.bundles then
+        for _, jar in ipairs(client.config.init_options.bundles) do
+            table.insert(config.classPaths, jar)
+        end
+    end
     config = vim.tbl_extend('force', config, config_overrides or default_config_overrides)
     if lens.testKind == TestKind.TestNG or lens.kind == TestKind.TestNG then
         local jar = testng_runner()
