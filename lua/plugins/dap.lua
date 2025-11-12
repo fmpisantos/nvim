@@ -129,6 +129,179 @@ return {
             end
         end
 
+        -- Detect if current test is an integration test
+        local function is_integration_test()
+            local current_file = vim.fn.expand('%:p')
+            -- Check if file is in src/test directory or ends with IT.java
+            return current_file:match('IT%.java
+
+        -- Docker compose management
+        local docker_started = false
+
+        local function start_docker_compose()
+            if docker_started then
+                print('🐳 Docker Compose already running')
+                return
+            end
+
+            print('🐳 Starting Docker Compose...')
+            local result = vim.fn.system('./gradlew composeUp')
+            if vim.v.shell_error == 0 then
+                print('✅ Docker Compose started')
+                docker_started = true
+            else
+                vim.api.nvim_err_writeln('❌ Failed to start Docker Compose:\n' .. result)
+            end
+        end
+
+        local function stop_docker_compose()
+            if not docker_started then
+                return
+            end
+
+            print('🐳 Stopping Docker Compose...')
+            vim.fn.system('./gradlew composeDown')
+            docker_started = false
+            print('✅ Docker Compose stopped')
+        end
+
+        -- Enhanced test runner with task selection
+        local function run_test_with_task(task, test_function)
+            compile()
+
+            -- Start Docker Compose if needed for integration tests
+            if task.needs_docker then
+                start_docker_compose()
+
+                -- Setup cleanup listener
+                Dap.listeners.before.event_terminated['docker-cleanup'] = function()
+                    vim.defer_fn(function()
+                        stop_docker_compose()
+                    end, 1000)
+                end
+            end
+
+            -- Prepare test classpath properly for the selected task
+            print('🧪 Preparing tests: ' .. task.name)
+            
+            -- Compile test sources based on task type
+            local test_compile_cmd
+            if task.name:match('integration') then
+                -- For integration tests, compile both test and integration test sources
+                test_compile_cmd = './gradlew testClasses integrationTestClasses'
+            else
+                -- For unit tests, just compile test sources
+                test_compile_cmd = './gradlew testClasses'
+            end
+            
+            print('📝 Compiling test sources...')
+            local result = vim.fn.system(test_compile_cmd)
+            if vim.v.shell_error ~= 0 then
+                vim.api.nvim_err_writeln('❌ Test compilation failed:\n' .. result)
+                return
+            end
+            print('✅ Test sources compiled')
+
+            -- Set environment variables for the test context
+            if task.source_set == 'integrationTest' then
+                -- Expose docker-compose environment variables
+                vim.fn.system('./gradlew composeUp --dry-run > /dev/null 2>&1')
+            end
+
+            -- Run the test
+            test_function()
+        end
+
+        local jdtls = require("jdtls")
+
+        vim.keymap.set('n', '<leader>Dr', function()
+            compile()
+            Dap.run_last()
+        end, { noremap = true, desc = "Debug run_last" })
+
+        -- Updated keymaps with test task selection
+        vim.keymap.set('n', "<leader>Dc", function()
+            select_test_task(function(task)
+                run_test_with_task(task, function()
+                    jdtls.test_class()
+                end)
+            end)
+        end, { desc = "[D]ebug [C]lass" })
+
+        vim.keymap.set('n', '<leader>Dm', function()
+            select_test_task(function(task)
+                run_test_with_task(task, function()
+                    jdtls.test_nearest_method()
+                end)
+            end)
+        end, { desc = '[D]ebug [M]ethod' })
+
+        vim.keymap.set("n", "<leader>Dl", function()
+            jdtls.pick_test()
+        end, { desc = "[D]ebug pick tests" })
+
+        vim.keymap.set('n', '<F5>', function()
+            if Dap.session() == nil then
+                compile()
+            end
+            Dap.continue()
+        end, { noremap = true, desc = "Debug Continue" })
+
+        vim.keymap.set('n', '<S-F5>', function()
+            Dap.terminate()
+            -- Cleanup docker if it was started
+            if docker_started then
+                stop_docker_compose()
+            end
+        end, { noremap = true, desc = "Debug Stop" })
+
+        vim.keymap.set('n', '<C-S-F5>', function()
+            Dap.terminate()
+            compile()
+            Dap.run_last()
+        end, { noremap = true, desc = "Debug Restart" })
+
+        vim.keymap.set('n', '<F9>', function()
+            Dap.toggle_breakpoint()
+        end, { noremap = true, desc = "Debug Toggle Breakpoint" })
+
+        vim.keymap.set('n', '<F10>', function()
+            Dap.step_over()
+        end, { noremap = true, desc = "Debug Step Over" })
+
+        vim.keymap.set('n', '<S-F11>', function()
+            Dap.step_out()
+        end, { noremap = true, desc = "Debug Step Out" })
+
+        vim.keymap.set('n', '<F11>', function()
+            Dap.step_into()
+        end, { noremap = true, desc = "Debug Step Into" })
+
+        vim.api.nvim_create_user_command("DapClearBreakpoints", function()
+            Dap.clear_breakpoints()
+        end, { desc = "Clear all breakpoints" })
+
+        vim.api.nvim_create_user_command("DapRepl", function()
+            Dap.repl.open()
+        end, { desc = "Open REPL" })
+
+        local function mvnnt()
+            require("plugins.java.config").clear_data_dir()
+            compile()
+        end
+
+        vim.api.nvim_create_user_command("Mvnnt", mvnnt, { desc = "Maven clean install with no tests" })
+        vim.api.nvim_create_user_command("DapCleanInstall", mvnnt, { desc = "Maven clean install with no tests" })
+
+        -- Docker management commands
+        vim.api.nvim_create_user_command("DockerUp", start_docker_compose,
+            { desc = "Start Docker Compose" })
+        vim.api.nvim_create_user_command("DockerDown", stop_docker_compose,
+            { desc = "Stop Docker Compose" })
+    end
+}) or current_file:match('/it/')
+        end
+
         -- Test task selection function
         local function select_test_task(callback)
             local tasks = {}
@@ -136,17 +309,26 @@ return {
             -- Detect available test tasks based on build file
             if vim.fn.filereadable('build.gradle') == 1 or vim.fn.filereadable('build.gradle.kts') == 1 then
                 tasks = {
-                    { name = 'test (unit tests only)', cmd = './gradlew test', needs_docker = false },
-                    { name = 'integrationTest', cmd = './gradlew integrationTest', needs_docker = true },
-                    { name = 'allTests (unit + integration)', cmd = './gradlew allTests', needs_docker = true },
+                    { name = 'test (unit tests only)', cmd = './gradlew test', needs_docker = false, source_set = 'test' },
+                    { name = 'integrationTest', cmd = './gradlew integrationTest', needs_docker = true, source_set = 'integrationTest' },
+                    { name = 'allTests (unit + integration)', cmd = './gradlew allTests', needs_docker = true, source_set = 'all' },
                 }
             elseif vim.fn.filereadable('pom.xml') == 1 then
                 tasks = {
-                    { name = 'test (unit tests)', cmd = 'mvn test', needs_docker = false },
-                    { name = 'verify (includes integration)', cmd = 'mvn verify', needs_docker = true },
+                    { name = 'test (unit tests)', cmd = 'mvn test', needs_docker = false, source_set = 'test' },
+                    { name = 'verify (includes integration)', cmd = 'mvn verify', needs_docker = true, source_set = 'integration' },
                 }
             else
                 vim.api.nvim_err_writeln('No build file found')
+                return
+            end
+
+            -- Auto-select based on current file if it's clearly an integration test
+            if is_integration_test() then
+                -- Pre-select integration test option
+                local integration_task = tasks[2] -- integrationTest is usually index 2
+                print('📝 Auto-detected integration test')
+                callback(integration_task)
                 return
             end
 
@@ -212,10 +394,26 @@ return {
                 end
             end
 
-            -- Prepare test classpath
+            -- Prepare test classpath properly for the selected task
             print('🧪 Preparing tests: ' .. task.name)
-            local prepare_cmd = task.cmd:gsub('gradlew', 'gradlew testClasses')
-            vim.fn.system(prepare_cmd .. ' --dry-run')
+            
+            -- Compile test sources based on task type
+            local test_compile_cmd
+            if task.name:match('integration') then
+                -- For integration tests, compile both test and integration test sources
+                test_compile_cmd = './gradlew testClasses integrationTestClasses'
+            else
+                -- For unit tests, just compile test sources
+                test_compile_cmd = './gradlew testClasses'
+            end
+            
+            print('📝 Compiling test sources...')
+            local result = vim.fn.system(test_compile_cmd)
+            if vim.v.shell_error ~= 0 then
+                vim.api.nvim_err_writeln('❌ Test compilation failed:\n' .. result)
+                return
+            end
+            print('✅ Test sources compiled')
 
             -- Run the test
             test_function()
