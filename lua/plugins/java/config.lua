@@ -21,13 +21,18 @@ local function get_jdtls_paths()
     local path = {}
 
     path.data_dir = vim.fn.stdpath('cache') .. '/nvim-jdtls'
-
+    path.java_agent = ""
 
     local mason_registry = require("mason-registry")
 
-    if mason_registry.has_package("jdtls") then
-        local _ = mason_registry.get_package("jdtls")
-        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls-17")
+    local suffix = ""
+    if mason_registry.has_package("jdtls-17") then
+        suffix = "-17"
+    end
+
+    if mason_registry.has_package("jdtls" .. suffix) then
+        local _ = mason_registry.get_package("jdtls" .. suffix)
+        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls" .. suffix)
         path.java_agent = jdtls_install .. '/lombok.jar'
         path.launcher_jar = vim.fn.glob(jdtls_install .. '/plugins/org.eclipse.equinox.launcher_*.jar')
 
@@ -43,9 +48,8 @@ local function get_jdtls_paths()
 
         ---
         -- Include java-test bundle if present
-        -- Temporarily disabled to avoid version conflicts with project JUnit
         ---
-        local java_test_path = vim.fn.expand("$MASON/packages/java-test-17")
+        local java_test_path = vim.fn.expand("$MASON/packages/java-test" .. suffix)
 
         local java_test_bundle = vim.split(
             vim.fn.glob(java_test_path .. '/extension/server/*.jar'),
@@ -58,9 +62,8 @@ local function get_jdtls_paths()
 
         ---
         -- Include java-debug-adapter bundle if present
-        -- Temporarily disabled to use project versions
         ---
-        local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter-17")
+        local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter" .. suffix)
 
         local java_debug_bundle = vim.split(
             vim.fn.glob(java_debug_path .. '/extension/server/com.microsoft.java.debug.plugin-*.jar'),
