@@ -4,12 +4,7 @@ local java_cmds = vim.api.nvim_create_augroup('java_cmds', { clear = true })
 local cache_vars = {}
 
 local features = {
-    -- change this to `true` to enable codelens
-    codelens = false,
-
-    -- change this to `true` if you have `nvim-dap`,
-    -- `java-test` and `java-debug-adapter` installed
-    -- Disabled for JUnit 4 compatibility
+    codelens = true,
     debugger = true,
 }
 
@@ -25,14 +20,9 @@ local function get_jdtls_paths()
 
     local mason_registry = require("mason-registry")
 
-    local suffix = ""
-    -- if mason_registry.has_package("jdtls-16") then
-    --     suffix = "-17"
-    -- end
-
-    if mason_registry.has_package("jdtls" .. suffix) then
-        local _ = mason_registry.get_package("jdtls" .. suffix)
-        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls" .. suffix)
+    if mason_registry.has_package("jdtls") then
+        local _ = mason_registry.get_package("jdtls")
+        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls")
         path.java_agent = jdtls_install .. '/lombok.jar'
         path.launcher_jar = vim.fn.glob(jdtls_install .. '/plugins/org.eclipse.equinox.launcher_*.jar')
 
@@ -49,7 +39,7 @@ local function get_jdtls_paths()
         ---
         -- Include java-test bundle if present
         ---
-        local java_test_path = vim.fn.expand("$MASON/packages/java-test" .. suffix)
+        local java_test_path = vim.fn.expand("$MASON/packages/java-test")
 
         local java_test_bundle = vim.split(
             vim.fn.glob(java_test_path .. '/extension/server/*.jar'),
@@ -60,10 +50,7 @@ local function get_jdtls_paths()
             vim.list_extend(path.bundles, java_test_bundle)
         end
 
-        ---
-        -- Include java-debug-adapter bundle if present
-        ---
-        local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter" .. suffix)
+        local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter")
 
         local java_debug_bundle = vim.split(
             vim.fn.glob(java_debug_path .. '/extension/server/com.microsoft.java.debug.plugin-*.jar'),
@@ -75,31 +62,6 @@ local function get_jdtls_paths()
         end
 
         path.runtimes = {
-            -- Note: the field `name` must be a valid `ExecutionEnvironment`,
-            -- you can find the list here:
-            -- https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
-            --
-            -- {
-            --     name = 'JavaSE-11',
-            --     path = vim.fn.expand('F:\\Java\\11'),
-            -- },
-            -- {
-            --     name = 'JavaSE-17',
-            --     path = vim.fn.expand('F:\\Java\\17'),
-            -- },
-            -- {
-            --     name = 'JavaSE-21',
-            --     path = vim.fn.expand("$JAVA_HOME"),
-            -- },
-            -- This example assume you are using sdkman: https://sdkman.io
-            -- {
-            --   name = 'JavaSE-17',
-            --   path = vim.fn.expand('~/.sdkman/candidates/java/17.0.6-tem'),
-            -- },
-            -- {
-            --   name = 'JavaSE-18',
-            --   path = vim.fn.expand('~/.sdkman/candidates/java/18.0.2-amzn'),
-            -- },
             {
                 name = 'JavaSE-17',
                 path = vim.fn.expand('~/.sdkman/candidates/java/17.0.16-tem'),
@@ -123,8 +85,6 @@ local function enable_debugger(_)
     local dap_config = require("plugins.java.dap_java_config");
     dap_config.setup_dap({ hotcodereplace = 'auto' })
     dap_config.setup_dap_main_class_configs()
-
-    -- local opts = { buffer = bufnr }
 end
 
 local function enable_codelens(bufnr)
@@ -194,19 +154,6 @@ function M.jdtls_setup(_)
     }
 
     return cmd, path
-
-    -- This starts a new client & server,
-    -- or attaches to an existing client & server depending on the `root_dir`.
-    -- jdtls.start_or_attach({
-    --     cmd = cmd,
-    --     on_attach = jdtls_on_attach,
-    --     flags = {
-    --         allow_incremental_sync = true,
-    --     },
-    --     init_options = {
-    --         bundles = path.bundles,
-    --     },
-    -- })
 end
 
 return M
