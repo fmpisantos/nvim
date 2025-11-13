@@ -211,7 +211,7 @@ return {
         end
 
         -- ---------- KEYMAPS ----------
-        local jdtls = require("jdtls")
+        local jdtls = require("plugins.java.dap_java_config")
 
         vim.keymap.set("n", "<leader>Dr", function()
             compile()
