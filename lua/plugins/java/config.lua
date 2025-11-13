@@ -4,12 +4,7 @@ local java_cmds = vim.api.nvim_create_augroup('java_cmds', { clear = true })
 local cache_vars = {}
 
 local features = {
-    -- change this to `true` to enable codelens
-    codelens = false,
-
-    -- change this to `true` if you have `nvim-dap`,
-    -- `java-test` and `java-debug-adapter` installed
-    -- Disabled for JUnit 4 compatibility
+    codelens = true,
     debugger = true,
 }
 
@@ -25,14 +20,9 @@ local function get_jdtls_paths()
 
     local mason_registry = require("mason-registry")
 
-    local suffix = ""
-    -- if mason_registry.has_package("jdtls-16") then
-    --     suffix = "-17"
-    -- end
-
-    if mason_registry.has_package("jdtls" .. suffix) then
-        local _ = mason_registry.get_package("jdtls" .. suffix)
-        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls" .. suffix)
+    if mason_registry.has_package("jdtls") then
+        local _ = mason_registry.get_package("jdtls")
+        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls")
         path.java_agent = jdtls_install .. '/lombok.jar'
         path.launcher_jar = vim.fn.glob(jdtls_install .. '/plugins/org.eclipse.equinox.launcher_*.jar')
 
@@ -49,7 +39,7 @@ local function get_jdtls_paths()
         ---
         -- Include java-test bundle if present
         ---
-        local java_test_path = vim.fn.expand("$MASON/packages/java-test" .. suffix)
+        local java_test_path = vim.fn.expand("$MASON/packages/java-test")
 
         local java_test_bundle = vim.split(
             vim.fn.glob(java_test_path .. '/extension/server/*.jar'),
@@ -63,7 +53,7 @@ local function get_jdtls_paths()
         ---
         -- Include java-debug-adapter bundle if present
         ---
-        local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter" .. suffix)
+        local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter")
 
         local java_debug_bundle = vim.split(
             vim.fn.glob(java_debug_path .. '/extension/server/com.microsoft.java.debug.plugin-*.jar'),
@@ -102,12 +92,15 @@ local function get_jdtls_paths()
             -- },
             {
                 name = 'JavaSE-17',
-                path = vim.fn.expand('~/.sdkman/candidates/java/17.0.16-tem'),
-                default = true
+                path = vim.fn.expand('~/.sdkman/candidates/java/17.0.17-tem'),
             },
             {
-                name = 'JavaSE-11',
-                path = vim.fn.expand('~/.sdkman/candidates/java/11.0.28-tem'),
+                name = 'JavaSE-21',
+                path = vim.fn.expand('~/.sdkman/candidates/java/21.0.9-tem'),
+            },
+            {
+                name = 'JavaSE-25',
+                path = vim.fn.expand('~/.sdkman/candidates/java/25.0.1-tem'),
             }
         }
 

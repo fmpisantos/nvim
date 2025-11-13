@@ -19,7 +19,7 @@ return {
 
         require("mason").setup({
             registries = {
-                'github:fmpisantos/mason-registry',
+                -- 'github:fmpisantos/mason-registry', -- This will replace jdtls, java-test and java-debugger-adapter with the corresponding JAVA 17 version
                 'github:mason-org/mason-registry'
             }
         });
