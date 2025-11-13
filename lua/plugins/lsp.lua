@@ -155,12 +155,16 @@ return {
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "omnisharp",
-                "jdtls",
+                -- "jdtls",
                 "lua_ls",
                 "vtsls"
             },
             automatic_installation = true,
             automatic_enable = true
+        });
+
+        vim.lsp.enable({
+            'jdtls'
         });
     end
 }
