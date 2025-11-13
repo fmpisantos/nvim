@@ -17,6 +17,15 @@ return {
         local on_attach = require("plugins.lsp-keymaps").on_attach
         local capabilities = vim.lsp.protocol.make_client_capabilities()
 
+        require("mason").setup({
+            registries = {
+                'github:fmpisantos/mason-registry',
+                'github:mason-org/mason-registry'
+            }
+        });
+
+        vim.cmd("MasonUpdate")
+
         -- Configure nvim-cmp
         local cmp = require("cmp")
         local luasnip = require("luasnip")
