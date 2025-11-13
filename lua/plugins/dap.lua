@@ -40,6 +40,7 @@ return {
 
         -- ---------- BUILD ----------
         local function compile_mvn()
+            print("Running command: mvn clean install -DskipTests")
             local handle = io.popen("mvn clean install -DskipTests 2>&1")
             if not handle then
                 vim.api.nvim_err_writeln("Failed to execute mvn compile")
@@ -59,6 +60,7 @@ return {
             if not io.open("./gradlew", "r") then
                 cmd = "gradle build -x test 2>&1"
             end
+            print("Running command: " .. cmd)
 
             local java_home = os.getenv("JAVA_HOME")
 
@@ -126,6 +128,7 @@ return {
                 return
             end
             print("🐳 Starting Docker Compose...")
+            print("Running command: ./gradlew composeUp")
             local result = vim.fn.system("./gradlew composeUp")
             if vim.v.shell_error == 0 then
                 print("✅ Docker Compose started")
@@ -138,6 +141,7 @@ return {
         local function stop_docker_compose()
             if not docker_started then return end
             print("🐳 Stopping Docker Compose...")
+            print("Running command: ./gradlew composeDown")
             vim.fn.system("./gradlew composeDown")
             docker_started = false
             print("✅ Docker Compose stopped")
@@ -200,6 +204,7 @@ return {
                 "./gradlew testClasses"
 
             print("📝 Compiling test sources...")
+            print("Running command: " .. test_compile_cmd)
             local result = vim.fn.system(test_compile_cmd)
             if vim.v.shell_error ~= 0 then
                 vim.api.nvim_err_writeln("❌ Test compilation failed:\n" .. result)
