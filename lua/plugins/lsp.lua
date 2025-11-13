@@ -15,7 +15,6 @@ return {
     event = { "BufReadPost", "BufWritePost", "BufNewFile" },
     setup = function()
         local on_attach = require("plugins.lsp-keymaps").on_attach
-        require("mason").setup();
         local capabilities = vim.lsp.protocol.make_client_capabilities()
 
         -- Configure nvim-cmp
@@ -85,6 +84,18 @@ return {
                 java = {
                     configuration = {
                         runtimes = path.runtimes
+                    },
+                    test = {
+                        config = {
+                            {
+                                name = "JUnit 4",
+                                testKind = "junit",
+                                workingDirectory = "${workspaceFolder}",
+                                classPaths = { "$Auto" },
+                                modulePaths = { "$Auto" }
+                            }
+                        },
+                        defaultConfig = "JUnit 4"
                     }
                 }
             },

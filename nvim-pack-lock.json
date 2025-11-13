@@ -23,6 +23,10 @@
     "markdown-preview.nvim": [],
     "marks.nvim": [],
     "mason-lspconfig.nvim": [],
+    "mason-registry": {
+      "rev": "0fec232",
+      "src": "https://github.com/fmpisantos/mason-registry"
+    },
     "mason.nvim": [],
     "neodev.nvim": [],
     "notes.nvim": [],

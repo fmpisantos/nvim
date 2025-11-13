@@ -113,6 +113,9 @@ local TestKind = {
     TestNG = 2
 }
 
+-- Force JUnit 4 for projects that don't use JUnit 5
+local FORCE_JUNIT4 = true
+
 
 local LegacyTestLevel = {
     Root = 0,
@@ -146,17 +149,25 @@ local function make_request_args(lens, uri)
     local new_api = lens.testKind ~= nil
     local req_arguments
     if new_api then
+        local testKind = lens.testKind
+        if FORCE_JUNIT4 and testKind == TestKind.JUnit5 then
+            testKind = TestKind.JUnit
+        end
         req_arguments = {
-            testKind = lens.testKind,
+            testKind = testKind,
             projectName = lens.projectName,
             testLevel = lens.testLevel,
         }
-        if lens.testKind == TestKind.TestNG or lens.testLevel == TestLevel.Class then
+        if testKind == TestKind.TestNG or lens.testLevel == TestLevel.Class then
             req_arguments.testNames = { lens.fullName, }
         elseif lens.testLevel then
             req_arguments.testNames = { lens.jdtHandler, }
         end
     else
+        local testKind = lens.kind
+        if FORCE_JUNIT4 and testKind == TestKind.JUnit5 then
+            testKind = TestKind.JUnit
+        end
         req_arguments = {
             uri = uri,
             -- Got renamed to fullName in https://github.com/microsoft/vscode-java-test/commit/57191b5367ae0a357b80e94f0def9e46f5e77796
@@ -167,7 +178,7 @@ local function make_request_args(lens, uri)
             project = lens.project,
             projectName = lens.project,
             scope = lens.level,
-            testKind = lens.kind,
+            testKind = testKind,
         }
         if lens.level == LegacyTestLevel.Method then
             req_arguments['start'] = lens.location.range['start']
@@ -384,6 +395,10 @@ local function make_config(lens, launch_args, config_overrides)
                 config.args = string.format('-testclass %s', parts[1])
             end
         end
+    elseif lens.testKind == TestKind.JUnit or lens.kind == TestKind.JUnit then
+        -- For JUnit 4, use JUnitCore as main class
+        config.mainClass = 'org.junit.runner.JUnitCore'
+        config.args = lens.fullName
     else
         config.args = table.concat(launch_args.programArguments, ' ');
     end
