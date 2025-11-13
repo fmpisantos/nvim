@@ -10,6 +10,8 @@ if vim.env.FROM_WEZTERM == "1" then
     return
 end
 
+require("nokia")
+
 vim.pack.add({ "https://github.com/fmpisantos/pack.nvim" })
 local pack = require("pack")
 
