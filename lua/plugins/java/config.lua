@@ -10,7 +10,7 @@ local features = {
     -- change this to `true` if you have `nvim-dap`,
     -- `java-test` and `java-debug-adapter` installed
     -- Disabled for JUnit 4 compatibility
-    debugger = false,
+    debugger = true,
 }
 
 local function get_jdtls_paths()
@@ -26,9 +26,9 @@ local function get_jdtls_paths()
     local mason_registry = require("mason-registry")
 
     local suffix = ""
-    if mason_registry.has_package("jdtls-17") then
-        suffix = "-17"
-    end
+    -- if mason_registry.has_package("jdtls-16") then
+    --     suffix = "-17"
+    -- end
 
     if mason_registry.has_package("jdtls" .. suffix) then
         local _ = mason_registry.get_package("jdtls" .. suffix)
@@ -73,6 +73,8 @@ local function get_jdtls_paths()
         if java_debug_bundle[1] ~= '' then
             vim.list_extend(path.bundles, java_debug_bundle)
         end
+
+        vim.print(vim.inspect(path.bundles))
 
         path.runtimes = {
             -- Note: the field `name` must be a valid `ExecutionEnvironment`,
