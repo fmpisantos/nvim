@@ -27,7 +27,7 @@ local function get_jdtls_paths()
 
     if mason_registry.has_package("jdtls") then
         local _ = mason_registry.get_package("jdtls")
-        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls")
+        local jdtls_install = vim.fn.expand("$MASON/packages/jdtls-17")
         path.java_agent = jdtls_install .. '/lombok.jar'
         path.launcher_jar = vim.fn.glob(jdtls_install .. '/plugins/org.eclipse.equinox.launcher_*.jar')
 
@@ -45,31 +45,31 @@ local function get_jdtls_paths()
         -- Include java-test bundle if present
         -- Temporarily disabled to avoid version conflicts with project JUnit
         ---
-        -- local java_test_path = vim.fn.expand("$MASON/packages/java-test")
-        --
-        -- local java_test_bundle = vim.split(
-        --     vim.fn.glob(java_test_path .. '/extension/server/*.jar'),
-        --     '\n'
-        -- )
-        --
-        -- if java_test_bundle[1] ~= '' then
-        --     vim.list_extend(path.bundles, java_test_bundle)
-        -- end
+        local java_test_path = vim.fn.expand("$MASON/packages/java-test-17")
+
+        local java_test_bundle = vim.split(
+            vim.fn.glob(java_test_path .. '/extension/server/*.jar'),
+            '\n'
+        )
+
+        if java_test_bundle[1] ~= '' then
+            vim.list_extend(path.bundles, java_test_bundle)
+        end
 
         ---
         -- Include java-debug-adapter bundle if present
         -- Temporarily disabled to use project versions
         ---
-        -- local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter")
-        --
-        -- local java_debug_bundle = vim.split(
-        --     vim.fn.glob(java_debug_path .. '/extension/server/com.microsoft.java.debug.plugin-*.jar'),
-        --     '\n'
-        -- )
-        --
-        -- if java_debug_bundle[1] ~= '' then
-        --     vim.list_extend(path.bundles, java_debug_bundle)
-        -- end
+        local java_debug_path = vim.fn.expand("$MASON/packages/java-debug-adapter-17")
+
+        local java_debug_bundle = vim.split(
+            vim.fn.glob(java_debug_path .. '/extension/server/com.microsoft.java.debug.plugin-*.jar'),
+            '\n'
+        )
+
+        if java_debug_bundle[1] ~= '' then
+            vim.list_extend(path.bundles, java_debug_bundle)
+        end
 
         path.runtimes = {
             -- Note: the field `name` must be a valid `ExecutionEnvironment`,
