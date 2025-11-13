@@ -48,7 +48,7 @@ return {
         end, { desc = "[P]roject [G]rep" })
 
         vim.keymap.set('v', '<leader>pg', function()
-            local text = vim.fn.getreg('"') -- get visual selection
+            local text = getLastVisualSelection()
             require('telescope.builtin').live_grep({
                 default_text = text,
                 additional_args = function() return { "--hidden" } end

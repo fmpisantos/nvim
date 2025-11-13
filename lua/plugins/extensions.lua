@@ -252,7 +252,6 @@ _G.FilterQFListToFile = function()
         vim.cmd('vnew')
         vim.cmd('put a')
         replace_string = '%s/' .. replace_string
-        vim.print(replace_string)
         vim.cmd(replace_string)
     else
         vim.cmd('copen')

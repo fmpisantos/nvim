@@ -74,8 +74,6 @@ local function get_jdtls_paths()
             vim.list_extend(path.bundles, java_debug_bundle)
         end
 
-        vim.print(vim.inspect(path.bundles))
-
         path.runtimes = {
             -- Note: the field `name` must be a valid `ExecutionEnvironment`,
             -- you can find the list here:
