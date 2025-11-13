@@ -350,22 +350,17 @@ local function make_config(lens, launch_args, config_overrides)
         mainClass = launch_args.mainClass,
         projectName = launch_args.projectName,
         cwd = launch_args.workingDirectory,
-        classPaths = {},
+        classPaths = launch_args.classpath,
         modulePaths = launch_args.modulepath,
         vmArgs = table.concat(launch_args.vmArguments, ' '),
         noDebug = false,
     }
-    -- Add jdtls bundles FIRST (e.g., java-test jars) to classpath for test execution
-    -- This ensures bundled JUnit version takes precedence over project dependencies
+    -- Add jdtls bundles (e.g., java-test jars) to classpath for test execution
     local client = get_clients({ name = 'jdtls' })[1]
     if client and client.config.init_options and client.config.init_options.bundles then
         for _, jar in ipairs(client.config.init_options.bundles) do
             table.insert(config.classPaths, jar)
         end
-    end
-    -- Add project classpath after bundles
-    for _, path in ipairs(launch_args.classpath) do
-        table.insert(config.classPaths, path)
     end
     config = vim.tbl_extend('force', config, config_overrides or default_config_overrides)
     if lens.testKind == TestKind.TestNG or lens.kind == TestKind.TestNG then
