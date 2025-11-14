@@ -216,32 +216,27 @@ return {
             compile()
 
             get_test_method_name(function(method_name)
-                local is_gradle = task.cmd:match("gradlew")
-                local transformed_method_name = method_name
-                if is_gradle then
-                    -- Replace '#' with '.' and remove '()' from the end of the method_name
-                    transformed_method_name = method_name:gsub("#", "."):gsub("%(%)$", "")
-                end
-
-                local test_arg = is_gradle and " --tests \"" .. transformed_method_name .. "\"" or
-                    " -Dtest=" .. method_name
-                local cmd = task.cmd .. test_arg
-
-                if task.needs_docker then
-                    DockerCleanup()
-                end
-
-                print("🧪 Running test: " .. cmd)
-                local result = vim.fn.system(cmd)
-                if vim.v.shell_error == 0 then
-                    print("✅ Test completed successfully")
-                else
-                    vim.api.nvim_err_writeln("❌ Test failed:\n" .. result)
-                end
-
-                if task.needs_docker then
-                    DockerCleanup()
-                end
+                local dap_java = require("plugins.java.dap_java_config")
+                local context = dap_java.make_context(bufnr)
+                local lnum = vim.api.nvim_win_get_cursor(0)[1]
+                dap_java.experimental.fetch_lenses(context, function(lenses)
+                    local lens = get_method_lens_above_cursor(lenses, lnum)
+                    if lens then
+                        dap_java.experimental.fetch_launch_args(lens, context, function(launch_args)
+                            local config = dap_java.experimental.make_config(lens, launch_args)
+                            config.noDebug = false  -- Ensure debugging is enabled
+                            if task.needs_docker then
+                                DockerCleanup()
+                            end
+                            Dap.run(config)
+                            if task.needs_docker then
+                                DockerCleanup()
+                            end
+                        end)
+                    else
+                        vim.notify('No suitable test method found')
+                    end
+                end)
             end, bufnr)
         end
 
@@ -260,11 +255,7 @@ return {
             end)
         end, { desc = "[D]ebug [C]lass" })
 
-        vim.keymap.set("n", "<leader>Dm", function()
-            select_test_task(function(task)
-                run_test_with_task(task, vim.api.nvim_get_current_buf())
-            end)
-        end, { desc = "[D]ebug [M]ethod" })
+        vim.keymap.set("n", "<leader>Dm", jdtls.test_nearest_method, { desc = "[D]ebug [M]ethod" })
 
         vim.keymap.set("n", "<leader>Dl", jdtls.pick_test, { desc = "[D]ebug pick tests" })
 
