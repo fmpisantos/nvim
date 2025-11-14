@@ -224,7 +224,7 @@ return {
                     if lens then
                         dap_java.experimental.fetch_launch_args(lens, context, function(launch_args)
                             local config = dap_java.experimental.make_config(lens, launch_args)
-                            config.noDebug = false  -- Ensure debugging is enabled
+                            config.noDebug = false -- Ensure debugging is enabled
                             if task.needs_docker then
                                 DockerCleanup()
                             end
@@ -257,14 +257,10 @@ return {
 
         vim.keymap.set("n", "<leader>Dm", function()
             if is_integration_test() then
-                DockerUp()
+                DockerComposeHere()
             end
             local dap_java = require("plugins.java.dap_java_config")
-            dap_java.test_nearest_method({
-                config_overrides = {
-                    vmArgs = "-Dspring.data.cassandra.port=9042"
-                }
-            })
+            dap_java.test_nearest_method()
         end, { desc = "[D]ebug [M]ethod" })
 
         vim.keymap.set("n", "<leader>Dl", jdtls.pick_test, { desc = "[D]ebug pick tests" })

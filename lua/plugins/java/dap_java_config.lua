@@ -409,7 +409,7 @@ end
 
 ---@param bufnr? integer
 ---@return JdtDapContext
-function M.make_context(bufnr)
+function make_context(bufnr)
     bufnr = assert((bufnr == nil or bufnr == 0) and api.nvim_get_current_buf() or bufnr)
     return {
         bufnr = bufnr,
@@ -708,43 +708,43 @@ end
 
 
 
- --- Register a |dap-adapter| for java. Requires nvim-dap
- ---@param opts nil|JdtSetupDapOpts See |JdtSetupDapOpts|
- function M.setup_dap(opts)
-     local status, dap = pcall(require, 'dap')
-     if not status then
-         print('nvim-dap is not available')
-         return
-     end
-     if dap.adapters.java then
-         return
-     end
-     opts = opts or {}
-     default_config_overrides = opts.config_overrides or {}
-     dap.listeners.before['event_hotcodereplace']['jdtls'] = function(session, body)
-         if body.changeType == hotcodereplace_type.BUILD_COMPLETE then
-             if opts.hotcodereplace == 'auto' then
-                 vim.notify('Applying code changes')
-                 session:request('redefineClasses', nil, function(err)
-                     assert(not err, vim.inspect(err))
-                 end)
-             end
-         elseif body.message then
-             vim.notify(body.message)
-         end
-     end
-     dap.adapters.java = function(callback, config)
-         if config.request == 'attach' then
-             callback({
-                 type = 'server',
-                 host = config.hostName or '127.0.0.1',
-                 port = config.port,
-             })
-         else
-             start_debug_adapter(callback, config)
-         end
-     end
- end
+--- Register a |dap-adapter| for java. Requires nvim-dap
+---@param opts nil|JdtSetupDapOpts See |JdtSetupDapOpts|
+function M.setup_dap(opts)
+    local status, dap = pcall(require, 'dap')
+    if not status then
+        print('nvim-dap is not available')
+        return
+    end
+    if dap.adapters.java then
+        return
+    end
+    opts = opts or {}
+    default_config_overrides = opts.config_overrides or {}
+    dap.listeners.before['event_hotcodereplace']['jdtls'] = function(session, body)
+        if body.changeType == hotcodereplace_type.BUILD_COMPLETE then
+            if opts.hotcodereplace == 'auto' then
+                vim.notify('Applying code changes')
+                session:request('redefineClasses', nil, function(err)
+                    assert(not err, vim.inspect(err))
+                end)
+            end
+        elseif body.message then
+            vim.notify(body.message)
+        end
+    end
+    dap.adapters.java = function(callback, config)
+        if config.request == 'attach' then
+            callback({
+                type = 'server',
+                host = config.hostName or '127.0.0.1',
+                port = config.port,
+            })
+        else
+            start_debug_adapter(callback, config)
+        end
+    end
+end
 
 ---@class JdtSetupDapOpts
 ---@field config_overrides JdtDapConfig These will be used as default overrides for |jdtls.dap.test_class|, |jdtls.dap.test_nearest_method| and discovered main classes
