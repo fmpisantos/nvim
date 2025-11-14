@@ -160,31 +160,72 @@ return {
             end)
         end
 
-        local function run_test_with_task(task, test_function)
-            compile()
-
-            if task.needs_docker then
-                DockerComposeHere()
-                Dap.listeners.before.event_terminated["docker-cleanup"] = function()
-                    vim.defer_fn(DockerCleanup, 1000)
+        local function get_method_lens_above_cursor(lenses_tree, lnum)
+            local result = {
+                best_match = nil
+            }
+            local find_nearest
+            find_nearest = function(lenses)
+                for _, lens in pairs(lenses) do
+                    local is_method = lens.level == 4 or lens.testLevel == 6
+                    local range = lens.location and lens.location.range or lens.range
+                    local line = range.start.line
+                    local best_match_line
+                    if result.best_match then
+                        local best_match = assert(result.best_match)
+                        best_match_line = best_match.location and best_match.location.range.start.line or best_match.range.start.line
+                    end
+                    if is_method and line <= lnum and (best_match_line == nil or line > best_match_line) then
+                        result.best_match = lens
+                    end
+                    if lens.children then
+                        find_nearest(lens.children)
+                    end
                 end
             end
+            find_nearest(lenses_tree)
+            return result.best_match
+        end
 
-            print("🧪 Preparing tests: " .. task.name)
-            local test_compile_cmd = task.name:match("integration") and
-                "./gradlew testClasses integrationTestClasses" or
-                "./gradlew testClasses"
+        local function get_test_method_name(callback)
+            local dap_java = require("plugins.java.dap_java_config")
+            local context = dap_java.make_context()
+            local lnum = vim.api.nvim_win_get_cursor(0)[1]
+            dap_java.experimental.fetch_lenses(context, function(lenses)
+                local lens = get_method_lens_above_cursor(lenses, lnum)
+                if lens then
+                    callback(lens.fullName)
+                else
+                    vim.notify('No suitable test method found')
+                end
+            end)
+        end
 
-            print("📝 Compiling test sources...")
-            print("Running command: " .. test_compile_cmd)
-            local result = vim.fn.system(test_compile_cmd)
-            if vim.v.shell_error ~= 0 then
-                vim.api.nvim_err_writeln("❌ Test compilation failed:\n" .. result)
-                return
-            end
-            print("✅ Test sources compiled")
+        local function run_test_with_task(task)
+            compile()
 
-            test_function()
+            get_test_method_name(function(method_name)
+                local is_gradle = task.cmd:match("gradlew")
+                local test_arg = is_gradle and " --test \"" .. method_name .. "\"" or " -Dtest=" .. method_name
+                local cmd = task.cmd .. test_arg
+
+                if task.needs_docker then
+                    DockerCleanup()
+                    DockerComposeHere()
+                end
+
+                print("🧪 Running test: " .. cmd)
+                local result = vim.fn.system(cmd)
+                if vim.v.shell_error == 0 then
+                    print("✅ Test completed successfully")
+                else
+                    vim.api.nvim_err_writeln("❌ Test failed:\n" .. result)
+                end
+
+                if task.needs_docker then
+                    DockerCleanup()
+                end
+            end)
         end
 
         -- ---------- KEYMAPS ----------
@@ -198,13 +239,13 @@ return {
 
         vim.keymap.set("n", "<leader>Dc", function()
             select_test_task(function(task)
-                run_test_with_task(task, jdtls.test_class)
+                run_test_with_task(task)
             end)
         end, { desc = "[D]ebug [C]lass" })
 
         vim.keymap.set("n", "<leader>Dm", function()
             select_test_task(function(task)
-                run_test_with_task(task, jdtls.test_nearest_method)
+                run_test_with_task(task)
             end)
         end, { desc = "[D]ebug [M]ethod" })
 
