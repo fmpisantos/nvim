@@ -4,13 +4,12 @@ return {
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
         "mfussenegger/nvim-jdtls",
-        -- Add nvim-cmp and its dependencies
-        "hrsh7th/nvim-cmp",         -- The completion plugin itself
-        "hrsh7th/cmp-nvim-lsp",     -- LSP completion source for nvim-cmp
-        "L3MON4D3/LuaSnip",         -- Snippet engine (recommended for LSP snippets)
-        "saadparwaiz1/cmp_luasnip", -- Snippet source for nvim-cmp
-        "hrsh7th/cmp-buffer",       -- Buffer word completion source
-        "hrsh7th/cmp-path",         -- File path completion source
+        "hrsh7th/nvim-cmp",
+        "hrsh7th/cmp-nvim-lsp",
+        "L3MON4D3/LuaSnip",
+        "saadparwaiz1/cmp_luasnip",
+        "hrsh7th/cmp-buffer",
+        "hrsh7th/cmp-path",
     },
     event = { "BufReadPost", "BufWritePost", "BufNewFile" },
     setup = function()
@@ -19,7 +18,7 @@ return {
 
         require("mason").setup({
             registries = {
-                'github:fmpisantos/mason-registry', -- This will replace jdtls, java-test and java-debugger-adapter with the corresponding Java 17 version
+                'github:fmpisantos/mason-registry',
                 'github:mason-org/mason-registry'
             }
         });
@@ -105,6 +104,11 @@ return {
                             }
                         },
                         defaultConfig = "JUnit 4"
+                    },
+                    format = {
+                        settings = {
+                            url = path.formatterUrl
+                        }
                     }
                 }
             },

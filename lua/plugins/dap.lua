@@ -119,34 +119,6 @@ return {
             end
         end
 
-        -- ---------- DOCKER ----------
-        local docker_started = false
-
-        local function start_docker_compose()
-            if docker_started then
-                print("🐳 Docker Compose already running")
-                return
-            end
-            print("🐳 Starting Docker Compose...")
-            print("Running command: ./gradlew composeUp")
-            local result = vim.fn.system("./gradlew composeUp")
-            if vim.v.shell_error == 0 then
-                print("✅ Docker Compose started")
-                docker_started = true
-            else
-                vim.api.nvim_err_writeln("❌ Failed to start Docker Compose:\n" .. result)
-            end
-        end
-
-        local function stop_docker_compose()
-            if not docker_started then return end
-            print("🐳 Stopping Docker Compose...")
-            print("Running command: ./gradlew composeDown")
-            vim.fn.system("./gradlew composeDown")
-            docker_started = false
-            print("✅ Docker Compose stopped")
-        end
-
         -- ---------- TESTING ----------
         local function is_integration_test()
             local current_file = vim.fn.expand("%:p")
@@ -192,9 +164,9 @@ return {
             compile()
 
             if task.needs_docker then
-                start_docker_compose()
+                DockerComposeHere()
                 Dap.listeners.before.event_terminated["docker-cleanup"] = function()
-                    vim.defer_fn(stop_docker_compose, 1000)
+                    vim.defer_fn(DockerCleanup, 1000)
                 end
             end
 
@@ -245,7 +217,7 @@ return {
 
         vim.keymap.set("n", "<S-F5>", function()
             Dap.terminate()
-            if docker_started then stop_docker_compose() end
+            DockerCleanup()
         end, { desc = "Debug Stop" })
 
         vim.keymap.set("n", "<C-S-F5>", function()
@@ -270,7 +242,7 @@ return {
 
         vim.api.nvim_create_user_command("Mvnnt", mvnnt, { desc = "Maven clean install with no tests" })
         vim.api.nvim_create_user_command("DapCleanInstall", mvnnt, { desc = "Maven clean install with no tests" })
-        vim.api.nvim_create_user_command("DockerUp", start_docker_compose, { desc = "Start Docker Compose" })
-        vim.api.nvim_create_user_command("DockerDown", stop_docker_compose, { desc = "Stop Docker Compose" })
+        vim.api.nvim_create_user_command("DockerUp", DockerComposeHere, { desc = "Start Docker Compose" })
+        vim.api.nvim_create_user_command("DockerDown", DockerCleanup, { desc = "Stop Docker Compose" })
     end,
 }

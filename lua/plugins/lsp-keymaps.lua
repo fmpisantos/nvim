@@ -21,11 +21,9 @@ function M.on_attach(_, bufnr)
     nmap('H', vim.lsp.buf.signature_help, 'Signature help')
     nmap('<M-Tab>', vim.lsp.buf.hover, 'Hover Documentation')
     imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
-    imap('<C-k>', function()
-        print("here!");
-        vim.lsp.buf.signature_help()
-        print("here2");
-    end, 'Signature help');
+    imap('<C-k>', function() vim.lsp.buf.signature_help() end, 'Signature help');
+    imap('<C-K>', function() require('cmp').open_docs() end, 'Open docs')
+    nmap('<C-K>', function() vim.print("CMP docs");require('cmp').open_docs() end, 'Open docs')
 
     local function organize_imports()
         local line_count = vim.api.nvim_buf_line_count(bufnr)
@@ -59,8 +57,8 @@ function M.on_attach(_, bufnr)
                     else
                         local client = vim.lsp.get_client_by_id(ctx.client_id)
                         if client then
-                            client:request("codeAction/resolve", action, function(err, resolved_action)
-                                if err or not resolved_action then return end
+                            client:request("codeAction/resolve", action, function(_err, resolved_action)
+                                if _err or not resolved_action then return end
 
                                 if resolved_action.edit then
                                     vim.lsp.util.apply_workspace_edit(resolved_action.edit, "utf-16")

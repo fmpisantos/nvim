@@ -36,9 +36,6 @@ local function get_jdtls_paths()
 
         path.bundles = {}
 
-        ---
-        -- Include java-test bundle if present
-        ---
         local java_test_path = vim.fn.expand("$MASON/packages/java-test")
 
         local java_test_bundle = vim.split(
@@ -83,7 +80,7 @@ end
 
 local function enable_debugger(_)
     local dap_config = require("plugins.java.dap_java_config");
-    dap_config.setup_dap({ hotcodereplace = 'auto' })
+    dap_config.setup_dap()
     dap_config.setup_dap_main_class_configs()
 end
 
@@ -124,7 +121,6 @@ function M.jdtls_setup(_)
     local data_dir = path.data_dir .. '/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 
     local cmd = {
-        -- 'java',
         vim.fn.expand('~/.sdkman/candidates/java/21.0.9-tem/bin/java'),
         '-Declipse.application=org.eclipse.jdt.ls.core.id1',
         '-Dosgi.bundles.defaultStartLevel=4',
@@ -152,6 +148,8 @@ function M.jdtls_setup(_)
         '-data',
         data_dir,
     }
+
+    path.formatterUrl = vim.fn.expand("~/.config/nvim/lua/4LabsStyle.xml");
 
     return cmd, path
 end
