@@ -255,7 +255,17 @@ return {
             end)
         end, { desc = "[D]ebug [C]lass" })
 
-        vim.keymap.set("n", "<leader>Dm", jdtls.test_nearest_method, { desc = "[D]ebug [M]ethod" })
+        vim.keymap.set("n", "<leader>Dm", function()
+            if is_integration_test() then
+                DockerUp()
+            end
+            local dap_java = require("plugins.java.dap_java_config")
+            dap_java.test_nearest_method({
+                config_overrides = {
+                    vmArgs = "-Dspring.data.cassandra.port=9042"
+                }
+            })
+        end, { desc = "[D]ebug [M]ethod" })
 
         vim.keymap.set("n", "<leader>Dl", jdtls.pick_test, { desc = "[D]ebug pick tests" })
 
