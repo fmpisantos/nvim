@@ -82,6 +82,17 @@ local function enable_debugger(_)
     local dap_config = require("plugins.java.dap_java_config");
     dap_config.setup_dap()
     dap_config.setup_dap_main_class_configs()
+
+    -- Add attach configuration
+    local dap = require('dap')
+    dap.configurations.java = dap.configurations.java or {}
+    table.insert(dap.configurations.java, {
+        type = 'java',
+        request = 'attach',
+        name = 'Attach to running JVM',
+        hostName = 'localhost',
+        port = 5005,
+    })
 end
 
 local function enable_codelens(bufnr)

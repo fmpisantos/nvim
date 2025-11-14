@@ -16,6 +16,16 @@ return {
             },
         }
 
+        -- Add attach configuration for Java
+        Dap.configurations.java = Dap.configurations.java or {}
+        table.insert(Dap.configurations.java, {
+            type = 'java',
+            request = 'attach',
+            name = 'Attach to running JVM',
+            hostName = 'localhost',
+            port = 5005,
+        })
+
         -- ---------- UTILITIES ----------
         local function read_file(path)
             local f = io.open(path, "r")
