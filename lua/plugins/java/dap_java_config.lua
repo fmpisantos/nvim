@@ -409,14 +409,13 @@ end
 
 ---@param bufnr? integer
 ---@return JdtDapContext
-local function make_context(bufnr)
+function M.make_context(bufnr)
     bufnr = assert((bufnr == nil or bufnr == 0) and api.nvim_get_current_buf() or bufnr)
     return {
         bufnr = bufnr,
         uri = vim.uri_from_bufnr(bufnr)
     }
 end
-
 
 local function maybe_repeat(lens, config, context, opts, items)
     if not opts.until_error then

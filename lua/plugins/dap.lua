@@ -129,9 +129,9 @@ return {
             local tasks = {}
             if vim.fn.filereadable("build.gradle") == 1 or vim.fn.filereadable("build.gradle.kts") == 1 then
                 tasks = {
-                    { name = "test (unit tests only)",        cmd = "./gradlew test",            needs_docker = false, source_set = "test" },
-                    { name = "integrationTest",               cmd = "./gradlew integrationTest", needs_docker = true,  source_set = "integrationTest" },
-                    { name = "allTests (unit + integration)", cmd = "./gradlew allTests",        needs_docker = true,  source_set = "all" },
+                    { name = "test (unit tests only)",        cmd = "./gradlew :test",            needs_docker = false, source_set = "test" },
+                    { name = "integrationTest",               cmd = "./gradlew :integrationTest", needs_docker = true,  source_set = "integrationTest" },
+                    { name = "allTests (unit + integration)", cmd = "./gradlew :allTests",        needs_docker = true,  source_set = "all" },
                 }
             elseif vim.fn.filereadable("pom.xml") == 1 then
                 tasks = {
@@ -173,7 +173,8 @@ return {
                     local best_match_line
                     if result.best_match then
                         local best_match = assert(result.best_match)
-                        best_match_line = best_match.location and best_match.location.range.start.line or best_match.range.start.line
+                        best_match_line = best_match.location and best_match.location.range.start.line or
+                            best_match.range.start.line
                     end
                     if is_method and line <= lnum and (best_match_line == nil or line > best_match_line) then
                         result.best_match = lens
@@ -187,9 +188,9 @@ return {
             return result.best_match
         end
 
-        local function get_test_method_name(callback)
+        local function get_test_method_name(callback, bufnr)
             local dap_java = require("plugins.java.dap_java_config")
-            local context = dap_java.make_context()
+            local context = dap_java.make_context(bufnr)
             local lnum = vim.api.nvim_win_get_cursor(0)[1]
             dap_java.experimental.fetch_lenses(context, function(lenses)
                 local lens = get_method_lens_above_cursor(lenses, lnum)
@@ -201,17 +202,23 @@ return {
             end)
         end
 
-        local function run_test_with_task(task)
+        local function run_test_with_task(task, bufnr)
             compile()
 
             get_test_method_name(function(method_name)
                 local is_gradle = task.cmd:match("gradlew")
-                local test_arg = is_gradle and " --test \"" .. method_name .. "\"" or " -Dtest=" .. method_name
+                local transformed_method_name = method_name
+                if is_gradle then
+                    -- Replace '#' with '.' and remove '()' from the end of the method_name
+                    transformed_method_name = method_name:gsub("#", "."):gsub("%(%)$", "")
+                end
+
+                local test_arg = is_gradle and " --tests \"" .. transformed_method_name .. "\"" or
+                    " -Dtest=" .. method_name
                 local cmd = task.cmd .. test_arg
 
                 if task.needs_docker then
                     DockerCleanup()
-                    DockerComposeHere()
                 end
 
                 print("🧪 Running test: " .. cmd)
@@ -225,7 +232,7 @@ return {
                 if task.needs_docker then
                     DockerCleanup()
                 end
-            end)
+            end, bufnr)
         end
 
         -- ---------- KEYMAPS ----------
@@ -239,13 +246,13 @@ return {
 
         vim.keymap.set("n", "<leader>Dc", function()
             select_test_task(function(task)
-                run_test_with_task(task)
+                run_test_with_task(task, vim.api.nvim_get_current_buf())
             end)
         end, { desc = "[D]ebug [C]lass" })
 
         vim.keymap.set("n", "<leader>Dm", function()
             select_test_task(function(task)
-                run_test_with_task(task)
+                run_test_with_task(task, vim.api.nvim_get_current_buf())
             end)
         end, { desc = "[D]ebug [M]ethod" })
 
