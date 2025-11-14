@@ -114,7 +114,7 @@ local TestKind = {
 }
 
 -- Force JUnit 4 for projects that don't use JUnit 5
-local FORCE_JUNIT4 = true
+local FORCE_JUNIT4 = false
 
 
 local LegacyTestLevel = {
