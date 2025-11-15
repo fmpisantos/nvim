@@ -80,8 +80,11 @@ vim.api.nvim_create_autocmd('TermOpen', {
 if vim.loop.os_uname().sysname == 'Darwin' or vim.loop.os_uname().sysname == 'Linux' then
     -- macOS → use zsh
     vim.opt.shell = "/bin/zsh"
-    vim.opt.shellcmdflag = "-i -c"
-    -- vim.opt.shellcmdflag = "-c"
+    if vim.loop.os_uname().sysname == 'Linux' then
+        vim.opt.shellcmdflag = "-i -c"
+    else
+        vim.opt.shellcmdflag = "-c"
+    end
     vim.opt.shellquote = ""
     vim.opt.shellxquote = ""
 else
