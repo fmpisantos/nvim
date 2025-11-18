@@ -170,5 +170,24 @@ return {
         vim.lsp.enable({
             'jdtls'
         });
+
+        -- LSP Cache Cleanup function
+        function _G.LspCacheCleanup()
+            local cache_path = vim.fn.expand("~/snap/alacritty/common/.cache/nvim/nvim-jdtls")
+            local result = vim.fn.system("rm -rf " .. vim.fn.shellescape(cache_path))
+            if vim.v.shell_error == 0 then
+                vim.notify("LSP cache cleaned up successfully: " .. cache_path, vim.log.levels.INFO)
+                vim.cmd("LspRestart")
+            else
+                vim.notify("Failed to cleanup LSP cache at: " .. cache_path, vim.log.levels.ERROR)
+            end
+        end
+
+        -- Create the :LspCleanup command
+        vim.api.nvim_create_user_command("LspCleanup", function()
+            _G.LspCacheCleanup()
+        end, {
+            desc = "Cleanup LSP cache"
+        })
     end
 }
