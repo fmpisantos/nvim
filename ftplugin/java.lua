@@ -18,7 +18,7 @@ local function setup_gradle_build()
     end
 
     -- Set makeprg to run gradlew build from project root
-    vim.opt_local.makeprg = gradlew_path .. ' build'
+    vim.opt_local.makeprg = gradlew_path .. ' build -x test'
 
     -- Parse Gradle/Java compiler error format
     -- Matches: filepath:line: error: message
@@ -41,7 +41,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 setup_gradle_build()
 
 -- Create commands for clean build
-vim.api.nvim_create_user_command('MakeClean', function()
+vim.api.nvim_buf_create_user_command(0, 'MakeClean', function()
     local gradle_root = get_gradle_root()
     if not gradle_root then
         vim.notify('Could not find gradle root from LSP', vim.log.levels.ERROR)
@@ -57,6 +57,5 @@ vim.api.nvim_create_user_command('MakeClean', function()
     vim.opt_local.makeprg = gradlew_path .. ' clean build'
     vim.cmd('make')
 end, {
-    buffer = 0,
     desc = 'Run ./gradlew clean build from project root'
 })
