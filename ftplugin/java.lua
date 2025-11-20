@@ -21,8 +21,9 @@ local function setup_gradle_build()
     vim.opt_local.makeprg = gradlew_path .. ' build -x test'
 
     -- Parse Gradle/Java compiler error format
-    -- Matches: filepath:line: error: message
-    vim.opt_local.errorformat = '%f:%l: error: %m'
+    -- Matches: filepath:line: error: message and filepath:line: warning: message
+    -- Ignores Gradle task output lines (starting with ||)
+    vim.opt_local.errorformat = '%f:%l: %t%*[a-z]: %m,%-G||%.%#,%-G%.%#'
 end
 
 -- Setup on buffer enter if jdtls is available
