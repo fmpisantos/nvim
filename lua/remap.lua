@@ -198,3 +198,67 @@ vim.keymap.set('n', "<C-c>", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy
 vim.keymap.set('n', "<leader>c", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy filepath to clipboard" });
 
 vim.keymap.set('n', '-', "<cmd>Ex<CR>", { noremap = true, silent = true, desc = "Open file" })
+
+local function smart_ctrl_a()
+    local line = vim.api.nvim_get_current_line()
+    local col = vim.fn.col(".")
+    local after = line:sub(col)
+
+    -- Find next number
+    local num_start, _ = after:find("%d+")
+
+    -- Find next boolean (need to search twice for true/false)
+    local true_start, true_end = after:find("%f[%a]true%f[%A]")
+    local false_start, false_end = after:find("%f[%a]false%f[%A]")
+
+    -- Determine which boolean comes first (if any)
+    local bool_start, bool_end
+    if true_start and false_start then
+        if true_start < false_start then
+            bool_start, bool_end = true_start, true_end
+        else
+            bool_start, bool_end = false_start, false_end
+        end
+    elseif true_start then
+        bool_start, bool_end = true_start, true_end
+    elseif false_start then
+        bool_start, bool_end = false_start, false_end
+    end
+
+    -- Resolve relative positions (nil → huge number so it loses comparisons)
+    local num_pos = num_start or math.huge
+    local bool_pos = bool_start or math.huge
+
+    if bool_pos < num_pos then
+        -- Next match is a boolean → toggle it
+        local bool = after:sub(bool_start, bool_end)
+        local low = bool:lower()
+        local new
+
+        -- Preserve casing
+        if bool == bool:upper() then
+            -- ALL CAPS: TRUE ↔ FALSE
+            new = (low == "true") and "FALSE" or "TRUE"
+        elseif bool:sub(1, 1):match("%u") then
+            -- Title case: True ↔ False
+            new = (low == "true") and "False" or "True"
+        else
+            -- lowercase: true ↔ false
+            new = (low == "true") and "false" or "true"
+        end
+
+        -- Calculate absolute positions in the line
+        local start_col = col + bool_start - 2
+        local end_col = col + bool_end - 1
+        local line_num = vim.fn.line(".") - 1
+
+        vim.api.nvim_buf_set_text(0, line_num, start_col, line_num, end_col, { new })
+        return
+    end
+
+    -- Otherwise → fallback to real <C-a>
+    local key = vim.api.nvim_replace_termcodes("<C-a>", true, false, true)
+    vim.api.nvim_feedkeys(key, "n", false)
+end
+
+vim.keymap.set("n", "<C-a>", smart_ctrl_a, { noremap = true })
