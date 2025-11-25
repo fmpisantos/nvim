@@ -106,8 +106,10 @@ return {
                         defaultConfig = "JUnit 4"
                     },
                     format = {
+                        enabled = true,
                         settings = {
-                            url = path.formatterUrl
+                            url = path.formatterUrl,
+                            profile = "4LabsStyle"
                         }
                     }
                 }
