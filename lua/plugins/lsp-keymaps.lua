@@ -23,7 +23,9 @@ function M.on_attach(_, bufnr)
     imap('<M-Tab>', vim.lsp.buf.signature_help, 'Signature help');
     imap('<C-k>', function() vim.lsp.buf.signature_help() end, 'Signature help');
     imap('<C-K>', function() require('cmp').open_docs() end, 'Open docs')
-    nmap('<C-K>', function() vim.print("CMP docs");require('cmp').open_docs() end, 'Open docs')
+    nmap('<C-K>', function()
+        vim.print("CMP docs"); require('cmp').open_docs()
+    end, 'Open docs')
 
     local function organize_imports()
         local line_count = vim.api.nvim_buf_line_count(bufnr)
@@ -84,13 +86,13 @@ function M.on_attach(_, bufnr)
     end
 
     local function format()
-        vim.cmd('setlocal expandtab')
-        vim.cmd('setlocal shiftwidth=4')
         local before = vim.fn.getline(1, '$')
         vim.lsp.buf.format()
         if vim.bo.filetype == 'java' then
             require('jdtls').organize_imports()
         else
+            vim.cmd('setlocal expandtab')
+            vim.cmd('setlocal shiftwidth=4')
             organize_imports()
         end
         local after = vim.fn.getline(1, '$')
