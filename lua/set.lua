@@ -60,6 +60,20 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 10
 vim.opt.hlsearch = true
 
+-- Use CopyQ for clipboard operations
+vim.g.clipboard = {
+  name = 'CopyQ',
+  copy = {
+    ['+'] = {'sh', '-c', 'cat | copyq add -'},
+    ['*'] = {'sh', '-c', 'cat | copyq add -'},
+  },
+  paste = {
+    ['+'] = {'copyq', 'read', '0'},
+    ['*'] = {'copyq', 'read', '0'},
+  },
+  cache_enabled = 0,
+}
+
 vim.api.nvim_create_autocmd('TextYankPost', {
     desc = 'Highlight when yanking (copying) text',
     group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
