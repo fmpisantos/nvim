@@ -24,7 +24,9 @@ local function insert_file_reference()
                     local new_line = line:sub(1, col) .. filepath .. " " .. line:sub(col + 1)
                     vim.api.nvim_buf_set_lines(target_buf, row - 1, row, false, { new_line })
                     vim.api.nvim_win_set_cursor(target_win, { row, col + #filepath + 1 })
-                    vim.cmd("startinsert")
+                    vim.schedule(function()
+                        vim.cmd("startinsert!")
+                    end)
                 end
             end)
             return true
