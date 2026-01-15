@@ -10,6 +10,10 @@ local config_file = config_dir .. "/config.json"
 -- Current selected model (nil means use default)
 local selected_model = nil
 
+-- Draft content storage (persists between window open/close)
+local draft_content = nil
+local draft_cursor = nil
+
 -- Load saved model from config file
 local function load_config()
     if vim.fn.filereadable(config_file) == 1 then
@@ -63,6 +67,7 @@ end
 -- Parse opencode JSON output and extract only assistant text (no thinking)
 -- Returns: response_text, error_message, is_thinking
 local function parse_opencode_response(json_lines)
+    vim.print(vim.inspect(json_lines))
     local response_parts = {}
     local error_message = nil
     local is_thinking = false
@@ -81,10 +86,10 @@ local function parse_opencode_response(json_lines)
                     else
                         error_message = err.name or "Unknown error"
                     end
-                -- Detect thinking events
+                    -- Detect thinking events
                 elseif data.type == "thinking" or (data.part and data.part.type == "thinking") then
                     is_thinking = true
-                -- Look for text events from assistant (not thinking)
+                    -- Look for text events from assistant (not thinking)
                 elseif data.type == "text" and data.part and data.part.type == "text" then
                     is_thinking = false -- No longer thinking once text arrives
                     table.insert(response_parts, data.part.text or "")
@@ -162,27 +167,29 @@ local function run_opencode(prompt)
 
     local function update_spinner()
         if is_loading and vim.api.nvim_buf_is_valid(response_buf) then
-            vim.schedule(function()
-                if is_loading and vim.api.nvim_buf_is_valid(response_buf) then
-                    local display_lines = vim.deepcopy(header_lines)
-                    table.insert(display_lines, loading_prefix .. spinner_frames[spinner_idx])
-                    table.insert(display_lines, "")
-                    vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
-                    spinner_idx = (spinner_idx % #spinner_frames) + 1
-                end
-            end)
+            local display_lines = vim.deepcopy(header_lines)
+            table.insert(display_lines, loading_prefix .. spinner_frames[spinner_idx])
+            table.insert(display_lines, "")
+            vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
+            spinner_idx = (spinner_idx % #spinner_frames) + 1
+            -- Schedule next update
+            if is_loading then
+                loading_timer = vim.fn.timer_start(80, function()
+                    update_spinner()
+                end)
+            end
         end
     end
 
     -- Start spinner animation
-    loading_timer = vim.loop.new_timer()
-    loading_timer:start(0, 80, vim.schedule_wrap(update_spinner))
+    loading_timer = vim.fn.timer_start(0, function()
+        update_spinner()
+    end)
 
     local function stop_loading()
         is_loading = false
         if loading_timer then
-            loading_timer:stop()
-            loading_timer:close()
+            vim.fn.timer_stop(loading_timer)
             loading_timer = nil
         end
     end
@@ -190,164 +197,106 @@ local function run_opencode(prompt)
     local json_output = {}
     local stderr_output = {}
     local job_id = nil
-    local timeout_timer = nil
-    local timeout_seconds = 120 -- 2 minute timeout
-
-    -- Function to update display with current state
-    local function update_display()
-        if not vim.api.nvim_buf_is_valid(response_buf) then
-            return
-        end
-        local display_lines = vim.deepcopy(header_lines)
-
-        if is_loading then
-            table.insert(display_lines, loading_prefix .. spinner_frames[spinner_idx])
-            table.insert(display_lines, "")
-        end
-
-        -- Show stderr in real-time if we have any
-        if #stderr_output > 0 then
-            if is_loading then
-                table.insert(display_lines, "**stderr output (process still running):**")
-            else
-                table.insert(display_lines, "**stderr output:**")
-            end
-            table.insert(display_lines, "```")
-            for _, stderr_line in ipairs(stderr_output) do
-                table.insert(display_lines, stderr_line)
-            end
-            table.insert(display_lines, "```")
-            table.insert(display_lines, "")
-        end
-
-        vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
-    end
-
-    local function stop_timeout()
-        if timeout_timer then
-            timeout_timer:stop()
-            timeout_timer:close()
-            timeout_timer = nil
-        end
-    end
 
     local function handle_timeout()
         stop_loading()
-        stop_timeout()
-        -- Kill the job if still running
+        -- Kill the process if still running
         if job_id then
-            vim.fn.jobstop(job_id)
+            job_id:kill(9)
         end
-        vim.schedule(function()
-            if vim.api.nvim_buf_is_valid(response_buf) then
-                local display_lines = vim.deepcopy(header_lines)
-                table.insert(display_lines, "**Error:** Request timed out after " .. timeout_seconds .. " seconds")
-                table.insert(display_lines, "")
-                if #stderr_output > 0 then
-                    table.insert(display_lines, "**stderr output:**")
-                    table.insert(display_lines, "```")
-                    for _, stderr_line in ipairs(stderr_output) do
-                        table.insert(display_lines, stderr_line)
-                    end
-                    table.insert(display_lines, "```")
+        if vim.api.nvim_buf_is_valid(response_buf) then
+            local display_lines = vim.deepcopy(header_lines)
+            table.insert(display_lines, "**Error:** Request timed out after 120 seconds")
+            table.insert(display_lines, "")
+            if #stderr_output > 0 then
+                table.insert(display_lines, "**stderr output:**")
+                table.insert(display_lines, "```")
+                for _, stderr_line in ipairs(stderr_output) do
+                    table.insert(display_lines, stderr_line)
                 end
-                vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
+                table.insert(display_lines, "```")
             end
-        end)
+            vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
+        end
     end
 
     local function execute_opencode()
         -- Start timeout timer
-        timeout_timer = vim.loop.new_timer()
-        timeout_timer:start(timeout_seconds * 1000, 0, vim.schedule_wrap(handle_timeout))
+        vim.fn.timer_start(120000, function()
+            handle_timeout()
+        end)
 
-        job_id = vim.fn.jobstart(cmd, {
-            cwd = nvim_cwd,
-            stdout_buffered = false,
-            on_stdout = function(_, data)
-                if data then
-                    for _, line in ipairs(data) do
-                        if line and line ~= "" then
-                            stop_loading()
-                            stop_timeout()
-                            table.insert(json_output, line)
-                            -- Parse incrementally and update buffer
-                            local response, err = parse_opencode_response(json_output)
-                            vim.schedule(function()
-                                if vim.api.nvim_buf_is_valid(response_buf) then
-                                    local display_lines = vim.deepcopy(header_lines)
-                                    if err then
-                                        table.insert(display_lines, "Error: " .. err)
-                                    elseif response and response ~= "" then
-                                        local response_lines = vim.split(response, "\n", { plain = true })
-                                        for _, rline in ipairs(response_lines) do
-                                            table.insert(display_lines, rline)
-                                        end
-                                    end
-                                    vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
-                                end
-                            end)
-                        end
-                    end
-                end
-            end,
-            on_stderr = function(_, data)
-                if data then
-                    for _, line in ipairs(data) do
-                        if line and line ~= "" then
-                            table.insert(stderr_output, line)
-                            -- Update display to show stderr in real-time
-                            vim.schedule(update_display)
-                        end
-                    end
-                end
-            end,
-            on_exit = function(_, code)
+        local system_obj = vim.system(cmd, { cwd = nvim_cwd }, function(result)
+            vim.schedule(function()
                 stop_loading()
-                stop_timeout()
-                vim.schedule(function()
-                    if vim.api.nvim_buf_is_valid(response_buf) then
-                        local display_lines = vim.deepcopy(header_lines)
-                        local response, err = parse_opencode_response(json_output)
-                        if err then
-                            table.insert(display_lines, "Error: " .. err)
-                        elseif not response or response == "" then
-                            if code ~= 0 then
-                                table.insert(display_lines, "Error: opencode exited with code " .. code)
-                                if #stderr_output > 0 then
-                                    table.insert(display_lines, "")
-                                    table.insert(display_lines, "**stderr output:**")
-                                    table.insert(display_lines, "```")
-                                    for _, stderr_line in ipairs(stderr_output) do
-                                        table.insert(display_lines, stderr_line)
-                                    end
-                                    table.insert(display_lines, "```")
+                if vim.api.nvim_buf_is_valid(response_buf) then
+                    -- Parse stdout
+                    if result.stdout and result.stdout ~= "" then
+                        for line in result.stdout:gmatch("[^\r\n]+") do
+                            table.insert(json_output, line)
+                        end
+                    end
+                    -- Parse stderr
+                    if result.stderr and result.stderr ~= "" then
+                        for line in result.stderr:gmatch("[^\r\n]+") do
+                            table.insert(stderr_output, line)
+                        end
+                    end
+
+                    local display_lines = vim.deepcopy(header_lines)
+                    local response, err = parse_opencode_response(json_output)
+                    local code = result.code
+
+                    if err then
+                        table.insert(display_lines, "**Error:** " .. err)
+                        if #stderr_output > 0 then
+                            table.insert(display_lines, "")
+                            table.insert(display_lines, "**stderr output:**")
+                            table.insert(display_lines, "```")
+                            for _, stderr_line in ipairs(stderr_output) do
+                                table.insert(display_lines, stderr_line)
+                            end
+                            table.insert(display_lines, "```")
+                        end
+                    elseif not response or response == "" then
+                        if code ~= 0 then
+                            table.insert(display_lines, "**Error:** opencode exited with code " .. code)
+                            if #stderr_output > 0 then
+                                table.insert(display_lines, "")
+                                table.insert(display_lines, "**stderr output:**")
+                                table.insert(display_lines, "```")
+                                for _, stderr_line in ipairs(stderr_output) do
+                                    table.insert(display_lines, stderr_line)
                                 end
-                            else
-                                if #stderr_output > 0 then
-                                    table.insert(display_lines, "No response received.")
-                                    table.insert(display_lines, "")
-                                    table.insert(display_lines, "**stderr output:**")
-                                    table.insert(display_lines, "```")
-                                    for _, stderr_line in ipairs(stderr_output) do
-                                        table.insert(display_lines, stderr_line)
-                                    end
-                                    table.insert(display_lines, "```")
-                                else
-                                    table.insert(display_lines, "No response received.")
-                                end
+                                table.insert(display_lines, "```")
                             end
                         else
-                            local response_lines = vim.split(response, "\n", { plain = true })
-                            for _, rline in ipairs(response_lines) do
-                                table.insert(display_lines, rline)
+                            if #stderr_output > 0 then
+                                table.insert(display_lines, "No response received.")
+                                table.insert(display_lines, "")
+                                table.insert(display_lines, "**stderr output:**")
+                                table.insert(display_lines, "```")
+                                for _, stderr_line in ipairs(stderr_output) do
+                                    table.insert(display_lines, stderr_line)
+                                end
+                                table.insert(display_lines, "```")
+                            else
+                                table.insert(display_lines, "No response received.")
                             end
                         end
-                        vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
+                    else
+                        local response_lines = vim.split(response, "\n", { plain = true })
+                        for _, rline in ipairs(response_lines) do
+                            table.insert(display_lines, rline)
+                        end
                     end
-                end)
-            end,
-        })
+                    vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, display_lines)
+                end
+            end)
+        end)
+
+        -- Store for potential cancellation on timeout
+        job_id = system_obj
     end
 
     -- Check if we need to init first
@@ -421,11 +370,20 @@ M.OpenCode = function(initial_prompt, filetype, source_file)
 
     local initial_lines = {}
     if initial_prompt then
+        -- New prompt with selection, clear any draft
+        draft_content = nil
+        draft_cursor = nil
         initial_lines = { "```" .. filetype }
         vim.list_extend(initial_lines, initial_prompt)
         vim.list_extend(initial_lines, { "```", "" })
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, initial_lines)
         vim.api.nvim_win_set_cursor(win, { #initial_lines, 0 })
+    elseif draft_content then
+        -- Restore previous draft
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, draft_content)
+        if draft_cursor then
+            pcall(vim.api.nvim_win_set_cursor, win, draft_cursor)
+        end
     end
 
     vim.cmd("startinsert")
@@ -443,9 +401,18 @@ M.OpenCode = function(initial_prompt, filetype, source_file)
         local content = table.concat(lines, "\n")
         -- Replace #buffer or #buf with source file path if available
         if source_file and source_file ~= "" then
-            content = content:gsub("#buffer", "@" .. source_file)
-            content = content:gsub("#buf", "@" .. source_file)
+            local new_content = content:gsub("#buffer", "@" .. source_file)
+            new_content = new_content:gsub("#buf", "@" .. source_file)
+            -- Update buffer visually if replacements were made
+            if new_content ~= content then
+                local new_lines = vim.split(new_content, "\n", { plain = true })
+                vim.api.nvim_buf_set_lines(buf, 0, -1, false, new_lines)
+            end
+            content = new_content
         end
+        -- Clear draft on submit
+        draft_content = nil
+        draft_cursor = nil
         vim.api.nvim_win_close(win, true)
         if content and content ~= "" then
             run_opencode(content)
@@ -467,12 +434,28 @@ M.OpenCode = function(initial_prompt, filetype, source_file)
         return "wq"
     end, { buffer = buf, expr = true })
 
-    vim.keymap.set("n", "q", function()
+    local function save_draft_and_close()
+        local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+        -- Only save if there's actual content
+        local has_content = false
+        for _, line in ipairs(lines) do
+            if line ~= "" then
+                has_content = true
+                break
+            end
+        end
+        if has_content then
+            draft_content = lines
+            draft_cursor = vim.api.nvim_win_get_cursor(win)
+        else
+            draft_content = nil
+            draft_cursor = nil
+        end
         vim.api.nvim_win_close(win, true)
-    end, { buffer = buf, noremap = true, silent = true })
-    vim.keymap.set("n", "<Esc>", function()
-        vim.api.nvim_win_close(win, true)
-    end, { buffer = buf, noremap = true, silent = true })
+    end
+
+    vim.keymap.set("n", "q", save_draft_and_close, { buffer = buf, noremap = true, silent = true })
+    vim.keymap.set("n", "<Esc>", save_draft_and_close, { buffer = buf, noremap = true, silent = true })
 end
 
 local function get_source_file()
@@ -519,7 +502,7 @@ M.SelectModel = function()
             results = models,
         }),
         sorter = conf.generic_sorter({}),
-        attach_mappings = function(prompt_bufnr, map)
+        attach_mappings = function(prompt_bufnr, _)
             actions.select_default:replace(function()
                 actions.close(prompt_bufnr)
                 local selection = action_state.get_selected_entry()
@@ -594,54 +577,36 @@ local function run_opencode_command(command, args)
             table.insert(cmd, args)
         end
 
-        vim.fn.jobstart(cmd, {
-            cwd = nvim_cwd,
-            stdout_buffered = false,
-            on_stdout = function(_, data)
-                if data then
-                    for _, line in ipairs(data) do
-                        if line and line ~= "" then
+        vim.system(cmd, { cwd = nvim_cwd }, function(result)
+            vim.schedule(function()
+                if vim.api.nvim_buf_is_valid(response_buf) then
+                    -- Parse stdout
+                    if result.stdout and result.stdout ~= "" then
+                        for line in result.stdout:gmatch("[^\r\n]+") do
                             table.insert(json_output, line)
-                            -- Parse incrementally and update buffer
-                            local response, err = parse_opencode_response(json_output)
-                            vim.schedule(function()
-                                if vim.api.nvim_buf_is_valid(response_buf) then
-                                    if err then
-                                        vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, { "Error: " .. err })
-                                    elseif response and response ~= "" then
-                                        local lines = vim.split(response, "\n", { plain = true })
-                                        vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, lines)
-                                    end
-                                end
-                            end)
                         end
+                    end
+
+                    local response, err = parse_opencode_response(json_output)
+                    local code = result.code
+
+                    if err then
+                        vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, { "Error: " .. err })
+                    elseif not response or response == "" then
+                        if code ~= 0 then
+                            local stderr_msg = result.stderr or ""
+                            vim.api.nvim_buf_set_lines(response_buf, 0, -1, false,
+                                { "Error: opencode exited with code " .. code, "", stderr_msg })
+                        else
+                            vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, { "No response received." })
+                        end
+                    else
+                        local lines = vim.split(response, "\n", { plain = true })
+                        vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, lines)
                     end
                 end
-            end,
-            on_stderr = function(_, data)
-                -- Ignore stderr
-            end,
-            on_exit = function(_, code)
-                vim.schedule(function()
-                    if vim.api.nvim_buf_is_valid(response_buf) then
-                        local response, err = parse_opencode_response(json_output)
-                        if err then
-                            vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, { "Error: " .. err })
-                        elseif not response or response == "" then
-                            if code ~= 0 then
-                                vim.api.nvim_buf_set_lines(response_buf, 0, -1, false,
-                                    { "Error: opencode exited with code " .. code })
-                            else
-                                vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, { "No response received." })
-                            end
-                        else
-                            local lines = vim.split(response, "\n", { plain = true })
-                            vim.api.nvim_buf_set_lines(response_buf, 0, -1, false, lines)
-                        end
-                    end
-                end)
-            end,
-        })
+            end)
+        end)
     end
 
     -- Check if we need to init first
