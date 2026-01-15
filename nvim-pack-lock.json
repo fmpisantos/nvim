@@ -1,5 +1,6 @@
 {
   "plugins": {
+    "CopilotChat.nvim": [],
     "LuaSnip": [],
     "cmp-buffer": {
       "rev": "b74fab3",
@@ -17,6 +18,7 @@
       "rev": "98d9cb5",
       "src": "https://github.com/saadparwaiz1/cmp_luasnip"
     },
+    "copilot.lua": [],
     "harpoon": {
       "version": "'harpoon2'"
     },
@@ -46,7 +48,13 @@
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
     },
     "oil.nvim": [],
-    "pack.nvim": [],
+    "opencode.nvim": {
+      "rev": "e268ae3",
+      "src": "https://github.com/fmpisantos/opencode.nvim"
+    },
+    "pack.nvim": {
+      "rev": "50dbc0b"
+    },
     "plenary.nvim": [],
     "shared_buffer.nvim": [],
     "telescope-fzf-native.nvim": [],
