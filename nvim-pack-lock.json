@@ -7,7 +7,7 @@
       "src": "https://github.com/hrsh7th/cmp-buffer"
     },
     "cmp-nvim-lsp": {
-      "rev": "bd5a7d6",
+      "rev": "cbc7b02",
       "src": "https://github.com/hrsh7th/cmp-nvim-lsp"
     },
     "cmp-path": {
@@ -20,6 +20,7 @@
     },
     "copilot.lua": [],
     "harpoon": {
+      "rev": "87b1a35",
       "version": "'harpoon2'"
     },
     "markdown-preview.nvim": [],
@@ -53,7 +54,7 @@
       "src": "https://github.com/fmpisantos/opencode.nvim"
     },
     "pack.nvim": {
-      "rev": "50dbc0b"
+      "rev": "85502da"
     },
     "plenary.nvim": [],
     "shared_buffer.nvim": [],

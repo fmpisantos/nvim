@@ -8,7 +8,7 @@ return {
     },
     setup = function()
         require("opencode").setup({
-            timeout_ms = 300000
+            timeout_ms = -1
         })
     end
 }
