@@ -14,6 +14,9 @@ return {
                 additional_vim_regex_highlighting = { "markdown" },
             },
             indent = { enable = true },
+            folds = {
+                enable = true
+            }
         });
     end
 }
