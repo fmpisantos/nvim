@@ -1,7 +1,11 @@
 {
   "plugins": {
-    "CopilotChat.nvim": [],
-    "LuaSnip": [],
+    "CopilotChat.nvim": {
+      "rev": "07dcc18"
+    },
+    "LuaSnip": {
+      "rev": "dae4f5a"
+    },
     "cmp-buffer": {
       "rev": "b74fab3",
       "src": "https://github.com/hrsh7th/cmp-buffer"
@@ -18,55 +22,87 @@
       "rev": "98d9cb5",
       "src": "https://github.com/saadparwaiz1/cmp_luasnip"
     },
-    "copilot.lua": [],
+    "copilot.lua": {
+      "rev": "2d75114"
+    },
     "harpoon": {
       "rev": "87b1a35",
       "version": "'harpoon2'"
     },
     "markdown-preview.nvim": [],
     "marks.nvim": [],
-    "mason-lspconfig.nvim": [],
+    "mason-lspconfig.nvim": {
+      "rev": "80c0130"
+    },
     "mason-registry": {
-      "rev": "0fec232",
+      "rev": "f78120e",
       "src": "https://github.com/fmpisantos/mason-registry"
     },
-    "mason.nvim": [],
+    "mason.nvim": {
+      "rev": "44d1e90"
+    },
     "neodev.nvim": [],
     "notes.nvim": [],
     "nvim-cmp": {
-      "rev": "106c4bc",
+      "rev": "85bbfad",
       "src": "https://github.com/hrsh7th/nvim-cmp"
     },
-    "nvim-dap": [],
+    "nvim-dap": {
+      "rev": "cdfd55a"
+    },
     "nvim-dap-ui": [],
-    "nvim-jdtls": [],
-    "nvim-lspconfig": [],
+    "nvim-jdtls": {
+      "rev": "f73731b"
+    },
+    "nvim-lspconfig": {
+      "rev": "92ee7d4"
+    },
     "nvim-nio": [],
     "nvim-treesitter": [],
-    "nvim-treesitter-context": [],
+    "nvim-treesitter-context": {
+      "rev": "64dd4cf"
+    },
     "nvim-web-devicons": {
-      "rev": "8dcb311",
+      "rev": "8033534",
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
     },
-    "oil.nvim": [],
+    "oil.nvim": {
+      "rev": "f55b25e"
+    },
     "opencode.nvim": {
-      "rev": "e268ae3",
+      "rev": "5bbff81",
       "src": "https://github.com/fmpisantos/opencode.nvim"
     },
     "pack.nvim": {
-      "rev": "85502da"
+      "rev": "fd2586c"
     },
     "plenary.nvim": [],
-    "shared_buffer.nvim": [],
-    "telescope-fzf-native.nvim": [],
+    "shared_buffer.nvim": {
+      "rev": "fc06cbe"
+    },
+    "telescope-fzf-native.nvim": {
+      "rev": "6fea601"
+    },
     "telescope-ui-select.nvim": [],
-    "telescope.nvim": [],
-    "tokyonight.nvim": [],
-    "undotree": [],
-    "vague.nvim": [],
-    "vim-dadbod": [],
+    "telescope.nvim": {
+      "rev": "a8c2223"
+    },
+    "tokyonight.nvim": {
+      "rev": "5da1b76"
+    },
+    "undotree": {
+      "rev": "178d19e"
+    },
+    "vague.nvim": {
+      "rev": "fcc2835"
+    },
+    "vim-dadbod": {
+      "rev": "6d1d41d"
+    },
     "vim-dadbod-completion": [],
-    "vim-dadbod-ui": [],
+    "vim-dadbod-ui": {
+      "rev": "48c4f27"
+    },
     "vim-fugitive": []
   }
 }
