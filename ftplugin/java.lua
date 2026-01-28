@@ -42,6 +42,36 @@ vim.api.nvim_create_autocmd('LspAttach', {
 setup_gradle_build()
 
 -- Create commands for clean build
+vim.api.nvim_buf_create_user_command(0, 'OpenInIntellij', function()
+    local gradle_root = get_gradle_root()
+    local path
+    if gradle_root then
+        path = gradle_root
+    else
+        path = vim.fn.getcwd()
+    end
+
+    function vim.pesc(str)
+        return str:gsub("([^%w])", "%%%1")
+    end
+
+    local file_path = vim.fn.expand('%:p')
+    local relative_file = file_path:gsub('^' .. vim.pesc(path) .. '/', '')
+    path = {
+        path,
+        relative_file
+    }
+    local cmd = "idea " .. table.concat(path, " ")
+    vim.print(cmd)
+    vim.loop.spawn("idea", { args = path, detached = true }, function(code, _)
+        if code ~= 0 then
+            vim.notify("Failed to open IntelliJ: Exit code " .. code, vim.log.levels.ERROR)
+        end
+    end)
+end, {
+    desc = 'Open current project or file in IntelliJ'
+})
+
 vim.api.nvim_buf_create_user_command(0, 'MakeClean', function()
     local gradle_root = get_gradle_root()
     if not gradle_root then
