@@ -1,6 +1,5 @@
 return {
     src = "CopilotC-Nvim/CopilotChat.nvim",
-    disable = true,
     deps = {
         "zbirenbaum/copilot.lua",
     },
