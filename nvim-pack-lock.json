@@ -28,6 +28,10 @@
     "harpoon": {
       "version": "'harpoon2'"
     },
+    "lazygit.nvim": {
+      "rev": "a04ad0d",
+      "src": "https://github.com/kdheepak/lazygit.nvim"
+    },
     "markdown-preview.nvim": [],
     "marks.nvim": [],
     "mason-lspconfig.nvim": [],
@@ -59,11 +63,11 @@
       "rev": "f55b25e"
     },
     "opencode.nvim": {
-      "rev": "1a84909",
+      "rev": "99e46c7",
       "src": "https://github.com/fmpisantos/opencode.nvim"
     },
     "pack.nvim": {
-      "rev": "fd2586c"
+      "rev": "49e9401"
     },
     "plenary.nvim": [],
     "shared_buffer.nvim": {
@@ -74,7 +78,7 @@
     },
     "telescope-ui-select.nvim": [],
     "telescope.nvim": {
-      "rev": "a8c2223"
+      "rev": "ad7d958"
     },
     "tokyonight.nvim": {
       "rev": "5da1b76"
