@@ -19,6 +19,9 @@ pack.require("plugins");
 pack.require("plugins.myPlugins.init");
 pack.install()
 
+-- Run on repo
+require('plugins.static-website')
+
 -- Force wrap
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     pattern = "*/Notes/PersonalNotes/notes/notesForInterview(story).md",
