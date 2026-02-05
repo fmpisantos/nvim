@@ -13,6 +13,11 @@ vim.opt.smartindent = true
 
 vim.opt.wrap = false
 
+-- Show a vertical guide at 120 characters to indicate line length limit
+vim.opt.colorcolumn = "120"
+-- Subtle background for the column (works with termguicolors)
+vim.cmd("highlight ColorColumn guibg=#2a2a2a ctermbg=236")
+
 vim.opt.swapfile = false
 vim.opt.backup = false
 
