@@ -55,8 +55,13 @@ return {
             })
         end, { desc = "[P]roject [G]rep" })
         -- Document
-        vim.keymap.set('n', '<leader>dg', function() builtin.live_grep({ search_dirs = { vim.fn.expand("%:p") } }) end,
-            { desc = "[D]ocument [G]rep" });
+        vim.keymap.set('n', '<leader>dg', function()
+            if vim.bo.filetype == 'qf' then
+                builtin.quickfix()
+            else
+                builtin.live_grep({ search_dirs = { vim.fn.expand("%:p") } })
+            end
+        end, { desc = "[D]ocument [G]rep" });
         vim.keymap.set('v', '<leader>dg', function()
             local text = vim.getVisualSelection()
             builtin.live_grep({ search_dirs = { vim.fn.expand("%:p") }, default_text = text })
