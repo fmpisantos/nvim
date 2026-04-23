@@ -1,6 +1,6 @@
 return {
     src = "fmpisantos/opencode.nvim",
-    dev = true,
+    -- dev = true,
     deps = {
         "nvim-telescope/telescope.nvim",
         "nvim-telescope/telescope-ui-select.nvim",
