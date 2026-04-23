@@ -1,22 +1,41 @@
 return {
     src = {
-        "nvim-treesitter/nvim-treesitter",
+        { src = "nvim-treesitter/nvim-treesitter", version = "main" },
         "nvim-treesitter/nvim-treesitter-context",
     },
-    event = { "BufReadPost", "BufWritePost", "BufNewFile" },
     setup = function()
-        require('nvim-treesitter.install').prefer_git = true
-        require('nvim-treesitter.configs').setup({
-            ensure_installed = { 'c', 'cpp', 'c_sharp', 'lua', 'markdown', 'xml', 'json', 'java' },
-            auto_install = true,
-            highlight = {
-                enable = true,
-                additional_vim_regex_highlighting = { "markdown" },
-            },
-            indent = { enable = true },
-            folds = {
-                enable = true
-            }
-        });
-    end
+        local ts = require('nvim-treesitter')
+        if not ts.install then
+            vim.notify("nvim-treesitter is on the legacy branch; run :PackUpdate to switch to 'main'",
+                vim.log.levels.WARN)
+            return
+        end
+
+        ts.setup({
+            install_dir = vim.fn.stdpath('data') .. '/site',
+        })
+
+        ts.install({
+            'c', 'cpp', 'c_sharp', 'lua', 'markdown', 'markdown_inline',
+            'xml', 'json', 'java',
+        })
+
+        vim.api.nvim_create_autocmd('FileType', {
+            callback = function(args)
+                local ok = pcall(vim.treesitter.start, args.buf)
+                if ok then
+                    vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+                    vim.wo[0][0].foldmethod = 'expr'
+                    vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                end
+            end,
+        })
+
+        vim.api.nvim_create_autocmd('FileType', {
+            pattern = 'markdown',
+            callback = function()
+                vim.bo.syntax = 'ON'
+            end,
+        })
+    end,
 }
