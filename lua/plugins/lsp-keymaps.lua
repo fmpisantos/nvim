@@ -27,15 +27,17 @@ function M.on_attach(_, bufnr)
     --     vim.print("CMP docs"); require('cmp').open_docs()
     -- end, 'Open docs')
 
-    local function organize_imports()
-        local line_count = vim.api.nvim_buf_line_count(bufnr)
+    local function organize_imports(buf)
+        -- allow explicit buffer or default to current buffer
+        local b = buf or vim.api.nvim_get_current_buf()
+        local line_count = vim.api.nvim_buf_line_count(b)
         local range = {
             start = { line = 0, character = 0 },
             ["end"] = { line = line_count - 1, character = 0 }
         }
 
         local params = {
-            textDocument = vim.lsp.util.make_text_document_params(),
+            textDocument = vim.lsp.util.make_text_document_params(b),
             range = range,
             context = { only = { "source.organizeImports" }, diagnostics = {} }
         }
@@ -44,7 +46,7 @@ function M.on_attach(_, bufnr)
             return true
         end
 
-        vim.lsp.buf_request(bufnr, "textDocument/codeAction", params, function(err, actions, ctx)
+        vim.lsp.buf_request(b, "textDocument/codeAction", params, function(err, actions, ctx)
             if err or not actions or #actions == 0 then return end
 
             for _, action in ipairs(actions) do
@@ -70,7 +72,7 @@ function M.on_attach(_, bufnr)
                                 end
 
                                 vim.lsp.handlers["workspace/executeCommand"] = nil
-                            end, bufnr)
+                            end, b)
                             return
                         end
                     end
@@ -85,21 +87,40 @@ function M.on_attach(_, bufnr)
         end)
     end
 
-    local function format()
-        local before = vim.fn.getline(1, '$')
-        vim.lsp.buf.format()
-        if vim.bo.filetype == 'java' then
-            require('jdtls').organize_imports()
+    -- make format available globally so other modules (eg. nokia.lua) can call it
+    function _G.format(buf)
+        local b = buf or 0
+        if b == 0 then b = vim.api.nvim_get_current_buf() end
+        local before = vim.api.nvim_buf_get_lines(b, 0, -1, false)
+
+        -- run LSP format for the buffer
+        pcall(vim.lsp.buf.format, { bufnr = b })
+
+        local ft = vim.api.nvim_buf_get_option(b, 'filetype')
+        if ft == 'java' then
+            -- jdtls organize_imports expects current buffer; switch temporarily
+            local cur = vim.api.nvim_get_current_buf()
+            vim.api.nvim_set_current_buf(b)
+            pcall(require, 'jdtls')
+            if package.loaded['jdtls'] and type(require('jdtls').organize_imports) == 'function' then
+                pcall(require('jdtls').organize_imports)
+            end
+            vim.api.nvim_set_current_buf(cur)
         else
-            vim.cmd('setlocal expandtab')
-            vim.cmd('setlocal shiftwidth=4')
-            organize_imports()
+            vim.api.nvim_buf_set_option(b, 'expandtab', true)
+            vim.api.nvim_buf_set_option(b, 'shiftwidth', 4)
+            organize_imports(b)
         end
-        local after = vim.fn.getline(1, '$')
+
+        local after = vim.api.nvim_buf_get_lines(b, 0, -1, false)
         if before ~= after then
+            local cur = vim.api.nvim_get_current_buf()
+            vim.api.nvim_set_current_buf(b)
             vim.cmd('update')
+            vim.api.nvim_set_current_buf(cur)
         end
     end
+    local format = _G.format
     local function format_all_files()
         local current_buffer = vim.fn.bufname('%')
         local current_win_view = vim.fn.winsaveview()

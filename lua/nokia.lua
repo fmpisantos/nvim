@@ -66,3 +66,56 @@ end
 function _G.DockerComposeHere()
     return DockerCompose(GetProfilePathHere())
 end
+
+--- Format Java files that have git changes (staged, unstaged or untracked)
+--- Scans the repo for changed files in the current working tree and runs
+--- the global `format()` function for each `.java` file found.
+---@return nil
+function _G.FormatChangedJavaFiles()
+    -- ensure we are inside a git repository
+    local inside = vim.fn.systemlist('git rev-parse --is-inside-work-tree')
+    if not inside or inside[1] ~= 'true' then
+        error('Not inside a git repository')
+    end
+
+    local current_buffer = vim.fn.bufname('%')
+    local current_win_view = vim.fn.winsaveview()
+
+    local function gather(cmd)
+        local res = {}
+        local out = vim.fn.systemlist(cmd)
+        for _, l in ipairs(out) do
+            if l and l ~= '' then table.insert(res, l) end
+        end
+        return res
+    end
+
+    -- staged, unstaged and untracked files
+    local files = {}
+    for _, f in ipairs(gather('git diff --name-only')) do files[f] = true end
+    for _, f in ipairs(gather('git diff --cached --name-only')) do files[f] = true end
+    for _, f in ipairs(gather('git ls-files --others --exclude-standard')) do files[f] = true end
+
+    for filename, _ in pairs(files) do
+        if filename:match('%.java$') then
+            if vim.fn.filereadable(filename) == 1 then
+                -- open file, format, then continue
+                vim.cmd('keepalt edit ' .. vim.fn.fnameescape(filename))
+                -- call global format function (accepts optional bufnr)
+                pcall(function() _G.format() end)
+            else
+                print('File not readable: ' .. filename)
+            end
+        end
+    end
+
+    if current_buffer ~= '' then
+        vim.cmd('buffer ' .. vim.fn.fnameescape(current_buffer))
+        vim.fn.winrestview(current_win_view)
+    end
+end
+
+-- Create a user command to run the formatter from command-line inside Neovim
+pcall(vim.api.nvim_create_user_command, 'FormatChangedJava', function()
+    pcall(function() _G.FormatChangedJavaFiles() end)
+end, { desc = 'Format Java files with git changes' })

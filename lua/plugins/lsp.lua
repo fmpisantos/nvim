@@ -77,48 +77,63 @@ return {
             },
         })
 
+        -- Use the nvim-jdtls helper to start or attach the server.  jdtls
+        -- performs extra initialization (workspace handling, bundles,
+        -- debugger integration) that a plain lsp start doesn't provide.
         local jdtls_config = require("plugins.java.config")
         local function on_attach_jdtls(client, _bufnr)
             on_attach(client, _bufnr)
             jdtls_config.jdtls_on_attach(client, _bufnr)
         end
+
         local cmd, path = jdtls_config.jdtls_setup()
 
-        vim.lsp.config('jdtls', {
-            cmd = cmd,
-            capabilities = capabilities,
-            on_attach = on_attach_jdtls,
-            settings = {
-                java = {
-                    configuration = {
-                        runtimes = path.runtimes
-                    },
-                    test = {
-                        config = {
-                            {
-                                name = "JUnit 4",
-                                testKind = "junit",
-                                workingDirectory = "${workspaceFolder}",
-                                classPaths = { "$Auto" },
-                                modulePaths = { "$Auto" }
-                            }
+        -- determine root_dir with lspconfig util (works reliably per-file)
+        local util = require('lspconfig.util')
+        local root_dir = util.root_pattern('.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle')(vim.fn.expand('%:p'))
+            or util.find_git_ancestor(vim.fn.getcwd())
+            or vim.fn.getcwd()
+
+        local ok_jdtls, jdtls = pcall(require, 'jdtls')
+        if ok_jdtls then
+            jdtls.start_or_attach({
+                cmd = cmd,
+                root_dir = root_dir,
+                capabilities = capabilities,
+                on_attach = on_attach_jdtls,
+                settings = {
+                    java = {
+                        configuration = {
+                            runtimes = path.runtimes
                         },
-                        defaultConfig = "JUnit 4"
-                    },
-                    format = {
-                        enabled = true,
-                        settings = {
-                            url = path.formatterUrl,
-                            profile = "4LabsStyle"
+                        test = {
+                            config = {
+                                {
+                                    name = "JUnit 4",
+                                    testKind = "junit",
+                                    workingDirectory = "${workspaceFolder}",
+                                    classPaths = { "$Auto" },
+                                    modulePaths = { "$Auto" }
+                                }
+                            },
+                            defaultConfig = "JUnit 4"
+                        },
+                        format = {
+                            enabled = true,
+                            settings = {
+                                url = path.formatterUrl,
+                                profile = "4LabsStyle"
+                            }
                         }
                     }
-                }
-            },
-            init_options = {
-                bundles = path.bundles,
-            },
-            root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' })
-        });
+                },
+                init_options = {
+                    bundles = path.bundles,
+                },
+            })
+        else
+            vim.notify("jdtls plugin not available; cannot start jdtls properly", vim.log.levels.WARN)
+        end
 
         vim.lsp.config("clangd", {
             on_attach = on_attach,
@@ -169,9 +184,8 @@ return {
             automatic_enable = true
         });
 
-        vim.lsp.enable({
-            'jdtls'
-        });
+        -- jdtls is started via require('jdtls').start_or_attach; avoid enabling
+        -- it globally with vim.lsp.enable to prevent duplicate or partial clients.
 
         -- LSP Cache Cleanup function
         function _G.LspCacheCleanup()

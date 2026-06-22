@@ -96,14 +96,18 @@ local function enable_debugger(_)
 end
 
 local function enable_codelens(bufnr)
-    pcall(vim.lsp.codelens.refresh)
+    local function refresh()
+        pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
+    end
+
+    refresh()
 
     vim.api.nvim_create_autocmd('BufWritePost', {
         buffer = bufnr,
         group = java_cmds,
         desc = 'refresh codelens',
         callback = function()
-            pcall(vim.lsp.codelens.refresh)
+            refresh()
         end,
     })
 end
