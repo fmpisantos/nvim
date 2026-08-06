@@ -87,62 +87,82 @@ return {
         end
 
         local cmd, path = jdtls_config.jdtls_setup()
-
-        -- determine root_dir with lspconfig util (works reliably per-file)
         local util = require('lspconfig.util')
-        local root_dir = util.root_pattern('.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle')(vim.fn.expand('%:p'))
-            or util.find_git_ancestor(vim.fn.getcwd())
-            or vim.fn.getcwd()
 
         local ok_jdtls, jdtls = pcall(require, 'jdtls')
-        if ok_jdtls then
-            jdtls.start_or_attach({
-                cmd = cmd,
-                root_dir = root_dir,
-                capabilities = capabilities,
-                on_attach = on_attach_jdtls,
-                settings = {
-                    java = {
-                        configuration = {
-                            runtimes = path.runtimes
-                        },
-                        completion = {
-                            importOrder = { "", "com.nokia", "#", "#com.nokia" },
-                        },
-                        sources = {
-                            organizeImports = {
-                                starThreshold = 99,
-                                staticStarThreshold = 99,
+        if not ok_jdtls then
+            vim.notify("jdtls plugin not available; cannot start jdtls properly", vim.log.levels.WARN)
+        else
+            -- Build the jdtls config once. `start_or_attach` will reuse the
+            -- existing client for buffers under the same root_dir instead of
+            -- spawning a new jdtls process, so we call it per java buffer via
+            -- a FileType autocmd (this is the pattern nvim-jdtls documents).
+            local function start_jdtls_for_current_buf()
+                local fname = vim.api.nvim_buf_get_name(0)
+                if fname == '' then return end
+                local root_dir = util.root_pattern(
+                    '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle'
+                )(fname) or util.find_git_ancestor(fname) or vim.fn.getcwd()
+
+                jdtls.start_or_attach({
+                    cmd = cmd,
+                    root_dir = root_dir,
+                    capabilities = capabilities,
+                    on_attach = on_attach_jdtls,
+                    settings = {
+                        java = {
+                            configuration = {
+                                runtimes = path.runtimes
                             },
-                        },
-                        test = {
-                            config = {
-                                {
-                                    name = "JUnit 4",
-                                    testKind = "junit",
-                                    workingDirectory = "${workspaceFolder}",
-                                    classPaths = { "$Auto" },
-                                    modulePaths = { "$Auto" }
+                            completion = {
+                                importOrder = { "", "com.nokia", "#", "#com.nokia" },
+                            },
+                            sources = {
+                                organizeImports = {
+                                    starThreshold = 99,
+                                    staticStarThreshold = 99,
+                                },
+                            },
+                            test = {
+                                config = {
+                                    {
+                                        name = "JUnit 4",
+                                        testKind = "junit",
+                                        workingDirectory = "${workspaceFolder}",
+                                        classPaths = { "$Auto" },
+                                        modulePaths = { "$Auto" }
+                                    }
+                                },
+                                defaultConfig = "JUnit 4"
+                            },
+                            format = {
+                                enabled = true,
+                                settings = {
+                                    url = path.formatterUrl,
+                                    -- profile = "4LabsStyle"
+                                    profile = "JavaConventions"
                                 }
-                            },
-                            defaultConfig = "JUnit 4"
-                        },
-                        format = {
-                            enabled = true,
-                            settings = {
-                                url = path.formatterUrl,
-                                -- profile = "4LabsStyle"
-                                profile = "JavaConventions"
                             }
                         }
-                    }
-                },
-                init_options = {
-                    bundles = path.bundles,
-                },
+                    },
+                    init_options = {
+                        bundles = path.bundles,
+                    },
+                })
+            end
+
+            local jdtls_ft_group = vim.api.nvim_create_augroup('jdtls_ft_attach', { clear = true })
+            vim.api.nvim_create_autocmd('FileType', {
+                group = jdtls_ft_group,
+                pattern = 'java',
+                callback = start_jdtls_for_current_buf,
+                desc = 'Attach jdtls to every java buffer (reuses existing client)',
             })
-        else
-            vim.notify("jdtls plugin not available; cannot start jdtls properly", vim.log.levels.WARN)
+
+            -- If the plugin loaded on a java buffer, attach right away.
+            if vim.bo.filetype == 'java' then
+                start_jdtls_for_current_buf()
+            end
         end
 
         vim.lsp.config("clangd", {

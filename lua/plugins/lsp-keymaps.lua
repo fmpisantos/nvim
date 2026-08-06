@@ -225,12 +225,206 @@ function M.on_attach(_, bufnr)
         return dedupe(files)
     end
 
+    -- Progress reporter: writes a single-line status to the cmdline area.
+    -- Cleared with `clear()`.
+    local function make_progress(label)
+        local ns = vim.api.nvim_create_namespace('lsp_keymaps_progress')
+        local function update(text)
+            vim.schedule(function()
+                vim.api.nvim_echo({ { label .. ': ' .. text, 'ModeMsg' } }, false, {})
+                vim.cmd('redraw')
+            end)
+        end
+        local function done(text)
+            vim.schedule(function()
+                if text and text ~= '' then
+                    vim.api.nvim_echo({ { label .. ': ' .. text, 'MoreMsg' } }, true, {})
+                else
+                    vim.api.nvim_echo({ { '' } }, false, {})
+                end
+            end)
+        end
+        return { update = update, done = done, ns = ns }
+    end
+
+    -- Async LSP formatting for a specific buffer.
+    -- Sends textDocument/formatting to any client that supports it, applies
+    -- the returned edits, then invokes cb(stats). stats has fields
+    -- { clients = N, formatters = N, applied = N, errors = N }.
+    local function lsp_format_async(bufnr, cb)
+        local clients = vim.lsp.get_clients({ bufnr = bufnr })
+        local formatters = {}
+        for _, c in ipairs(clients) do
+            local supports = false
+            -- Prefer client:supports_method (handles dynamic registration
+            -- which jdtls uses for textDocument/formatting).
+            if type(c.supports_method) == 'function' then
+                local ok, s = pcall(function()
+                    return c:supports_method('textDocument/formatting', { bufnr = bufnr })
+                end)
+                if not ok then
+                    -- fallback to non-colon call signature for older nvim
+                    ok, s = pcall(c.supports_method, 'textDocument/formatting', { bufnr = bufnr })
+                end
+                if ok then supports = s and true or false end
+            end
+            if not supports and c.server_capabilities
+                and c.server_capabilities.documentFormattingProvider then
+                supports = true
+            end
+            if supports then
+                table.insert(formatters, c)
+            end
+        end
+        local stats = { clients = #clients, formatters = #formatters, applied = 0, errors = 0 }
+        if #formatters == 0 then
+            return cb(stats)
+        end
+
+        local sw = vim.api.nvim_buf_get_option(bufnr, 'shiftwidth')
+        if sw == 0 then sw = vim.api.nvim_buf_get_option(bufnr, 'tabstop') end
+        local params = {
+            textDocument = vim.lsp.util.make_text_document_params(bufnr),
+            options = {
+                tabSize = sw,
+                insertSpaces = vim.api.nvim_buf_get_option(bufnr, 'expandtab'),
+                trimTrailingWhitespace = true,
+                insertFinalNewline = true,
+                trimFinalNewlines = true,
+            },
+        }
+
+        local remaining = #formatters
+        local function one_done()
+            remaining = remaining - 1
+            if remaining <= 0 then cb(stats) end
+        end
+
+        for _, client in ipairs(formatters) do
+            local ok, req_id = pcall(function()
+                return client:request('textDocument/formatting', params, function(err, result)
+                    if err then
+                        stats.errors = stats.errors + 1
+                    elseif result and vim.api.nvim_buf_is_loaded(bufnr) then
+                        local enc = client.offset_encoding or 'utf-16'
+                        local ok2 = pcall(vim.lsp.util.apply_text_edits, result, bufnr, enc)
+                        if ok2 then
+                            stats.applied = stats.applied + #result
+                        else
+                            stats.errors = stats.errors + 1
+                        end
+                    end
+                    one_done()
+                end, bufnr)
+            end)
+            if not ok or not req_id then
+                stats.errors = stats.errors + 1
+                one_done()
+            end
+        end
+    end
+
+    -- Async organize-imports via source.organizeImports code action.
+    -- Applies edits (and commands for jdtls-style responses) then calls cb().
+    local function organize_imports_async(bufnr, cb)
+        if not vim.api.nvim_buf_is_loaded(bufnr) then return cb() end
+        local line_count = vim.api.nvim_buf_line_count(bufnr)
+        local params = {
+            textDocument = vim.lsp.util.make_text_document_params(bufnr),
+            range = {
+                start = { line = 0, character = 0 },
+                ["end"] = { line = math.max(0, line_count - 1), character = 0 },
+            },
+            context = { only = { "source.organizeImports" }, diagnostics = {} },
+        }
+
+        vim.lsp.buf_request(bufnr, 'textDocument/codeAction', params, function(err, actions, ctx)
+            if err or not actions or #actions == 0 then return cb() end
+            local client = vim.lsp.get_client_by_id(ctx.client_id)
+            if not client then return cb() end
+
+            local function apply_action(action, done)
+                if action.edit then
+                    pcall(vim.lsp.util.apply_workspace_edit, action.edit,
+                        client.offset_encoding or 'utf-16')
+                end
+                if action.command then
+                    pcall(function() client:exec_cmd(action.command) end)
+                end
+                done()
+            end
+
+            for _, action in ipairs(actions) do
+                if action.kind == 'source.organizeImports'
+                    or (action.title and action.title:match('Organize Imports')) then
+                    if action.edit or action.command then
+                        return apply_action(action, cb)
+                    end
+                    local ok = pcall(function()
+                        client:request('codeAction/resolve', action, function(_err, resolved)
+                            if _err or not resolved then return cb() end
+                            apply_action(resolved, cb)
+                        end, bufnr)
+                    end)
+                    if not ok then return cb() end
+                    return
+                end
+            end
+            cb()
+        end)
+    end
+
+    -- Async format for a single buffer (formatting + organize imports + java
+    -- post-fixups). Calls cb(stats) when finished. The buffer must be loaded.
+    local function format_buffer_async(bufnr, cb)
+        if not vim.api.nvim_buf_is_valid(bufnr) or not vim.api.nvim_buf_is_loaded(bufnr) then
+            return cb({ clients = 0, formatters = 0, applied = 0, errors = 0 })
+        end
+        local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+
+        lsp_format_async(bufnr, function(stats)
+            organize_imports_async(bufnr, function()
+                if ft == 'java' then
+                    local ok_jc, jc = pcall(require, 'plugins.java.config')
+                    if ok_jc then
+                        if type(jc.javadoc_paragraph_fix) == 'function' then
+                            pcall(jc.javadoc_paragraph_fix, bufnr)
+                        end
+                        if type(jc.operator_wrap_nl) == 'function' then
+                            pcall(jc.operator_wrap_nl, bufnr)
+                        end
+                    end
+                else
+                    pcall(vim.api.nvim_buf_set_option, bufnr, 'expandtab', true)
+                    pcall(vim.api.nvim_buf_set_option, bufnr, 'shiftwidth', 4)
+                end
+                cb(stats)
+            end)
+        end)
+    end
+
+    -- Wait (non-blocking) for at least one LSP client to attach to `bufnr`.
+    -- If `client_name` is given, wait for that specific server. Calls cb(ok).
+    local function wait_for_lsp(bufnr, client_name, timeout_ms, cb)
+        local start = vim.uv.now()
+        local function check()
+            if not vim.api.nvim_buf_is_valid(bufnr) then return cb(false) end
+            local clients = vim.lsp.get_clients({ bufnr = bufnr })
+            for _, c in ipairs(clients) do
+                if (not client_name or c.name == client_name) and c.initialized then
+                    return cb(true)
+                end
+            end
+            if vim.uv.now() - start > timeout_ms then return cb(false) end
+            vim.defer_fn(check, 100)
+        end
+        check()
+    end
+
     -- filetype_filter: optional filetype string (e.g. 'java')
     -- git_param, git_extra: optional git-param and (for 'commit') its hash
-    local function format_all_files(filetype_filter, git_param, git_extra)
-        local current_buffer = vim.fn.bufname('%')
-        local current_win_view = vim.fn.winsaveview()
-
+    -- cmd_label: label used for progress messages (e.g. 'FormatAllType java')
+    local function format_all_files(filetype_filter, git_param, git_extra, cmd_label)
         local files
         if git_param and git_param ~= '' then
             files = resolve_git_param(git_param, git_extra)
@@ -242,36 +436,177 @@ function M.on_attach(_, bufnr)
             files = vim.fn.systemlist('git ls-files --cached --others --exclude-standard')
         end
 
+        -- Pre-filter by filetype so progress totals reflect actual work.
+        local targets = {}
         for _, filename in ipairs(files) do
             if vim.fn.filereadable(filename) == 1 then
-                local matches_ft = true
                 if filetype_filter and filetype_filter ~= '' then
                     local ft_guess = vim.filetype.match({ filename = filename }) or ''
-                    matches_ft = (ft_guess == filetype_filter)
-                end
-
-                if matches_ft then
-                    vim.cmd('keepalt edit ' .. vim.fn.fnameescape(filename))
-                    local buf = vim.api.nvim_get_current_buf()
-                    local ft = vim.api.nvim_buf_get_option(buf, 'filetype')
-                    if ft == 'java' then
-                        -- wait for jdtls to attach and be ready before formatting
-                        vim.wait(15000, function()
-                            local clients = vim.lsp.get_clients({ bufnr = buf, name = 'jdtls' })
-                            return #clients > 0 and clients[1].initialized
-                        end, 100)
+                    if ft_guess == filetype_filter then
+                        table.insert(targets, filename)
                     end
-                    format()
+                else
+                    table.insert(targets, filename)
                 end
-            else
-                print("File doesn't exist: " .. filename)
             end
         end
 
-        if current_buffer ~= '' then
-            vim.cmd('buffer ' .. vim.fn.fnameescape(current_buffer))
-            vim.fn.winrestview(current_win_view)
+        local total = #targets
+        local progress = make_progress(cmd_label or 'FormatAll')
+        if total == 0 then
+            progress.done('no files to format')
+            return
         end
+
+        local index = 0
+        local jdtls_ready = false
+        local summary = {
+            processed = 0,
+            no_client = 0,
+            no_formatter = 0,
+            errors = 0,
+            skipped_lsp_timeout = 0,
+            written = 0,
+        }
+
+        local function finalize()
+            local parts = {
+                string.format('done %d/%d', summary.processed, total),
+            }
+            if summary.written > 0 then
+                table.insert(parts, string.format('wrote %d', summary.written))
+            end
+            if summary.no_client > 0 then
+                table.insert(parts, string.format('no-lsp %d', summary.no_client))
+            end
+            if summary.no_formatter > 0 then
+                table.insert(parts, string.format('no-formatter %d', summary.no_formatter))
+            end
+            if summary.errors > 0 then
+                table.insert(parts, string.format('errors %d', summary.errors))
+            end
+            if summary.skipped_lsp_timeout > 0 then
+                table.insert(parts,
+                    string.format('skipped-timeout %d', summary.skipped_lsp_timeout))
+            end
+            progress.done(table.concat(parts, ', '))
+        end
+
+        local function process_next()
+            index = index + 1
+            if index > total then
+                finalize()
+                return
+            end
+
+            local filename = targets[index]
+            progress.update(string.format('[%d/%d]: %s', index, total, filename))
+
+            local abs = vim.fn.fnamemodify(filename, ':p')
+            local existing_bufnr = vim.fn.bufnr(abs)
+            local was_loaded = existing_bufnr ~= -1 and vim.api.nvim_buf_is_loaded(existing_bufnr)
+
+            local bufnr = vim.fn.bufadd(abs)
+            if bufnr == 0 then
+                vim.schedule(process_next)
+                return
+            end
+            -- Run bufload (and the FileType/LspAttach autocmds it triggers)
+            -- with this buffer as current. Some LSP setups (notably jdtls'
+            -- FileType hook) call APIs that read the *current* buffer, so
+            -- hidden loads would otherwise fail to attach a client.
+            local ok_load = pcall(function()
+                if not vim.api.nvim_buf_is_loaded(bufnr) then
+                    vim.api.nvim_buf_call(bufnr, function()
+                        vim.fn.bufload(bufnr)
+                    end)
+                end
+            end)
+            if not ok_load or not vim.api.nvim_buf_is_valid(bufnr) then
+                vim.schedule(process_next)
+                return
+            end
+
+            local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+            -- If filetype wasn't detected during load (rare, but possible
+            -- when the buffer was preloaded without a filename), force it.
+            if ft == '' then
+                pcall(function()
+                    vim.api.nvim_buf_call(bufnr, function()
+                        vim.cmd('filetype detect')
+                    end)
+                end)
+                ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+            end
+
+            local function do_format()
+                format_buffer_async(bufnr, function(stats)
+                    summary.processed = summary.processed + 1
+                    if stats then
+                        if stats.clients == 0 then
+                            summary.no_client = summary.no_client + 1
+                        elseif stats.formatters == 0 then
+                            summary.no_formatter = summary.no_formatter + 1
+                        end
+                        if stats.errors > 0 then
+                            summary.errors = summary.errors + stats.errors
+                        end
+                    end
+
+                    if vim.api.nvim_buf_is_valid(bufnr) then
+                        local modified = vim.api.nvim_buf_get_option(bufnr, 'modified')
+                        vim.b[bufnr].format_in_progress = true
+                        pcall(function()
+                            vim.api.nvim_buf_call(bufnr, function()
+                                vim.cmd('silent noautocmd keepalt update')
+                            end)
+                        end)
+                        vim.b[bufnr].format_in_progress = false
+                        if modified then summary.written = summary.written + 1 end
+
+                        if not was_loaded then
+                            local displayed = false
+                            for _, win in ipairs(vim.api.nvim_list_wins()) do
+                                if vim.api.nvim_win_get_buf(win) == bufnr then
+                                    displayed = true
+                                    break
+                                end
+                            end
+                            if not displayed then
+                                pcall(vim.api.nvim_buf_delete, bufnr,
+                                    { force = false, unload = false })
+                            end
+                        end
+                    end
+                    vim.schedule(process_next)
+                end)
+            end
+
+            if ft == 'java' then
+                local timeout_ms = jdtls_ready and 5000 or 60000
+                wait_for_lsp(bufnr, 'jdtls', timeout_ms, function(ok)
+                    if not ok then
+                        summary.skipped_lsp_timeout = summary.skipped_lsp_timeout + 1
+                        vim.notify(
+                            'jdtls not ready for ' .. filename .. ', skipping',
+                            vim.log.levels.WARN
+                        )
+                        vim.schedule(process_next)
+                        return
+                    end
+                    jdtls_ready = true
+                    do_format()
+                end)
+            else
+                -- Give non-jdtls servers a brief moment to attach; skip wait if none.
+                wait_for_lsp(bufnr, nil, 3000, function(_ok)
+                    do_format()
+                end)
+            end
+        end
+
+        progress.update(string.format('[0/%d] starting…', total))
+        vim.schedule(process_next)
     end
 
     local git_param_completions = { 'staged', 'unstaged', 'commit', 'local' }
@@ -291,7 +626,12 @@ function M.on_attach(_, bufnr)
 
     vim.api.nvim_buf_create_user_command(bufnr, 'FormatAll', function(opts)
         local git_param, git_extra = parse_git_args(opts.fargs)
-        format_all_files(nil, git_param, git_extra)
+        local label = 'FormatAll'
+        if git_param and git_param ~= '' then
+            label = label .. ' ' .. git_param
+            if git_extra and git_extra ~= '' then label = label .. ' ' .. git_extra end
+        end
+        format_all_files(nil, git_param, git_extra, label)
     end, {
         desc = 'Format project files with LSP (optionally filtered by git-param)',
         nargs = '*',
@@ -315,7 +655,12 @@ function M.on_attach(_, bufnr)
         local ft = args[1]
         local git_param = args[2]
         local git_extra = args[3]
-        format_all_files(ft, git_param, git_extra)
+        local label = 'FormatAllType ' .. ft
+        if git_param and git_param ~= '' then
+            label = label .. ' ' .. git_param
+            if git_extra and git_extra ~= '' then label = label .. ' ' .. git_extra end
+        end
+        format_all_files(ft, git_param, git_extra, label)
     end, {
         desc = 'Format project files of a given filetype (optionally filtered by git-param)',
         nargs = '+',
