@@ -106,6 +106,15 @@ return {
                         configuration = {
                             runtimes = path.runtimes
                         },
+                        completion = {
+                            importOrder = { "", "com.nokia", "#", "#com.nokia" },
+                        },
+                        sources = {
+                            organizeImports = {
+                                starThreshold = 99,
+                                staticStarThreshold = 99,
+                            },
+                        },
                         test = {
                             config = {
                                 {
@@ -122,7 +131,8 @@ return {
                             enabled = true,
                             settings = {
                                 url = path.formatterUrl,
-                                profile = "4LabsStyle"
+                                -- profile = "4LabsStyle"
+                                profile = "JavaConventions"
                             }
                         }
                     }
