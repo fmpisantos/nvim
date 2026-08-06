@@ -51,10 +51,6 @@ vim.api.nvim_buf_create_user_command(0, 'OpenInIntellij', function()
         path = vim.fn.getcwd()
     end
 
-    function vim.pesc(str)
-        return str:gsub("([^%w])", "%%%1")
-    end
-
     local file_path = vim.fn.expand('%:p')
     local relative_file = file_path:gsub('^' .. vim.pesc(path) .. '/', '')
     path = {

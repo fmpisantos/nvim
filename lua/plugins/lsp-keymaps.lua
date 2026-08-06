@@ -511,6 +511,11 @@ function M.on_attach(_, bufnr)
                 vim.schedule(process_next)
                 return
             end
+            -- Mark the buffer as being driven by a batch formatter *before*
+            -- bufload fires BufReadPost/FileType/LspAttach autocmds, so hooks
+            -- (checkstyle lint, codelens refresh, save-hooks, etc.) can bail
+            -- out for these ephemeral loads.
+            vim.b[bufnr].format_in_progress = true
             -- Run bufload (and the FileType/LspAttach autocmds it triggers)
             -- with this buffer as current. Some LSP setups (notably jdtls'
             -- FileType hook) call APIs that read the *current* buffer, so
@@ -555,13 +560,14 @@ function M.on_attach(_, bufnr)
 
                     if vim.api.nvim_buf_is_valid(bufnr) then
                         local modified = vim.api.nvim_buf_get_option(bufnr, 'modified')
-                        vim.b[bufnr].format_in_progress = true
+                        -- format_in_progress was set to true at bufadd time;
+                        -- keep it set through save so any BufWrite* hooks (if
+                        -- autocmds weren't suppressed) bail out.
                         pcall(function()
                             vim.api.nvim_buf_call(bufnr, function()
                                 vim.cmd('silent noautocmd keepalt update')
                             end)
                         end)
-                        vim.b[bufnr].format_in_progress = false
                         if modified then summary.written = summary.written + 1 end
 
                         if not was_loaded then
@@ -573,9 +579,32 @@ function M.on_attach(_, bufnr)
                                 end
                             end
                             if not displayed then
-                                pcall(vim.api.nvim_buf_delete, bufnr,
-                                    { force = false, unload = false })
+                                -- Defer deletion so any pending debounced
+                                -- callbacks (e.g. vim.lsp.codelens.refresh,
+                                -- which is scheduled with a 200ms delay from
+                                -- on_lines) can complete against a valid
+                                -- buffer id.
+                                local to_delete = bufnr
+                                vim.defer_fn(function()
+                                    if vim.api.nvim_buf_is_valid(to_delete) then
+                                        local still_displayed = false
+                                        for _, win in ipairs(vim.api.nvim_list_wins()) do
+                                            if vim.api.nvim_win_get_buf(win) == to_delete then
+                                                still_displayed = true
+                                                break
+                                            end
+                                        end
+                                        if not still_displayed then
+                                            pcall(vim.api.nvim_buf_delete, to_delete,
+                                                { force = false, unload = false })
+                                        end
+                                    end
+                                end, 500)
+                            else
+                                vim.b[bufnr].format_in_progress = false
                             end
+                        else
+                            vim.b[bufnr].format_in_progress = false
                         end
                     end
                     vim.schedule(process_next)

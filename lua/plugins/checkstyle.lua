@@ -51,20 +51,9 @@ local function init()
         cmd = checkstyle_bin,
         stdin = false,
         append_fname = true,
-        args = function()
-            local cfg = find_checkstyle_config()
-            local a = { '-f', 'plain' }
-            if cfg then
-                table.insert(a, '-c')
-                table.insert(a, cfg)
-                local props = properties_file_for(cfg)
-                if props then
-                    table.insert(a, '-p')
-                    table.insert(a, props)
-                end
-            end
-            return a
-        end,
+        -- Populated by run_checkstyle() below just before invoking try_lint,
+        -- because nvim-lint requires `args` to be a list, not a function.
+        args = { '-f', 'plain' },
         stream = 'stdout',
         ignore_exitcode = true,
         parser = function(output, bufnr)
@@ -96,30 +85,57 @@ local function init()
     lint.linters_by_ft = lint.linters_by_ft or {}
     lint.linters_by_ft.java = { 'checkstyle' }
 
+    -- Rebuild `args` from the current buffer's project context, then invoke
+    -- try_lint. nvim-lint requires `args` to be a list (not a function), so
+    -- we mutate it right before each lint pass.
+    local function run_checkstyle()
+        local a = { '-f', 'plain' }
+        local cfg = find_checkstyle_config()
+        if cfg then
+            table.insert(a, '-c')
+            table.insert(a, cfg)
+            local props = properties_file_for(cfg)
+            if props then
+                table.insert(a, '-p')
+                table.insert(a, props)
+            end
+        end
+        lint.linters.checkstyle.args = a
+        require('lint').try_lint('checkstyle')
+    end
+
+    local warned_missing = false
     local grp = vim.api.nvim_create_augroup('nvim_lint_checkstyle', { clear = true })
     vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufReadPost' }, {
         group = grp,
         pattern = '*.java',
-        callback = function()
-            if vim.fn.executable(checkstyle_bin) == 0 then
-                vim.notify('checkstyle not installed; run :MasonInstall checkstyle', vim.log.levels.WARN)
+        callback = function(args)
+            -- Skip while a batch formatter (e.g. :FormatAllType) is driving
+            -- this buffer; otherwise every temp-loaded buffer would spam a
+            -- lint run and potentially a "not installed" warning.
+            if vim.b[args.buf] and vim.b[args.buf].format_in_progress then
                 return
             end
-            require('lint').try_lint('checkstyle')
+            if vim.fn.executable(checkstyle_bin) == 0 then
+                if not warned_missing then
+                    warned_missing = true
+                    vim.notify('checkstyle not installed; run :MasonInstall checkstyle',
+                        vim.log.levels.WARN)
+                end
+                return
+            end
+            run_checkstyle()
         end,
     })
 
-    vim.api.nvim_create_user_command('Checkstyle', function()
-        require('lint').try_lint('checkstyle')
-    end, { desc = 'Run checkstyle on current buffer' })
+    vim.api.nvim_create_user_command('Checkstyle', run_checkstyle,
+        { desc = 'Run checkstyle on current buffer' })
 
     -- Trigger once on the current buffer if it's already a java file at the
     -- time setup() runs (covers the case where BufReadPost already fired
     -- before this plugin was lazy-loaded).
     if vim.bo.filetype == 'java' and vim.fn.executable(checkstyle_bin) == 1 then
-        vim.schedule(function()
-            require('lint').try_lint('checkstyle')
-        end)
+        vim.schedule(run_checkstyle)
     end
 end
 

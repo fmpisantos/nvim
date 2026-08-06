@@ -324,6 +324,10 @@ end
 
 local function enable_codelens(bufnr)
     local function refresh()
+        if not vim.api.nvim_buf_is_valid(bufnr) or not vim.api.nvim_buf_is_loaded(bufnr) then
+            return
+        end
+        if vim.b[bufnr].format_in_progress then return end
         pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
     end
 
@@ -356,6 +360,7 @@ function M.jdtls_on_attach(_, bufnr)
         group = java_cmds,
         desc = 'organize imports and format Java buffer on save',
         callback = function()
+            if not vim.g.format_on_save then return end
             if vim.b[bufnr].format_in_progress then return end
             pcall(function() require('jdtls').organize_imports() end)
             pcall(vim.lsp.buf.format, { async = false, bufnr = bufnr, timeout_ms = 10000 })
