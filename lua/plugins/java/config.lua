@@ -121,14 +121,25 @@ local function enable_debugger(_)
 end
 
 local function enable_codelens(bufnr)
-    pcall(vim.lsp.codelens.refresh)
+    -- Scope the refresh to this buffer and skip buffers that :FormatAll loaded
+    -- ephemerally — those are deleted shortly after saving, and a debounced
+    -- refresh firing against a deleted buffer errors.
+    local function refresh()
+        if not vim.api.nvim_buf_is_valid(bufnr) or not vim.api.nvim_buf_is_loaded(bufnr) then
+            return
+        end
+        if vim.b[bufnr].format_in_progress then return end
+        pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
+    end
+
+    refresh()
 
     vim.api.nvim_create_autocmd('BufWritePost', {
         buffer = bufnr,
         group = java_cmds,
         desc = 'refresh codelens',
         callback = function()
-            pcall(vim.lsp.codelens.refresh)
+            refresh()
         end,
     })
 end
@@ -144,6 +155,20 @@ function M.jdtls_on_attach(_, bufnr)
 
     local opts = { buffer = bufnr }
     vim.keymap.set('n', '<A-o>', "<cmd>lua require('jdtls').organize_imports()<cr>", opts)
+
+    vim.api.nvim_create_autocmd('BufWritePre', {
+        buffer = bufnr,
+        group = java_cmds,
+        desc = 'organize imports and format Java buffer on save',
+        callback = function()
+            -- Opt-in: toggle with :FormatOnSaveToggle (see init.lua)
+            if not vim.g.format_on_save then return end
+            -- Skip buffers being driven by :FormatAll, which formats explicitly
+            if vim.b[bufnr].format_in_progress then return end
+            pcall(function() require('jdtls').organize_imports() end)
+            pcall(vim.lsp.buf.format, { async = false, bufnr = bufnr, timeout_ms = 10000 })
+        end,
+    })
 end
 
 function M.clear_data_dir()
