@@ -411,7 +411,8 @@ function M.jdtls_setup(_)
 
     -- path.formatterUrl = vim.fn.expand("~/.config/nvim/lua/4LabsStyle.xml");
     -- path.formatterUrl = vim.fn.expand("~/Projects/n4b-services/.vscode/settings.json");
-    path.formatterUrl = vim.fn.expand("~/Projects/n4b-services/.vscode/formatter.xml");
+    -- path.formatterUrl = vim.fn.expand("~/Projects/n4b-services/.vscode/formatter.xml");
+    path.formatterUrl = vim.fn.expand("~/Projects/n4b-services/formatter.xml");
 
     return cmd, path
 end

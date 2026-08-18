@@ -229,16 +229,33 @@ function M.on_attach(_, bufnr)
     -- Cleared with `clear()`.
     local function make_progress(label)
         local ns = vim.api.nvim_create_namespace('lsp_keymaps_progress')
+        -- Truncate a message so it always fits on a single cmdline row.
+        -- Otherwise a long path wraps to 2 lines and Neovim forces a
+        -- "Press ENTER to continue" prompt, interrupting the batch run.
+        local function fit_to_cmdline(msg)
+            -- Reserve a couple columns so we never exactly hit the edge
+            -- (the ruler/showcmd area can eat into the last columns).
+            local max = math.max(10, vim.o.columns - 12)
+            if vim.fn.strdisplaywidth(msg) <= max then
+                return msg
+            end
+            -- Keep the tail of the message (the useful part of a path)
+            -- and prefix with an ellipsis.
+            local tail = vim.fn.strcharpart(msg, vim.fn.strchars(msg) - max + 1)
+            return '…' .. tail
+        end
         local function update(text)
             vim.schedule(function()
-                vim.api.nvim_echo({ { label .. ': ' .. text, 'ModeMsg' } }, false, {})
+                local msg = fit_to_cmdline(label .. ': ' .. text)
+                vim.api.nvim_echo({ { msg, 'ModeMsg' } }, false, {})
                 vim.cmd('redraw')
             end)
         end
         local function done(text)
             vim.schedule(function()
                 if text and text ~= '' then
-                    vim.api.nvim_echo({ { label .. ': ' .. text, 'MoreMsg' } }, true, {})
+                    local msg = fit_to_cmdline(label .. ': ' .. text)
+                    vim.api.nvim_echo({ { msg, 'MoreMsg' } }, true, {})
                 else
                     vim.api.nvim_echo({ { '' } }, false, {})
                 end
