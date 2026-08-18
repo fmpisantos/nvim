@@ -328,7 +328,7 @@ local function enable_codelens(bufnr)
             return
         end
         if vim.b[bufnr].format_in_progress then return end
-        pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
+        pcall(vim.lsp.codelens.enable, true, { bufnr = bufnr })
     end
 
     refresh()
