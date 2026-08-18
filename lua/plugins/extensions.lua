@@ -66,27 +66,6 @@ function OpenFloatingWindow(content)
     local screen_width = vim.o.columns
     local screen_height = vim.o.lines
 
-    local num_lines = #content
-    local max_line_length = 0
-    for _, line in ipairs(content) do
-        if #line > max_line_length then
-            max_line_length = #line
-        end
-    end
-
-    local min_width = 20
-    local min_height = 5
-    local max_width = math.floor(screen_width * 0.9)
-    local max_height = math.floor(screen_height * 0.9)
-
-    local win_width = math.max(min_width, math.min(max_width, max_line_length + 4))
-    local win_height = math.max(min_height, math.min(max_height, num_lines + 2))
-
-    local win_row = math.floor((screen_height - win_height) / 2)
-    local win_col = math.floor((screen_width - win_width) / 2)
-
-    local buf = api.nvim_create_buf(false, true)
-
     local function sanitize_lines(content)
         local lines = {}
 
@@ -107,7 +86,45 @@ function OpenFloatingWindow(content)
         return lines
     end
 
-    api.nvim_buf_set_lines(buf, 0, -1, false, sanitize_lines(content))
+    local lines = sanitize_lines(content)
+
+    local max_line_length = 0
+    for _, line in ipairs(lines) do
+        local w = vim.fn.strdisplaywidth(line)
+        if w > max_line_length then
+            max_line_length = w
+        end
+    end
+
+    local min_width = 20
+    local min_height = 5
+    local max_width = math.floor(screen_width * 0.9)
+    local max_height = math.floor(screen_height * 0.9)
+
+    local win_width = math.max(min_width, math.min(max_width, max_line_length + 4))
+
+    -- Compute how many visual rows the content occupies when wrapped to win_width.
+    -- The inner text area width is win_width (border is drawn outside for floats
+    -- with `border`), so each logical line takes ceil(display_width / win_width) rows.
+    local inner_width = math.max(1, win_width)
+    local visual_rows = 0
+    for _, line in ipairs(lines) do
+        local w = vim.fn.strdisplaywidth(line)
+        if w == 0 then
+            visual_rows = visual_rows + 1
+        else
+            visual_rows = visual_rows + math.ceil(w / inner_width)
+        end
+    end
+
+    local win_height = math.max(min_height, math.min(max_height, visual_rows))
+
+    local win_row = math.floor((screen_height - win_height) / 2)
+    local win_col = math.floor((screen_width - win_width) / 2)
+
+    local buf = api.nvim_create_buf(false, true)
+
+    api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 
 
     local win = api.nvim_open_win(buf, true, {
@@ -126,6 +143,36 @@ function OpenFloatingWindow(content)
 
     api.nvim_buf_set_keymap(buf, 'n', 'q', '<cmd>lua vim.api.nvim_win_close(' .. win .. ', true)<cr>',
         { noremap = true, silent = true })
+end
+
+_G.dedent_lines_to_min = function(input_lines)
+    local out = {}
+    for _, line in ipairs(input_lines) do
+        table.insert(out, line)
+    end
+
+    local min_indent = math.huge
+    for _, line in ipairs(out) do
+        if line:match("%S") then
+            local indent = #(line:match("^(%s*)") or "")
+            if indent < min_indent then
+                min_indent = indent
+            end
+        end
+    end
+
+    if min_indent == math.huge or min_indent == 0 then
+        return out
+    end
+
+    for i, line in ipairs(out) do
+        if line:match("%S") then
+            out[i] = line:sub(min_indent + 1)
+        else
+            out[i] = ""
+        end
+    end
+    return out
 end
 
 _G.getVisualSelection = function()
@@ -179,25 +226,22 @@ end
 
 _G.show_current_line_popup = function()
     local current_line = api.nvim_get_current_line()
-    current_line = trim(current_line)
 
-    OpenFloatingWindow({ current_line })
+    OpenFloatingWindow(_G.dedent_lines_to_min({ current_line }))
 end
 
 _G.show_selected_lines_popup = function()
-    local s = vim.fn.line("v")
-    local e = vim.fn.line(".")
-    if s == 0 then
-        s = vim.fn.line("'<")
-        e = vim.fn.line("'>")
+    local s = vim.fn.line("'<")
+    local e = vim.fn.line("'>")
+    if s == 0 or e == 0 then
+        s = vim.fn.line(".")
+        e = s
     end
     if s > e then s, e = e, s end
 
     local lines = vim.api.nvim_buf_get_lines(0, s - 1, e, false)
 
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-
-    OpenFloatingWindow(lines)
+    OpenFloatingWindow(_G.dedent_lines_to_min(lines))
 end
 
 function Exit_visual_and_wait_for_marks()
