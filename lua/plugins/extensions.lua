@@ -184,6 +184,22 @@ _G.show_current_line_popup = function()
     OpenFloatingWindow({ current_line })
 end
 
+_G.show_selected_lines_popup = function()
+    local s = vim.fn.line("v")
+    local e = vim.fn.line(".")
+    if s == 0 then
+        s = vim.fn.line("'<")
+        e = vim.fn.line("'>")
+    end
+    if s > e then s, e = e, s end
+
+    local lines = vim.api.nvim_buf_get_lines(0, s - 1, e, false)
+
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+
+    OpenFloatingWindow(lines)
+end
+
 function Exit_visual_and_wait_for_marks()
     vim.cmd('normal! <Esc>')
     vim.cmd('undo')
