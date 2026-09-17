@@ -142,12 +142,14 @@ end
 function M.start_new_session()
     config.state.current_session_id = nil
     config.state.current_session_name = nil
+    config.state.session_mode = nil
 end
 
 --- Clear the current session reference
 function M.clear_session()
     config.state.current_session_id = nil
     config.state.current_session_name = nil
+    config.state.session_mode = nil
 end
 
 --- Get the session id associated with the current response buffer, if any

@@ -122,10 +122,32 @@ function M.run(prompt, opts)
         config.set_mode(mode_override)
     end
 
+    -- The cursor-agent CLI fixes a session's execution mode at creation time:
+    -- resuming with a different --mode is ignored, so an "ask" session stays in
+    -- "ask" forever. When the requested mode differs from the mode the current
+    -- session was created in, we must start a fresh session instead of resuming.
+    local forced_new_session = false
+    if resume_id and state.session_mode and state.session_mode ~= mode then
+        resume_id = nil
+        state.current_session_id = nil
+        state.current_session_name = nil
+        forced_new_session = true
+        vim.notify(
+            string.format(
+                "Mode changed (%s -> %s). Starting a new conversation, since cursor-agent can't switch a session's mode.",
+                state.session_mode, mode
+            ),
+            vim.log.levels.INFO
+        )
+    end
+
     local is_continuation = resume_id ~= nil
     if resume_id then
         state.current_session_id = resume_id
     end
+
+    -- Record the mode this run's session is (or will be) bound to.
+    state.session_mode = mode
 
     -- Preserve existing transcript when continuing.
     local existing_content = {}

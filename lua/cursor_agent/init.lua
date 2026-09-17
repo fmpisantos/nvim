@@ -400,6 +400,7 @@ local function open_session_picker(callback)
                         if entry.id then
                             state.current_session_id = entry.id
                             state.current_session_name = entry.name
+                            state.session_mode = nil
                             local content = sessionmod.load_session_preview(entry.id)
                             local buf, _ = ui.create_response_split("CursorAgent Response", true)
                             vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(content, "\n", { plain = true }))
@@ -424,6 +425,7 @@ select_session_for_prompt = function(source_file)
         if session_id then
             state.current_session_id = session_id
             state.current_session_name = session_name
+            state.session_mode = nil
             M.Open(nil, nil, source_file, session_id)
         else
             M.Open(nil, nil, source_file, nil)

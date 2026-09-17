@@ -112,6 +112,7 @@ end
 ---@field is_initialized boolean
 ---@field current_session_id string|nil
 ---@field current_session_name string|nil
+---@field session_mode string|nil
 ---@field response_buf number|nil
 ---@field response_win number|nil
 ---@field prompt_buf number|nil
@@ -130,6 +131,7 @@ M.state = {
 
     current_session_id = nil,
     current_session_name = nil,
+    session_mode = nil,
     response_buf = nil,
     response_win = nil,
 

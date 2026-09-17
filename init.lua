@@ -68,3 +68,16 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
         vim.opt_local.wrap = true
     end,
 })
+
+-- Disable <Esc> auto-closing the CursorAgent / OpenCode floating prompts.
+-- Use standard Neovim commands (:q, <C-w>q, :close, etc.) to close instead.
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "cursoragent", "opencode" },
+    callback = function(args)
+        vim.schedule(function()
+            if vim.api.nvim_buf_is_valid(args.buf) then
+                pcall(vim.keymap.del, "n", "<Esc>", { buffer = args.buf })
+            end
+        end)
+    end,
+})
