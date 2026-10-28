@@ -47,6 +47,35 @@ require("netrw_config")
 require("remap")
 
 if vim.env.FROM_WEZTERM == "1" then
+    local ok, colorscheme = pcall(require, "plugins.colorscheme")
+    if ok then
+        local srcs = type(colorscheme.src) == "table" and colorscheme.src or { colorscheme.src }
+        for _, src in ipairs(srcs) do
+            pcall(vim.cmd.packadd, (src:match("[^/]+$"):gsub("%.git$", "")))
+        end
+        pcall(colorscheme.setup)
+    end
+
+    local file = vim.env.SCROLLBACK_FILE
+    if file and vim.fn.filereadable(file) == 1 then
+        local buf = vim.api.nvim_create_buf(false, true)
+        vim.api.nvim_win_set_buf(0, buf)
+        vim.bo[buf].scrollback = 100000
+        -- Terminal width follows the window text width; extra columns would wrap full-width lines
+        vim.wo.number = false
+        vim.wo.relativenumber = false
+        vim.wo.signcolumn = "no"
+        vim.wo.colorcolumn = ""
+
+        -- Skip the TermOpen autocmd in set.lua, which would enter terminal mode
+        local eventignore = vim.o.eventignore
+        vim.o.eventignore = "TermOpen"
+        local chan = vim.api.nvim_open_term(buf, {})
+        vim.o.eventignore = eventignore
+        vim.api.nvim_chan_send(chan, table.concat(vim.fn.readfile(file), "\r\n"))
+        vim.defer_fn(function() vim.cmd("normal! G") end, 50)
+        vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buffer = buf })
+    end
     return
 end
 
