@@ -27,6 +27,11 @@ end
 
 
 local function enrich_dap_config(config_, on_config)
+    -- Attach configs only need hostName/port; skip main-class resolution.
+    if config_.request == 'attach' then
+        on_config(config_)
+        return
+    end
     if config_.mainClass
         and config_.projectName
         and config_.modulePaths ~= nil

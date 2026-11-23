@@ -13,6 +13,9 @@ vim.opt.smartindent = true
 
 vim.opt.wrap = false
 
+-- Vertical guide at 120 characters (highlight is set in plugins/colorscheme.lua)
+vim.opt.colorcolumn = "120"
+
 vim.opt.swapfile = false
 vim.opt.backup = false
 
@@ -61,6 +64,22 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 vim.opt.scrolloff = 10
 vim.opt.hlsearch = true
+
+-- Use CopyQ as the clipboard provider if available
+if vim.fn.executable('copyq') == 1 then
+    vim.g.clipboard = {
+        name = 'CopyQ',
+        copy = {
+            ['+'] = { 'sh', '-c', 'cat | copyq add -' },
+            ['*'] = { 'sh', '-c', 'cat | copyq add -' },
+        },
+        paste = {
+            ['+'] = { 'copyq', 'read', '0' },
+            ['*'] = { 'copyq', 'read', '0' },
+        },
+        cache_enabled = 0,
+    }
+end
 
 vim.api.nvim_create_autocmd('TextYankPost', {
     desc = 'Highlight when yanking (copying) text',

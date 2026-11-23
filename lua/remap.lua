@@ -106,6 +106,9 @@ vim.keymap.set('n', '<leader>td',
 vim.keymap.set("n", "<leader>l", ":lua show_current_line_popup()<cr>",
     { noremap = true, silent = true, desc = "show current line in popup" });
 
+vim.keymap.set("x", "<leader>l", ":<C-u>lua show_selected_lines_popup()<cr>",
+    { noremap = true, silent = true, desc = "show selected lines in popup" });
+
 vim.keymap.set('n', '<leader>qf', ':lua FilterQFListToFile()<cr>',
     { noremap = true, silent = true, desc = "[Q]uickFixList [F]ilter" })
 

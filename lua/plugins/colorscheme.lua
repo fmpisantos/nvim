@@ -15,6 +15,8 @@ return {
         vim.api.nvim_set_hl(0, 'LineNrAbove', { fg = 'white' })
         vim.api.nvim_set_hl(0, 'LineNr', { fg = 'orange' })
         vim.api.nvim_set_hl(0, 'LineNrBelow', { fg = 'white' })
+        -- Subtle background for the 120-col guide (colorcolumn in set.lua)
+        vim.api.nvim_set_hl(0, 'ColorColumn', { bg = '#2a2a2a', ctermbg = 236 })
 
         -- vim.cmd.colorscheme("vague");
 

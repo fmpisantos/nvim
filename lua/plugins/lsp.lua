@@ -85,34 +85,68 @@ return {
         end
         local cmd, path = jdtls_config.jdtls_setup()
 
-        vim.lsp.config('jdtls', {
-            cmd = cmd,
-            capabilities = capabilities,
-            on_attach = on_attach_jdtls,
-            settings = {
-                java = {
-                    configuration = {
-                        runtimes = path.runtimes
-                    },
-                    test = {
-                        config = {
-                            {
-                                name = "JUnit 4",
-                                testKind = "junit",
-                                workingDirectory = "${workspaceFolder}",
-                                classPaths = { "$Auto" },
-                                modulePaths = { "$Auto" }
+        -- jdtls is started through nvim-jdtls rather than vim.lsp.enable:
+        -- start_or_attach reuses the client for buffers under the same
+        -- root_dir and does the extra init (workspace, bundles, debugger)
+        -- a plain lsp start doesn't.
+        local ok_jdtls, jdtls = pcall(require, 'jdtls')
+        if not ok_jdtls then
+            vim.notify("nvim-jdtls not available; jdtls will not start", vim.log.levels.WARN)
+        else
+            local function start_jdtls_for_current_buf()
+                local fname = vim.api.nvim_buf_get_name(0)
+                if fname == '' then return end
+                local root_dir = vim.fs.root(fname, { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' })
+                    or vim.fn.getcwd()
+
+                jdtls.start_or_attach({
+                    cmd = cmd,
+                    root_dir = root_dir,
+                    capabilities = capabilities,
+                    on_attach = on_attach_jdtls,
+                    settings = {
+                        java = {
+                            configuration = {
+                                runtimes = path.runtimes
+                            },
+                            sources = {
+                                organizeImports = {
+                                    starThreshold = 99,
+                                    staticStarThreshold = 99,
+                                },
+                            },
+                            test = {
+                                config = {
+                                    {
+                                        name = "JUnit 4",
+                                        testKind = "junit",
+                                        workingDirectory = "${workspaceFolder}",
+                                        classPaths = { "$Auto" },
+                                        modulePaths = { "$Auto" }
+                                    }
+                                },
+                                defaultConfig = "JUnit 4"
                             }
-                        },
-                        defaultConfig = "JUnit 4"
-                    }
-                }
-            },
-            init_options = {
-                bundles = path.bundles,
-            },
-            root_dir = vim.fs.root(0, { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' })
-        });
+                        }
+                    },
+                    init_options = {
+                        bundles = path.bundles,
+                    },
+                })
+            end
+
+            vim.api.nvim_create_autocmd('FileType', {
+                group = vim.api.nvim_create_augroup('jdtls_ft_attach', { clear = true }),
+                pattern = 'java',
+                callback = start_jdtls_for_current_buf,
+                desc = 'Attach jdtls to every java buffer (reuses existing client)',
+            })
+
+            -- The plugin may load on a java buffer whose FileType already fired.
+            if vim.bo.filetype == 'java' then
+                start_jdtls_for_current_buf()
+            end
+        end
 
         vim.lsp.config("clangd", {
             on_attach = on_attach,
@@ -160,11 +194,9 @@ return {
                 "vtsls"
             },
             automatic_installation = true,
-            automatic_enable = true
-        });
-
-        vim.lsp.enable({
-            'jdtls'
+            -- jdtls is started via require('jdtls').start_or_attach above;
+            -- enabling it here too would spawn a duplicate client.
+            automatic_enable = { exclude = { "jdtls" } }
         });
     end
 }

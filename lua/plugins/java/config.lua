@@ -117,7 +117,21 @@ local function enable_debugger(_)
     dap_config.setup_dap({ hotcodereplace = 'auto' })
     dap_config.setup_dap_main_class_configs()
 
-    -- local opts = { buffer = bufnr }
+    -- Attach to a JVM started with -agentlib:jdwp=...,address=5005.
+    -- This runs on every jdtls attach, so only add the entry once.
+    local dap = require('dap')
+    dap.configurations.java = dap.configurations.java or {}
+    local attach_name = 'Attach to running JVM'
+    for _, cfg in ipairs(dap.configurations.java) do
+        if cfg.name == attach_name then return end
+    end
+    table.insert(dap.configurations.java, {
+        type = 'java',
+        request = 'attach',
+        name = attach_name,
+        hostName = 'localhost',
+        port = 5005,
+    })
 end
 
 local function enable_codelens(bufnr)
@@ -129,7 +143,7 @@ local function enable_codelens(bufnr)
             return
         end
         if vim.b[bufnr].format_in_progress then return end
-        pcall(vim.lsp.codelens.refresh, { bufnr = bufnr })
+        pcall(vim.lsp.codelens.enable, true, { bufnr = bufnr })
     end
 
     refresh()

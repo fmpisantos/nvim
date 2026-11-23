@@ -205,16 +205,27 @@ function M.on_attach(_, bufnr)
 
     -- Progress reporter: writes a single-line status to the cmdline area.
     local function make_progress(label)
+        -- Truncate to a single cmdline row; a wrapped message forces a
+        -- "Press ENTER to continue" prompt that interrupts the batch run.
+        local function fit_to_cmdline(msg)
+            -- Leave room for the ruler/showcmd area at the right edge.
+            local max = math.max(10, vim.o.columns - 12)
+            if vim.fn.strdisplaywidth(msg) <= max then
+                return msg
+            end
+            -- Keep the tail (the useful end of a path) behind an ellipsis.
+            return '…' .. vim.fn.strcharpart(msg, vim.fn.strchars(msg) - max + 1)
+        end
         local function update(text)
             vim.schedule(function()
-                vim.api.nvim_echo({ { label .. ': ' .. text, 'ModeMsg' } }, false, {})
+                vim.api.nvim_echo({ { fit_to_cmdline(label .. ': ' .. text), 'ModeMsg' } }, false, {})
                 vim.cmd('redraw')
             end)
         end
         local function done(text)
             vim.schedule(function()
                 if text and text ~= '' then
-                    vim.api.nvim_echo({ { label .. ': ' .. text, 'MoreMsg' } }, true, {})
+                    vim.api.nvim_echo({ { fit_to_cmdline(label .. ': ' .. text), 'MoreMsg' } }, true, {})
                 else
                     vim.api.nvim_echo({ { '' } }, false, {})
                 end
